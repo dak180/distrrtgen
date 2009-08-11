@@ -1,0 +1,56 @@
+# This should work on Linux.  Modify as needed for other platforms.
+
+BOINC_DIR = /home/boincadm/src/boinc
+BOINC_API_DIR = $(BOINC_DIR)/api
+BOINC_LIB_DIR = $(BOINC_DIR)/lib
+BOINC_SCHED_DIR = $(BOINC_DIR)/sched
+BOINC_DB_DIR = $(BOINC_DIR)/db
+BOINC_TOOLS_DIR = $(BOINC_DIR)/tools
+MYSQL_DIR = /usr/include/mysql
+
+CXXFLAGS = -g \
+    -DAPP_GRAPHICS \
+    -I$(BOINC_DIR) \
+    -I$(BOINC_LIB_DIR) \
+    -I$(BOINC_API_DIR) \
+    -I$(BOINC_SCHED_DIR) \
+    -I$(BOINC_DB_DIR) \
+    -I$(MYSQL_DIR) \
+    -I$(BOINC_TOOLS_DIR) \
+    -L$(BOINC_API_DIR) \
+    -L$(BOINC_LIB_DIR) \
+    -L$(BOINC_SCHED_DIR) \
+    -L/usr/X11R6/lib \
+    -L/usr/lib/mysql \
+    -L.
+
+# the following should be freeglut; use nm to check
+# you may have to change the paths for your system
+
+ifeq ($(wildcard /usr/local/lib/libglut.a),)
+	LIBGLUT = /usr/lib/libglut.a
+	LIBGLU = /usr/lib/libGLU.a
+	LIBJPEG = /usr/lib/libjpeg.a
+else
+	LIBGLUT = /usr/local/lib/libglut.a
+	LIBGLU = /usr/local/lib/libGLU.a
+	LIBJPEG = /usr/local/lib/libjpeg.a
+endif
+
+PROGS = distrrtgen \
+# uc2_graphics
+# make this optional so compile doesn't break on systems without OpenGL
+
+all: $(PROGS)
+
+libstdc++.a:
+	ln -s `g++ -print-file-name=libstdc++.a`
+
+clean:
+	/bin/rm -f $(PROGS) *.o
+
+distclean:
+	/bin/rm -f $(PROGS) *.o libstdc++.a
+
+distrrtgen: index_calculator_assimilator.o libstdc++.a $(BOINC_API_DIR)/libboinc_api.a $(BOINC_LIB_DIR)/libboinc.a $(BOINC_SCHED_DIR)/libsched.a 
+	$(CXX) index_calculator_assimilator.cpp assimilator.cpp validate_util.cpp $(CXXFLAGS) -o index_calculator_assimilator libstdc++.a -pthread -lboinc_api -lsched -lboinc -lmysqlclient -lssl -O3 

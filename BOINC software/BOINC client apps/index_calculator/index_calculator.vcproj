@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<VisualStudioProject
+	ProjectType="Visual C++"
+	Version="9,00"
+	Name="index_calculator"
+	ProjectGUID="{C7A957CF-9FDC-4C72-9C3E-7C029E915D1E}"
+	RootNamespace="index_calculator"
+	Keyword="Win32Proj"
+	TargetFrameworkVersion="196613"
+	>
+	<Platforms>
+		<Platform
+			Name="Win32"
+		/>
+	</Platforms>
+	<ToolFiles>
+	</ToolFiles>
+	<Configurations>
+		<Configuration
+			Name="Debug|Win32"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="1"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				AdditionalIncludeDirectories="/boinc/lib;/boinc/api;&quot;/boinc/zip&quot;;&quot;/boinc/client/win&quot;;&quot;/boinc/&quot;;../distrrtgen;&quot;../../rt api&quot;"
+				PreprocessorDefinitions="WIN32;_DEBUG;_MT;_CONSOLE"
+				MinimalRebuild="true"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="1"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				DebugInformationFormat="4"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="libcmtd.lib libcpmtd.lib kernel32.lib user32.lib ole32.lib delayimp.lib ..\lib_debug\libboinc_staticcrt.lib ..\lib_debug\libboincapi_staticcrt.lib c:/openssl/lib/libeay32.lib"
+				LinkIncremental="0"
+				IgnoreAllDefaultLibraries="true"
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release|Win32"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="1"
+			CharacterSet="2"
+			WholeProgramOptimization="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="2"
+				InlineFunctionExpansion="2"
+				EnableIntrinsicFunctions="true"
+				FavorSizeOrSpeed="1"
+				WholeProgramOptimization="true"
+				AdditionalIncludeDirectories="/boinc/lib;/boinc/api;&quot;/boinc/zip&quot;;&quot;/boinc/client/win&quot;;&quot;/boinc/&quot;;../distrrtgen;&quot;../../rt api&quot;"
+				PreprocessorDefinitions="WIN32;NDEBUG;_MT;_CONSOLE"
+				RuntimeLibrary="0"
+				EnableFunctionLevelLinking="true"
+				EnableEnhancedInstructionSet="2"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="true"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="odbc32.lib odbccp32.lib libcmt.lib libcpmt.lib ..\lib_release\libboinc_staticcrt.lib ..\lib_release\libboincapi_staticcrt.lib c:/openssl/lib/libeay32.lib"
+				LinkIncremental="1"
+				IgnoreAllDefaultLibraries="true"
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				OptimizeReferences="0"
+				EnableCOMDATFolding="0"
+				LinkTimeCodeGeneration="0"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+	</Configurations>
+	<References>
+	</References>
+	<Files>
+		<Filter
+			Name="Source Files"
+			Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
+			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
+			>
+			<File
+				RelativePath="..\..\rt api\ChainWalkContext.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\rt api\ChainWalkSet.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\rt api\des_enc.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\rt api\des_setkey.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\rt api\ecb_enc.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\rt api\HashAlgorithm.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\rt api\HashRoutine.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\index_calculator.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\rt api\md4.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\rt api\md5.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\rt api\Public.cpp"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Header Files"
+			Filter="h;hpp;hxx;hm;inl;inc;xsd"
+			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
+			>
+			<File
+				RelativePath="..\..\rt api\ChainWalkContext.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\rt api\ChainWalkSet.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\rt api\des.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\rt api\des_locl.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\rt api\HashAlgorithm.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\rt api\HashRoutine.h"
+				>
+			</File>
+			<File
+				RelativePath=".\index_calculator.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\rt api\md4.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\rt api\md5.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\rt api\podd.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\rt api\Public.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\rt api\sk.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\rt api\spr.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Resource Files"
+			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
+			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
+			>
+		</Filter>
+	</Files>
+	<Globals>
+	</Globals>
+</VisualStudioProject>
