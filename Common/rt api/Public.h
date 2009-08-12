@@ -70,6 +70,7 @@ typedef struct
 
 unsigned int GetFileLen(FILE* file);
 string TrimString(string s);
+bool boinc_ReadLinesFromFile(string sPathName, vector<string>& vLine);
 bool ReadLinesFromFile(string sPathName, vector<string>& vLine);
 bool SeperateString(string s, string sSeperator, vector<string>& vPart);
 string uint64tostr(uint64 n);

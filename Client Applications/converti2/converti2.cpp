@@ -11,6 +11,7 @@
 #include <time.h>
 #include <math.h>
 #include <vector>
+#include <conio.h>
 #include "Public.h"
 #include "MemoryPool.h"
 using namespace std;
@@ -461,6 +462,13 @@ void ConvertRainbowTable(string sPathName, string sResultFileName, unsigned int 
 						//printf("Diffsize is %u\n", diffSize);
 
 						// then write the distance amount of 00's
+						if(diffSize > 1000) {
+							printf("WARNING! The distance to the next prefix is %i. Do you want to continue writing %i bytes of 0x00? Press y to continue", diffSize, diffSize);
+							if(getch() != 'y') {
+								printf("Aborting...");
+								exit(1);
+							}
+						}
 						for(int j = 1; j < diffSize; j++)
 						{								
 							fwrite(&zero, 1, m_indexrowsizebytes, pFileIndex);
@@ -612,7 +620,7 @@ int main(int argc, char* argv[])
 			sResultFile = vPathName[i].substr(n+1, vPathName[i].length()) + "i2";
 		else 
 			sResultFile = vPathName[i] + "i2"; // Resulting file is .rt, not .rti
-		printf("Using %i of 64 bits\n", (sptl + eptl + usecp));
+		printf("Using %i of 64 bits. sptl: %i, eptl: %i, cp: %i. Chains will be %i bytes in size\n", (sptl + eptl + usecp), sptl, eptl, usecp, ((sptl + eptl + usecp) / 8));
 		if(sptl + eptl + usecp > 64)
 		{
 			exit(1);

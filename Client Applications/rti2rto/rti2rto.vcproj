@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../../rt api"
+				AdditionalIncludeDirectories="../../common/rt api"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -115,7 +115,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="..\..\rt api"
+				AdditionalIncludeDirectories="../../common/rt api"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
@@ -173,19 +173,19 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\rt api\BaseRTReader.cpp"
+				RelativePath="..\..\Common\rt api\BaseRTReader.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\rt api\MemoryPool.cpp"
+				RelativePath="..\..\Common\rt api\MemoryPool.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\converti2\Public.cpp"
+				RelativePath="..\..\Common\rt api\Public.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\rt api\RTI2Reader.cpp"
+				RelativePath="..\..\Common\rt api\RTI2Reader.cpp"
 				>
 			</File>
 			<File
@@ -193,11 +193,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\rt api\RTIReader.cpp"
+				RelativePath="..\..\Common\rt api\RTIReader.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\rt api\RTReader.cpp"
+				RelativePath="..\..\Common\rt api\RTReader.cpp"
 				>
 			</File>
 		</Filter>
@@ -207,27 +207,27 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\..\rt api\BaseRTReader.h"
+				RelativePath="..\..\Common\rt api\BaseRTReader.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\rt api\MemoryPool.h"
+				RelativePath="..\..\Common\rt api\MemoryPool.h"
 				>
 			</File>
 			<File
-				RelativePath="..\converti2\Public.h"
+				RelativePath="..\..\Common\rt api\Public.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\rt api\RTI2Reader.h"
+				RelativePath="..\..\Common\rt api\RTI2Reader.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\rt api\RTIReader.h"
+				RelativePath="..\..\Common\rt api\RTIReader.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\rt api\RTReader.h"
+				RelativePath="..\..\Common\rt api\RTReader.h"
 				>
 			</File>
 		</Filter>

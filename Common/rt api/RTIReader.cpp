@@ -4,7 +4,16 @@ RTIReader::RTIReader(string Filename)
 {
 	m_pIndex = NULL;
 	m_pFile = fopen(Filename.c_str(), "rb");
-	FILE *pFileIndex = fopen(Filename.append(".index").c_str(), "rb");
+	if(m_pFile == NULL) {
+		printf("could not open file %s\n", Filename.c_str());
+		return;		
+	}
+	string sIndex = Filename.append(".index").c_str();
+	FILE *pFileIndex = fopen(sIndex.c_str(), "rb");
+	if(pFileIndex == NULL) {
+		printf("could not open index file %s\n", sIndex.c_str());
+		return;
+	}
 	m_chainPosition = 0;
 
 	// Load the index file

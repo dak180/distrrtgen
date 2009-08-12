@@ -9,7 +9,9 @@
 #endif
 
 #ifdef _WIN32
-#include "boinc_win.h"
+	#ifdef BOINC
+		#include "boinc_win.h"
+	#endif
 #else
 #include "config.h"
 #include <cstdio>
@@ -21,9 +23,10 @@
 #include <unistd.h>
 
 #endif
-#include "filesys.h"
-#include "boinc_api.h"
-
+#ifdef BOINC
+	#include "filesys.h"
+	#include "boinc_api.h"
+#endif
 #include "Public.h"
 
 #ifdef _WIN32
@@ -88,7 +91,8 @@ bool GetHybridCharsets(string sCharset, vector<tCharset>& vCharset)
 	}
 	return true;
 }
-bool ReadLinesFromFile(string sPathName, vector<string>& vLine)
+#ifdef BOINC
+bool boinc_ReadLinesFromFile(string sPathName, vector<string>& vLine)
 {
 	vLine.clear();
     char input_path[512];
@@ -134,6 +138,46 @@ bool ReadLinesFromFile(string sPathName, vector<string>& vLine)
 
 	return true;
 }
+#endif 
+bool ReadLinesFromFile(string sPathName, vector<string>& vLine)
+{
+	vLine.clear();
+    FILE *file = fopen(sPathName.c_str(), "rb");
+	if (file != NULL)
+	{
+		unsigned int len = GetFileLen(file);
+		char* data = new char[len + 1];
+		fread(data, 1, len, file);
+		data[len] = '\0';
+		string content = data;
+		content += "\n";
+		delete data;
+
+		unsigned int i;
+		for (i = 0; i < content.size(); i++)
+		{
+			if (content[i] == '\r')
+				content[i] = '\n';
+		}
+
+		int n;
+		while ((n = content.find("\n", 0)) != -1)
+		{
+			string line = content.substr(0, n);
+			line = TrimString(line);
+			if (line != "")
+				vLine.push_back(line);
+			content = content.substr(n + 1);
+		}
+
+		fclose(file);
+	}
+	else
+		return false;
+
+	return true;
+}
+
 
 bool SeperateString(string s, string sSeperator, vector<string>& vPart)
 {

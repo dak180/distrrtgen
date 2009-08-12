@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../../rt api"
+				AdditionalIncludeDirectories="../../Common/rt api"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -115,7 +115,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="../../rt api"
+				AdditionalIncludeDirectories="../../Common/rt api"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
@@ -177,11 +177,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\rt api\MemoryPool.cpp"
+				RelativePath="..\..\Common\rt api\MemoryPool.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\Public.cpp"
+				RelativePath="..\..\Common\rt api\Public.cpp"
 				>
 			</File>
 		</Filter>
@@ -191,11 +191,11 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\..\rt api\MemoryPool.h"
+				RelativePath="..\..\Common\rt api\MemoryPool.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Public.h"
+				RelativePath="..\..\Common\rt api\Public.h"
 				>
 			</File>
 		</Filter>
