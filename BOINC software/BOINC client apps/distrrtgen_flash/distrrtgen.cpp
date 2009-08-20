@@ -36,9 +36,8 @@
 //
 
 #ifdef _WIN32
-#include "boinc_win.h"
+
 #else
-#include "config.h"
 #include <cstdio>
 #include <cctype>
 #include <ctime>
@@ -51,10 +50,7 @@
 #include <string>
 #include <fstream>
 #include <iostream>
-#include "str_util.h"
-#include "util.h"
-#include "filesys.h"
-#include "boinc_api.h"
+#include <time.h>
 #include "Public.h"
 // Rainbowcrack code
 #include "ChainWalkContext.h"
@@ -70,59 +66,10 @@ bool early_crash = false;
 bool early_sleep = false;
 double cpu_time = 20, comp_result;
 */
-int QuickSortPartition(RainbowChainCP* pChain, int nLow, int nHigh)
-{
-	int nRandomIndex = nLow + ((unsigned int)rand() * (RAND_MAX + 1) + (unsigned int)rand()) % (nHigh - nLow + 1);
-	RainbowChainCP TempChain;
-	TempChain = pChain[nLow];
-	pChain[nLow] = pChain[nRandomIndex];
-	pChain[nRandomIndex] = TempChain;
-
-	TempChain = pChain[nLow];
-	uint64 nPivotKey = pChain[nLow].nIndexE;
-	while (nLow < nHigh)
-	{
-		while (nLow < nHigh && pChain[nHigh].nIndexE >= nPivotKey)
-			nHigh--;
-		pChain[nLow] = pChain[nHigh];
-		while (nLow < nHigh && pChain[nLow].nIndexE <= nPivotKey)
-			nLow++;
-		pChain[nHigh] = pChain[nLow];
-	}
-	pChain[nLow] = TempChain;
-	return nLow;
-}
-
-void QuickSort(RainbowChainCP* pChain, int nLow, int nHigh)
-{
-	if (nLow < nHigh)
-	{
-		int nPivotLoc = QuickSortPartition(pChain, nLow, nHigh);
-		QuickSort(pChain, nLow, nPivotLoc - 1);
-		QuickSort(pChain, nPivotLoc + 1, nHigh);
-	}
-}
-
 int main(int argc, char **argv) {    
     int retval;
     double fd;
-    char output_path[512], chkpt_path[512];
-    FILE* state;	
-    retval = boinc_init();
-    if (retval) {
-        fprintf(stderr, "boinc_init returned %d\n", retval);
-        exit(retval);
-    }
 	
-
-    // get size of input file (used to compute fraction done)
-    //
-    //file_size(input_path, fsize);
-
-    // See if there's a valid checkpoint file.
-    // If so seek input file and truncate output file
-    //
-
 
 	if(argc < 10)
 	{
@@ -207,45 +154,18 @@ int main(int argc, char **argv) {
 	//std::cout << "Opening chain file" << std::endl;
 
 	
-	// Open file
-//	fclose(fopen(sFilename.c_str(), "a"));
-//	FILE* file = fopen(sFilename.c_str(), "r+b");
-    boinc_resolve_filename("result", output_path, sizeof(output_path));
-	fclose(boinc_fopen(output_path, "a"));
-	FILE *outfile = boinc_fopen(output_path, "r+b");
-	
-	if (outfile == NULL)
-	{
-		std::cerr << "failed to create " << output_path << std::endl;
-		return 4;
-	}
-	
 	
 	// Check existing chains
-	unsigned int nDataLen = (unsigned int)GetFileLen(outfile);
-	unsigned int nFileLen;
-	
-	// Round to boundary
-	nDataLen = nDataLen / 18 * 18;
-	if ((int)nDataLen == nRainbowChainCount * 18)
-	{		
-		std::cerr << "precomputation of this rainbow table already finished" << std::endl;
-		fclose(outfile);
-		return 0;
-	}
-	nChainStart += (nDataLen / 18);
-	fseek(outfile, nDataLen, SEEK_SET);
 	size_t nReturn;
 	CChainWalkContext cwc;
 	uint64 nIndex[2];
 	time_t tStart = time(NULL);
 //	std::cout << "Starting to generate chains" << std::endl;
-	for(int nCurrentCalculatedChains = nDataLen / 18; nCurrentCalculatedChains < nRainbowChainCount; nCurrentCalculatedChains++)
+	for(int nCurrentCalculatedChains = 0; nCurrentCalculatedChains < nRainbowChainCount; nCurrentCalculatedChains++)
 	{		
 		int cpcheck = 0;
 		unsigned short checkpoint = 0;
 		fd = (double)nCurrentCalculatedChains / (double)nRainbowChainCount;
-		boinc_fraction_done(fd);
 		cwc.SetIndex(nChainStart++); // use a given index now!
 		nIndex[0] = cwc.GetIndex();
 		
@@ -268,78 +188,12 @@ int main(int argc, char **argv) {
 
 		nIndex[1] = cwc.GetIndex();
 		// Write chain to disk
-		if ((nReturn = fwrite(nIndex, 1, 16, outfile)) != 16)
-		{
-			std::cerr << "disk write fail" << std::endl;
-			fclose(outfile);
-			return 9;
-		}
-		if((nReturn = fwrite(&checkpoint, 1, 2, outfile)) != 2)
-		{
-			std::cerr << "disk write fail" << std::endl;
-			fclose(outfile);
-			return 9;
-		}
-//		fflush(file);
 	}
 	//std::cout << "Generation completed" << std::endl;
-    fseek(outfile, 0, SEEK_SET);
-	nFileLen = GetFileLen(outfile);
-	nRainbowChainCount = nFileLen / 18;
 
-	RainbowChainCP* pChain = (RainbowChainCP*)new unsigned char[sizeof(RainbowChainCP) * nRainbowChainCount];
-
-	if (pChain != NULL)
-	{
-		// Load file
-		fseek(outfile, 0, SEEK_SET);
-		for(int i = 0; i < nRainbowChainCount; i++)
-		{
-			if(fread(&pChain[i], 1, 16, outfile) != 16)
-			{
-				printf("disk read fail\n");
-				return 9;
-			}
-			if(fread(&pChain[i].nCheckPoint, 1, sizeof(pChain[i].nCheckPoint), outfile) != 2)
-			{
-				printf("disk read fail\n");
-				return 9;
-			}
-		}
-
-		// Sort file
-		QuickSort(pChain, 0, nRainbowChainCount - 1);
-
-		// Write file
-		fseek(outfile, 0, SEEK_SET);
-		for(int i = 0; i < nRainbowChainCount; i++)
-		{
-			fwrite(&pChain[i], 1, 16, outfile);
-			fwrite(&pChain[i].nCheckPoint, 2, 1, outfile);
-		}
-		delete[] pChain;
-	}
-
-	fclose(outfile);
     
 	// main loop - read characters, convert to UC, write
     //
 
-    boinc_fraction_done(1);
-    boinc_finish(0);
 }
-
-#ifdef _WIN32
-int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR Args, int WinMode) {
-    LPSTR command_line;
-    char* argv[100];
-    int argc;
-
-    command_line = GetCommandLine();
-    argc = parse_command_line( command_line, argv );
-    return main(argc, argv);
-}
-#endif
-
-const char *BOINC_RCSID_33ac47a071 = "$Id: upper_case.C 12135 2007-02-21 20:04:14Z davea $";
 

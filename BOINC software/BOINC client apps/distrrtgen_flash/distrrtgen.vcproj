@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="/boinc/lib;/boinc/api;&quot;/boinc/zip&quot;;&quot;/boinc/client/win&quot;;&quot;/boinc/&quot;;../../rt api"
+				AdditionalIncludeDirectories="../../../Common/rt api"
 				PreprocessorDefinitions="WIN32;_DEBUG;_MT;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -61,7 +61,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libcmtd.lib libcpmtd.lib kernel32.lib user32.lib ole32.lib delayimp.lib ..\lib_debug\libboinc_staticcrt.lib ..\lib_debug\libboincapi_staticcrt.lib c:/openssl/lib/libeay32.lib"
+				AdditionalDependencies="libcmtd.lib libcpmtd.lib kernel32.lib user32.lib ole32.lib delayimp.lib "
 				LinkIncremental="0"
 				IgnoreAllDefaultLibraries="true"
 				GenerateDebugInformation="true"
