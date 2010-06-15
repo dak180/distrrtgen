@@ -6,8 +6,7 @@ BOINC_LIB_DIR = $(BOINC_DIR)/lib
 COMMON_LIB_DIR = /usr/lib
 
 CXXFLAGS = -g \
-    -static
-    -DAPP_GRAPHICS \
+    -static -static-libgcc \
     -I$(BOINC_DIR) \
     -I$(BOINC_LIB_DIR) \
     -I$(BOINC_API_DIR) \
