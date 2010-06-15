@@ -1,10 +1,12 @@
 # This should work on Linux.  Modify as needed for other platforms.
 
-BOINC_DIR = /home/frt/server_stable
+BOINC_DIR = /home/ubuntu/boinc
 BOINC_API_DIR = $(BOINC_DIR)/api
 BOINC_LIB_DIR = $(BOINC_DIR)/lib
+COMMON_LIB_DIR = /usr/lib
 
 CXXFLAGS = -g \
+    -static
     -DAPP_GRAPHICS \
     -I$(BOINC_DIR) \
     -I$(BOINC_LIB_DIR) \
@@ -29,4 +31,4 @@ distclean:
 	/bin/rm -f $(PROGS) *.o libstdc++.a
 
 distrrtgen: distrrtgen.o libstdc++.a $(BOINC_API_DIR)/libboinc_api.a $(BOINC_LIB_DIR)/libboinc.a
-	$(CXX) Public.cpp ChainWalkContext.cpp HashAlgorithm.cpp HashRoutine.cpp md5.cpp $(CXXFLAGS) -o distrrtgen distrrtgen.o libstdc++.a -pthread -lboinc_api -lboinc -lssl -O3
+	$(CXX) *.c *.cpp $(CXXFLAGS) -o distrrtgen distrrtgen.o libstdc++.a $(COMMON_LIB_DIR)/libssl.a $(COMMON_LIB_DIR)/libpthread.a -lboinc_api -lboinc -lpthread -lssl -O3
