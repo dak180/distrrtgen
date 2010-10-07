@@ -1,0 +1,31 @@
+* linux thread priorities
+* testing/benchmarking suite
+* remove openssl dependencies
+	ChainWalkContext.cpp
+		rand.h
+	HashAlgorithm.cpp
+		des.h
+		md4.h (fix md4 so it can handle mscache lengths)
+		sha.h (the local sha1 impl is slower than openssl's)
+* more generic method for path seperator than _WIN32 ifdef?
+
+OpenBSD threading
+
+misc warnings:
+/tmp//ccWUTqDK.o(.text+0xcc7): In function `HashORACLE(unsigned char*, int, unsigned char*)':
+: warning: strcpy() is almost always misused, please use strlcpy()
+/usr/lib/libstdc++.so.47.0: warning: strcat() is almost always misused, please use strlcat()
+
+/tmp//ccmjYwuS.o(.text+0xbf9): In function `CChainWalkSet::CheckOrRotatePreCalcFile()':
+: warning: sprintf() is often misused, please use snprintf()
+
+ChainWalkSet.cpp: In member function 'bool CChainWalkSet::FindInFile(long long
+unsigned int*, unsigned char*, int)':
+ChainWalkSet.cpp:154: warning: 'offset' may be used uninitialized in this
+function
+
+ChainWalkContext.cpp: In member function 'void CChainWalkContext::HashToIndex(int)':
+ChainWalkContext.cpp:544: warning: dereferencing type-punned pointer will break strict-aliasing rules
+
+HashAlgorithm.cpp: In function 'void HashPIX(unsigned char*, int, unsigned char*)':
+HashAlgorithm.cpp:396: warning: dereferencing type-punned pointer will break strict-aliasing rules
