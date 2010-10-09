@@ -1,19 +1,23 @@
 #include <string>
 #include <vector>
 #ifdef _WIN32
-#include <io.h>
+	#include <io.h>
+	#include <conio.h>
 #else
 	#include <sys/types.h>
 	#include <sys/stat.h>
 	#include <unistd.h>
 #endif
 
+#include <stdlib.h>
+#include <string.h>
 #include <time.h>
 #include <math.h>
 #include <vector>
-#include <conio.h>
+
 #include "Public.h"
 #include "MemoryPool.h"
+
 using namespace std;
 
 void Usage()
@@ -300,8 +304,8 @@ void ConvertRainbowTable(string sPathName, string sResultFileName, unsigned int 
 	if (file != NULL && fileR != NULL)
 	{
 		// File length check
-		unsigned int nFileLen = GetFileLen(file);
-		unsigned int nTotalChainCount = 0;
+		UINT4 nFileLen = GetFileLen(file);
+		UINT4 nTotalChainCount = 0;
 		if(hascp == 0) nTotalChainCount = nFileLen / 16;
 		else nTotalChainCount = nFileLen / 18;
 		if ((hascp == 0 && nFileLen % 16 != 0) || (hascp == 1 && nFileLen % 18 != 0))
@@ -324,12 +328,12 @@ void ConvertRainbowTable(string sPathName, string sResultFileName, unsigned int 
 				fseek(file, 0, SEEK_SET);
 				uint64 curPrefix = 0, prefixStart = 0;
 				vector<IndexRow> indexes;
-				int nRainbowChainCountRead = 0;
+				UINT4 nRainbowChainCountRead = 0;
 				while (true)	// Chunk read loop
 				{
 /*					if (ftell(file) == nFileLen)
 						break;*/
-					int nReadThisRound;
+					UINT4 nReadThisRound;
 					memset(pChain, 0x00, nAllocatedSize);
 					printf("reading...\n");
 					clock_t t1 = clock();
@@ -355,7 +359,7 @@ void ConvertRainbowTable(string sPathName, string sResultFileName, unsigned int 
 					printf("%u bytes read, disk access time: %.2f s\n", nDataRead , fTime);
 					t1 = clock();
 
-					for(int i = 0; i < nReadThisRound; i++)
+					for(UINT4 i = 0; i < nReadThisRound; i++)
 					{
 						if(showDistribution == 1)
 						{
@@ -418,7 +422,7 @@ void ConvertRainbowTable(string sPathName, string sResultFileName, unsigned int 
 				indexes.push_back(index);
 
 				IndexRow high = {0}; // Used to find the highest numbers. This tells us how much we can pack the index bits
-				for(int i = 0; i < indexes.size(); i++)
+				for(UINT4 i = 0; i < indexes.size(); i++)
 				{
 					if(indexes[i].numchains > high.numchains)
 						high.numchains = indexes[i].numchains;
@@ -441,7 +445,7 @@ void ConvertRainbowTable(string sPathName, string sResultFileName, unsigned int 
 				fwrite(&rti_cplength, 1, 1, pFileIndex);
 //					fwrite(&m_rti_index_indexlength , 1, 1, pFileIndex);
 				fwrite(&m_rti_index_numchainslength, 1, 1, pFileIndex);
-				for(int i = 0; i < rti_cppos.size(); i++)
+				for(UINT4 i = 0; i < rti_cppos.size(); i++)
 				{
 					fwrite(&rti_cppos[i], 1, 4, pFileIndex); // The position of the checkpoints
 				}
@@ -449,11 +453,10 @@ void ConvertRainbowTable(string sPathName, string sResultFileName, unsigned int 
 				int zero = 0;
 				fwrite(&indexes[0].prefix, 1, 8, pFileIndex); // Write the first prefix
 				unsigned int lastPrefix = 0;
-				for(int i = 0; i < indexes.size(); i++)
+				for(UINT4 i = 0; i < indexes.size(); i++)
 				{
 					if(i == 0)
 						lastPrefix = indexes[0].prefix;
-					unsigned int indexrow = 0;
 					// Checks how big a distance there is between the current and the next prefix. eg cur is 3 and next is 10 = 7.
 					unsigned int diffSize = indexes[i].prefix - lastPrefix; 
 					if(i > 0 && diffSize > 1)
@@ -464,12 +467,16 @@ void ConvertRainbowTable(string sPathName, string sResultFileName, unsigned int 
 						// then write the distance amount of 00's
 						if(diffSize > 1000) {
 							printf("WARNING! The distance to the next prefix is %i. Do you want to continue writing %i bytes of 0x00? Press y to continue", diffSize, diffSize);
-							if(getch() != 'y') {
+							#ifdef _WIN32
+							if ( _getch() != 'y' ) {
+							#else
+							if ( tty_getchar() != 'y' ) {
+							#endif
 								printf("Aborting...");
 								exit(1);
 							}
 						}
-						for(int j = 1; j < diffSize; j++)
+						for(UINT4 j = 1; j < diffSize; j++)
 						{								
 							fwrite(&zero, 1, m_indexrowsizebytes, pFileIndex);
 						}
@@ -612,7 +619,7 @@ int main(int argc, char* argv[])
 		printf("no rainbow table found\n");
 		return 0;
 	}
-	for (int i = 0; i < vPathName.size(); i++)
+	for (UINT4 i = 0; i < vPathName.size(); i++)
 	{
 		string sResultFile;
 		int n = vPathName[i].find_last_of('\\');

@@ -1,7 +1,26 @@
 /*
-   RainbowCrack - a general propose implementation of Philippe Oechslin's faster time-memory trade-off technique.
-
-   Copyright (C) Zhu Shuanglei <shuanglei@hotmail.com>
+ * freerainbowtables is a project for generating, distributing, and using
+ * perfect rainbow tables
+ *
+ * Copyright (C) Zhu Shuanglei <shuanglei@hotmail.com>
+ * Copyright Martin Westergaard Jørgensen <martinwj2005@gmail.com>
+ * Copyright 2009, 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
+ * Copyright 2009, 2010 James Nobis <frt@quelrod.net>
+ *
+ * This file is part of freerainbowtables.
+ *
+ * freerainbowtables is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * freerainbowtables is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with freerainbowtables.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #ifdef _WIN32
@@ -25,8 +44,18 @@
 
 #ifdef _WIN32
 	#include <windows.h>
-#else
-	#include <sys/sysinfo.h>
+#elif defined(__APPLE__) || \
+	((defined(__unix__) || defined(unix)) && !defined(USG))
+
+	#include <sys/param.h>
+
+	#if defined(BSD)
+		#include <sys/sysctl.h>
+	#elif defined(__linux__)
+		#include <sys/sysinfo.h>
+	#else
+		#error Unsupported Operating system
+	#endif
 #endif
 
 //////////////////////////////////////////////////////////////////////
@@ -66,12 +95,13 @@ bool GetHybridCharsets(string sCharset, vector<tCharset>& vCharset)
 	// Example: hybrid(mixalpha-numeric-all-space#1-6,numeric#1-4)
 	if(sCharset.substr(0, 6) != "hybrid") // Not hybrid charset
 		return false;
-	size_t nEnd = sCharset.rfind(')');
-	size_t nStart = sCharset.rfind('(');
+
+	UINT4 nEnd = (int) sCharset.rfind(')');
+	UINT4 nStart = (int) sCharset.rfind('(');
 	string sChar = sCharset.substr(nStart + 1, nEnd - nStart - 1);
 	vector<string> vParts;
 	SeperateString(sChar, ",", vParts);
-	for(int i = 0; i < vParts.size(); i++)
+	for(UINT4 i = 0; i < vParts.size(); i++)
 	{
 		tCharset stCharset;
 		vector<string> vParts2;
@@ -97,7 +127,7 @@ bool ReadLinesFromFile(string sPathName, vector<string>& vLine)
 		data[len] = '\0';
 		string content = data;
 		content += "\n";
-		delete data;
+		delete [] data;
 
 		unsigned int i;
 		for (i = 0; i < content.size(); i++)
@@ -185,22 +215,33 @@ string HexToStr(const unsigned char* pData, int nLen)
 	return sRet;
 }
 
-unsigned int GetAvailPhysMemorySize()
+uint64 GetAvailPhysMemorySize()
 {
 #ifdef _WIN32
-		MEMORYSTATUS ms;
-		GlobalMemoryStatus(&ms);
-		return ms.dwAvailPhys;
-#else
+	MEMORYSTATUS ms;
+	GlobalMemoryStatus(&ms);
+	return ms.dwAvailPhys;
+#elif defined(BSD)
+	int mib[2] = { CTL_HW, HW_PHYSMEM };
+	uint64 physMem;
+	//XXX warning size_t isn't portable
+	size_t len;
+	len = sizeof(physMem);
+	sysctl(mib, 2, &physMem, &len, NULL, 0);
+	return physMem;
+#elif defined(__linux__)
 	struct sysinfo info;
-	sysinfo(&info);			// This function is Linux-specific
-	return info.freeram;
+	sysinfo(&info);
+	return ( info.freeram + info.bufferram ) * (unsigned long) info.mem_unit;
+#else
+	return 0;
+	#error Unsupported Operating System
 #endif
 }
 
 void ParseHash(string sHash, unsigned char* pHash, int& nHashLen)
 {
-	int i;
+	UINT4 i;
 	for (i = 0; i < sHash.size() / 2; i++)
 	{
 		string sSub = sHash.substr(i * 2, 2);
@@ -220,3 +261,59 @@ void Logo()
 	printf("original code by Zhu Shuanglei <shuanglei@hotmail.com>\n");
 	printf("http://www.antsight.com/zsl/rainbowcrack/\n\n");
 }
+
+// XXX nmap is GPL2, will check newer releases regarding license
+// Code comes from nmap, used for the linux implementation of kbhit()
+#ifndef _WIN32
+
+static int tty_fd = 0;
+struct termios saved_ti;
+
+int tty_getchar()
+{
+	int c, numChars;
+
+	if (tty_fd && tcgetpgrp(tty_fd) == getpid()) {
+		c = 0;
+		numChars = read(tty_fd, &c, 1);
+		if (numChars > 0) return c;
+	}
+
+	return -1;
+}
+
+void tty_done()
+{
+	if (!tty_fd) return;
+
+	tcsetattr(tty_fd, TCSANOW, &saved_ti);
+
+	close(tty_fd);
+	tty_fd = 0;
+}
+
+void tty_init()
+{
+	struct termios ti;
+
+	if (tty_fd)
+		return;
+
+	if ((tty_fd = open("/dev/tty", O_RDONLY | O_NONBLOCK)) < 0) return;
+
+	tcgetattr(tty_fd, &ti);
+	saved_ti = ti;
+	ti.c_lflag &= ~(ICANON | ECHO);
+	ti.c_cc[VMIN] = 1;
+	ti.c_cc[VTIME] = 0;
+	tcsetattr(tty_fd, TCSANOW, &ti);
+
+	atexit(tty_done);
+}
+
+void tty_flush(void)
+{
+	tcflush(tty_fd, TCIFLUSH);
+}
+// end nmap code
+#endif

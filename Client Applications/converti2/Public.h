@@ -1,8 +1,26 @@
 /*
-   RainbowCrack - a general propose implementation of Philippe Oechslin's faster time-memory trade-off technique.
-
-   Copyright (C) Zhu Shuanglei <shuanglei@hotmail.com>
-*/
+ * freerainbowtables is a project for generating, distributing, and using
+ * perfect rainbow tables
+ *
+ * Copyright (C) Zhu Shuanglei <shuanglei@hotmail.com>
+ * Copyright 2009, 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
+ * Copyright 2009, 2010 James Nobis <frt@quelrod.net>
+ *
+ * This file is part of freerainbowtables.
+ *
+ * freerainbowtables is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * freerainbowtables is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with freerainbowtables.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #ifndef _PUBLIC_H
 #define _PUBLIC_H
@@ -12,13 +30,10 @@
 #include <string>
 #include <vector>
 #include <list>
-using namespace std;
 
-#ifdef _WIN32
-	#define uint64 unsigned __int64
-#else
-	#define uint64 u_int64_t
-#endif
+#include "global.h"
+
+using namespace std;
 
 struct RainbowChain
 {
@@ -68,6 +83,21 @@ typedef struct
 #define MAX_HASH_LEN  256
 #define MAX_SALT_LEN  256
 
+// XXX nmap is GPL2, will check newer releases regarding license
+// Code comes from nmap, used for the linux implementation of kbhit()
+#ifndef _WIN32
+#include <unistd.h>
+#include <termios.h>
+#include <fcntl.h>
+
+int tty_getchar();
+void tty_done();
+void tty_init();
+void tty_flush(void);
+// end nmap code
+
+#endif
+
 unsigned int GetFileLen(FILE* file);
 string TrimString(string s);
 bool ReadLinesFromFile(string sPathName, vector<string>& vLine);
@@ -75,7 +105,7 @@ bool SeperateString(string s, string sSeperator, vector<string>& vPart);
 string uint64tostr(uint64 n);
 string uint64tohexstr(uint64 n);
 string HexToStr(const unsigned char* pData, int nLen);
-unsigned int GetAvailPhysMemorySize();
+uint64 GetAvailPhysMemorySize();
 void ParseHash(string sHash, unsigned char* pHash, int& nHashLen);
 bool GetHybridCharsets(string sCharset, vector<tCharset>& vCharset);
 void Logo();
