@@ -1,8 +1,26 @@
 /*
-   RainbowCrack - a general propose implementation of Philippe Oechslin's faster time-memory trade-off technique.
-
-   Copyright (C) Zhu Shuanglei <shuanglei@hotmail.com>
-*/
+ * rcracki_mt is a multithreaded implementation and fork of the original 
+ * RainbowCrack
+ *
+ * Copyright (C) Zhu Shuanglei <shuanglei@hotmail.com>
+ * Copyright 2009, 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
+ * Copyright 2009, 2010 James Nobis <frt@quelrod.net>
+ *
+ * This file is part of racrcki_mt.
+ *
+ * rcracki_mt is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * rcracki_mt is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with rcracki_mt.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #ifndef _CHAINWALKCONTEXT_H
 #define _CHAINWALKCONTEXT_H
@@ -13,7 +31,7 @@
 typedef struct 
 {
 	unsigned char m_PlainCharset[255];
-	int m_nPlainCharsetLen;
+	unsigned int m_nPlainCharsetLen;
 	int m_nPlainLenMin;
 	int m_nPlainLenMax;
 	string m_sPlainCharsetName;
@@ -30,7 +48,7 @@ private:
 	static HASHROUTINE m_pHashRoutine;							// Configuration
 	static int m_nHashLen;										// Configuration
 	static bool isOldRtFormat;
-	static bool isNewRtFormat;
+	static bool isRti2RtFormat;
 	static vector<stCharset> m_vCharset;
 	static int m_nPlainLenMinTotal, m_nPlainLenMaxTotal;
 	static uint64 m_nPlainSpaceUpToX[MAX_PLAIN_LEN + 1];		// Performance consideration
@@ -65,7 +83,8 @@ public:
 	static int GetRainbowTableIndex();
 	static void Dump();
 	static bool isOldFormat();
-	static bool isNewFormat();
+	static bool isRti2Format();
+
 
 	void SetIndex(uint64 nIndex);
 	void SetHash(unsigned char* pHash);		// The length should be m_nHashLen

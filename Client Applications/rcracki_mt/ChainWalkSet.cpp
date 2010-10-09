@@ -1,8 +1,27 @@
 /*
-   RainbowCrack - a general propose implementation of Philippe Oechslin's faster time-memory trade-off technique.
-
-   Copyright (C) Zhu Shuanglei <shuanglei@hotmail.com>
-*/
+ * rcracki_mt is a multithreaded implementation and fork of the original 
+ * RainbowCrack
+ *
+ * Copyright (C) Zhu Shuanglei <shuanglei@hotmail.com>
+ * Copyright Martin Westergaard Jørgensen <martinwj2005@gmail.com>
+ * Copyright 2009, 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
+ * Copyright 2009, 2010 James Nobis <frt@quelrod.net>
+ *
+ * This file is part of racrcki_mt.
+ *
+ * rcracki_mt is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * rcracki_mt is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with rcracki_mt.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #ifdef _WIN32
 	#pragma warning(disable : 4786)
@@ -34,7 +53,7 @@ void CChainWalkSet::DiscardAll()
 
 	list<ChainWalk>::iterator it;
 	for (it = m_lChainWalk.begin(); it != m_lChainWalk.end(); it++)
-		delete it->pIndexE;
+		delete [] it->pIndexE;
 	m_lChainWalk.clear();
 }
 
@@ -54,7 +73,7 @@ string CChainWalkSet::CheckOrRotatePreCalcFile()
 		if(file!=NULL)
 		{
 			fileLen = GetFileLen(file);
-			unsigned int nextFileLen = fileLen + (sizeof(uint64) * (m_nRainbowChainLen-1));
+			long unsigned int nextFileLen = fileLen + (sizeof(uint64) * (m_nRainbowChainLen-1));
 			// Rotate to next file if we are going to pass 2GB filesize
 			if (nextFileLen < ((unsigned)2 * 1024 * 1024 * 1024))
 			{
@@ -67,6 +86,8 @@ string CChainWalkSet::CheckOrRotatePreCalcFile()
 			fclose(file);
 		}
 	}
+
+	return string("");
 }
 
 void CChainWalkSet::updateUsedPrecalcFiles()
@@ -127,7 +148,7 @@ bool CChainWalkSet::FindInFile(uint64* pIndexE, unsigned char* pHash, int nHashL
 
 	string sCurrentPrecalcPathName = "";
 	string sCurrentPrecalcIndexPathName = "";
-	int offset;
+	long unsigned int offset;
 
 	int i;
 	for (i = 0; i < (int)vPrecalcFiles.size() && gotPrecalcOnLine == -1; i++)
@@ -168,7 +189,7 @@ bool CChainWalkSet::FindInFile(uint64* pIndexE, unsigned char* pHash, int nHashL
 
 	if (gotPrecalcOnLine > -1)
 	{
-		if (debug) printf("Debug: Reading pre calculations from file, line %d offset %d\n", gotPrecalcOnLine, offset);
+		if (debug) printf("Debug: Reading pre calculations from file, line %d offset %lu\n", gotPrecalcOnLine, offset);
 		
 		FILE* fp = fopen(sCurrentPrecalcPathName.c_str(), "rb");
 
@@ -176,7 +197,7 @@ bool CChainWalkSet::FindInFile(uint64* pIndexE, unsigned char* pHash, int nHashL
 			fseek(fp, offset, SEEK_SET);
 
 			// We should do some verification here, for example by recalculating the middle chain, to catch corrupted files
-			if(fread(pIndexE, sizeof(uint64), m_nRainbowChainLen-1, fp) != m_nRainbowChainLen-1)
+			if(fread(pIndexE, sizeof(uint64), (unsigned long)m_nRainbowChainLen-1, fp) != (unsigned long)m_nRainbowChainLen-1)
 				printf("File read error.");
 			fclose(fp);
 		}
@@ -190,7 +211,6 @@ bool CChainWalkSet::FindInFile(uint64* pIndexE, unsigned char* pHash, int nHashL
 	}
 
 	return false;
-
 }
 
 void CChainWalkSet::StoreToFile(uint64* pIndexE, unsigned char* pHash, int nHashLen)
@@ -203,7 +223,7 @@ void CChainWalkSet::StoreToFile(uint64* pIndexE, unsigned char* pHash, int nHash
 	FILE* fp = fopen(sCurrentPrecalcPathName.c_str(), "ab");
 	if(fp!=NULL)
 	{
-		if(fwrite(pIndexE, sizeof(uint64), m_nRainbowChainLen-1, fp) != m_nRainbowChainLen-1)
+		if(fwrite(pIndexE, sizeof(uint64), (unsigned long)m_nRainbowChainLen-1, fp) != (unsigned long)m_nRainbowChainLen-1)
 			printf("File write error.");
 		else
 		{
@@ -220,7 +240,6 @@ void CChainWalkSet::StoreToFile(uint64* pIndexE, unsigned char* pHash, int nHash
 		}
 	else
 		printf("Cannot open precalculation file %s\n", sCurrentPrecalcPathName.c_str());
-
 }
 
 uint64* CChainWalkSet::RequestWalk(unsigned char* pHash, int nHashLen,

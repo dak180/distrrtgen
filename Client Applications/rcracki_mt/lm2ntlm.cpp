@@ -1,14 +1,25 @@
 /*
-* Copyright (C) Daniël Niggebrugge <niggebrugge@fox-it.com>
-* All rights reserved.
-*
-* Redistribution and use in source and binary forms, with or without
-* modification, are permitted provided that the following conditions are met:
-*     * Redistributions of source code must retain the above copyright
-*       notice, this list of conditions and the following disclaimer.
-*     * Redistributions in binary form must reproduce the above copyright
-*       notice, [...] etc :p
-*/
+ * rcracki_mt is a multithreaded implementation and fork of the original 
+ * RainbowCrack
+ *
+ * Copyright 2009, 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
+ * Copyright 2009, 2010 James Nobis <frt@quelrod.net>
+ *
+ * This file is part of racrcki_mt.
+ *
+ * rcracki_mt is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * rcracki_mt is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with rcracki_mt.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #ifdef _WIN32
 	#pragma warning(disable : 4786 4267 4018)
@@ -39,7 +50,7 @@ bool LM2NTLMcorrector::LMPasswordCorrectUnicode(string hexPassword, unsigned cha
 {
 	string sPlain = "";
 
-	int i;
+	UINT4 i;
 	for (i = 0; i < hexPassword.size() / 2; i++)
 	{
 		string sSub = hexPassword.substr(i * 2, 2);
@@ -48,10 +59,10 @@ bool LM2NTLMcorrector::LMPasswordCorrectUnicode(string hexPassword, unsigned cha
 		sPlain += (unsigned char)nValue;
 	}
 
-	memcpy(NTLMHash, pNTLMHash, 16);
+	memcpy(NTLMHash, pNTLMHash, MD4_DIGEST_LENGTH);
 
 
-	int tmpLength = sPlain.size() * 2;
+	unsigned long int tmpLength = sPlain.size() * 2;
 	unsigned char* pLMPassword = new unsigned char[tmpLength];
 
 	//printf("Searching for unicode password.\n");
@@ -67,7 +78,7 @@ bool LM2NTLMcorrector::LMPasswordCorrectUnicode(string hexPassword, unsigned cha
 	tty_init();
 #endif
 
-	if (startCorrecting(sPlain, NTLMHash, sNTLMPassword, pLMPassword))
+	if (startCorrecting(sPlain, sNTLMPassword, pLMPassword))
 	{
 		sBinary = ByteToStr(pLMPassword, tmpLength).c_str();
 		//printf("\nFound unicode password: %s\n", sNTLMPassword.c_str());
@@ -89,7 +100,7 @@ bool LM2NTLMcorrector::LMPasswordCorrectUnicode(string hexPassword, unsigned cha
 	}
 }
 
-bool LM2NTLMcorrector::startCorrecting(string sLMPassword, unsigned char* pNTLMHash, string& sNTLMPassword, unsigned char* pLMPassword)
+bool LM2NTLMcorrector::startCorrecting(string sLMPassword, string& sNTLMPassword, unsigned char* pLMPassword)
 {
 	if (sLMPassword.size() == 0)
 	{
@@ -190,7 +201,7 @@ bool LM2NTLMcorrector::startCorrecting(string sLMPassword, unsigned char* pNTLMH
 
 				setupCombinationAtPositions(length, pMuteMe, pTempMute, jAtPos, fullAtPos, sizeAtPos);
 
-				if (checkPermutations(length, pMuteMe, pTempMute, jAtPos, sizeAtPos, pLMPassword, sNTLMPassword))
+				if (checkPermutations(length, pTempMute, jAtPos, sizeAtPos, pLMPassword, sNTLMPassword))
 				{
 					return true;
 				}
@@ -221,7 +232,7 @@ void LM2NTLMcorrector::setupCombinationAtPositions(int length, unsigned char* pM
 		if (fullAtPos[i] == true)
 		{
 			unsigned char muteChar = pMuteMe[i];
-			int sizeMapForChar = m_mapChar[muteChar].size()/2; // 2 bytes per char
+			long unsigned int sizeMapForChar = m_mapChar[muteChar].size()/2; // 2 bytes per char
 			sizeAtPos[i] = sizeMapForChar;
 		}
 		else
@@ -235,7 +246,7 @@ void LM2NTLMcorrector::setupCombinationAtPositions(int length, unsigned char* pM
 }
 
 // go check all permutations for this combination
-bool LM2NTLMcorrector::checkPermutations(int length, unsigned char* pMuteMe, unsigned char* pTempMute, int* jAtPos, int* sizeAtPos, unsigned char* pLMPassword, string& sNTLMPassword)
+bool LM2NTLMcorrector::checkPermutations(int length, unsigned char* pTempMute, int* jAtPos, int* sizeAtPos, unsigned char* pLMPassword, string& sNTLMPassword)
 {
 	int pos = length - 1;
 
@@ -341,15 +352,18 @@ bool LM2NTLMcorrector::checkPermutations(int length, unsigned char* pMuteMe, uns
 // check password, maybe integrate this function in checkPermutations() for performance reasons.
 bool LM2NTLMcorrector::checkNTLMPassword(unsigned char* pLMPassword, int nLMPasswordLen, string& sNTLMPassword)
 {
-	unsigned char md[16];
+	unsigned char md[MD4_DIGEST_LENGTH];
 
 	//MD4(pLMPassword, nLMPasswordLen * 2, md);
+	/*
 	MD4_CTX ctx;
 	MD4_Init(&ctx);
 	MD4_Update(&ctx, pLMPassword, nLMPasswordLen * 2);
-	MD4_Final(md, &ctx);  
+	MD4_Final(md, &ctx);*/ 
 
-	if (memcmp(md, NTLMHash, 16) == 0)
+	MD4_NEW( pLMPassword, nLMPasswordLen * 2, md );
+
+	if (memcmp(md, NTLMHash, MD4_DIGEST_LENGTH) == 0)
 	{
 		sNTLMPassword = "";
 		int i;
@@ -400,7 +414,6 @@ int LM2NTLMcorrector::calculateTotalCombinations(int length, int setSize)
 	return factorial(length) / (factorial(setSize) * factorial(length-setSize));
 }
 
-
 int LM2NTLMcorrector::factorial (int num)
 {
 	int result = 1;
@@ -429,7 +442,7 @@ string LM2NTLMcorrector::ByteToStr(const unsigned char* pData, int nLen)
 
 void LM2NTLMcorrector::addToMapW(unsigned char key, unsigned char value1, unsigned char value2)
 {
-	int cnt = m_mapChar[key].size();
+	unsigned long int cnt = m_mapChar[key].size();
 	m_mapChar[key][cnt] = value2;
 	m_mapChar[key][cnt+1] = value1; //reverse for endiannes
 }

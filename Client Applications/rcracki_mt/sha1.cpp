@@ -1,22 +1,48 @@
+/*
+ * rcracki_mt is a multithreaded implementation and fork of the original 
+ * RainbowCrack
+ *
+ * Copyright Martin Westergaard Jørgensen <martinwj2005@gmail.com>
+ * Copyright Wei Dai <weidai@eskimo.com>
+ * Copyright 2009, 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
+ * Copyright 2009, 2010 James Nobis <frt@quelrod.net>
+ *
+ * This file is part of racrcki_mt.
+ *
+ * rcracki_mt is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * rcracki_mt is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with rcracki_mt.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 //#include <stdio.h>
-#if defined(WIN32)
-#include <windows.h>
+#if defined(_WIN32)
+	#include <windows.h>
 #endif
+
 #include <string.h>
 
-
+#include "sha1.h"
 
 #define SHA1CircularShift(bits,word) (((word) << (bits)) | ((word) >> (32-(bits))))
 
 // this rotate isn't faster with me
-#if defined(WIN32)
-#define ROTATE(a,n)     _lrotl(a,n)
+#if defined(_WIN32)
+	#define ROTATE(a,n)     _lrotl(a,n)
 #else
-#define ROTATE(a,n)     (((a)<<(n))|(((a)&0xffffffff)>>(32-(n))))
+	#define ROTATE(a,n)     (((a)<<(n))|(((a)&0xffffffff)>>(32-(n))))
 #endif
 
 /* A nice byte order reversal from Wei Dai <weidai@eskimo.com> */
-#if defined(WIN32)
+#if defined(_WIN32)
 /* 5 instructions with rotate instruction, else 9 */
 #define Endian_Reverse32(a) \
 	{ \
@@ -49,7 +75,6 @@
 #define H3 0x10325476
 #define H4 0xC3D2E1F0
 
-typedef unsigned int UINT4;
 #define SHA1HashSize 20
 
 void SHA1_NEW( unsigned char * pData, int length, unsigned char * pDigest)
@@ -57,7 +82,7 @@ void SHA1_NEW( unsigned char * pData, int length, unsigned char * pDigest)
 	if (length > 16)
 		return;
 
-    UINT4 Message_Block_Index    = 0;
+	UINT4 Message_Block_Index    = 0;
 
 	union
 	{
@@ -73,28 +98,22 @@ void SHA1_NEW( unsigned char * pData, int length, unsigned char * pDigest)
 
 	UINT4 Intermediate_Hash[5] = { H0, H1, H2, H3, H4 };
 	
- 	memcpy(Message_Block, pData, length);
+	memcpy(Message_Block, pData, length);
 	Message_Block_Index += length;
 
 	//padMessage
 	Message_Block[length] = 0x80;
 	
 	UINT4 W_15 = length << 3;
-	
-    int           t;                 /* Loop counter                */
-    UINT4      temp;              /* Temporary word value        */
-    UINT4      W[80];             /* Word sequence               */
-    UINT4      A, B, C, D, E;     /* Word buffers                */
+
+	int           t;                 /* Loop counter                */
+	UINT4      temp;              /* Temporary word value        */
+	UINT4      W[80];             /* Word sequence               */
+	UINT4      A, B, C, D, E;     /* Word buffers                */
 
     /*
      *  Initialize the first 16 words in the array W
      */
-
-	#define INIT_OLD(x) \
-        W[x] = (Message_Block[(x) * 4] << 24) | \
-        	(Message_Block[(x) * 4 + 1] << 16) | \
-        	(Message_Block[(x) * 4 +2] << 8) | \
-        	(Message_Block[(x) * 4 +3])
 
 	#define INIT(x) W[x] = Message_Block_W[x];
 	
@@ -121,18 +140,6 @@ void SHA1_NEW( unsigned char * pData, int length, unsigned char * pDigest)
 		INIT_NULL(8);  INIT_NULL(9);  INIT_NULL(10); INIT_NULL(11); \
 		INIT_NULL(12); INIT_NULL(13); INIT_NULL(14);
 
-	#define ROTATE1_NULL_1_14 \
-		ROTATE1_NULL;  ROTATE1_NULL_2_14;
-
-	#define ROTATE1_NULL_2_14 \
-		ROTATE1_NULL;  ROTATE1_NULL_3_14;
-
-	#define ROTATE1_NULL_3_14 \
-		ROTATE1_NULL;  ROTATE1_NULL_4_14;
-
-	#define ROTATE1_NULL_4_14 \
-		ROTATE1_NULL; ROTATE1_NULL_5_14;
-
 	#define ROTATE1_NULL_5_14 \
 		ROTATE1_NULL; ROTATE1_NULL; ROTATE1_NULL; \
 		ROTATE1_NULL; ROTATE1_NULL; ROTATE1_NULL; ROTATE1_NULL; \
@@ -145,7 +152,6 @@ void SHA1_NEW( unsigned char * pData, int length, unsigned char * pDigest)
 	#define EXPAND_3(t) W[t] = SHA1CircularShift(1,W[t-3]);
 	#define EXPAND_16(t) W[t] = SHA1CircularShift(1,W[t-16]);
 	#define EXPAND_3_8(t) W[t] = SHA1CircularShift(1,W[t-3] ^ W[t-8]);
-
 
 	if (length < 4) {
 		INIT_NULL_1_14;
@@ -175,7 +181,6 @@ void SHA1_NEW( unsigned char * pData, int length, unsigned char * pDigest)
 		EXPAND(17);
 		EXPAND(18);
 	}
-
 
 	if (length < 12) {
 		EXPAND_3(19);
@@ -209,21 +214,9 @@ void SHA1_NEW( unsigned char * pData, int length, unsigned char * pDigest)
 	EXPAND(76);	EXPAND(77);	EXPAND(78);	EXPAND(79);
 
 
-	#define ROTATE1(t) \
-			temp = SHA1CircularShift(5,A) + F_00_19(B,C,D) + E + W[t] + K0; \
-			E = D; D = C; \
-			C = SHA1CircularShift(30,B); \
-			B = A; A = temp; \
-
 	#define ROTATE1_NEW(a, b, c, d, e, x) \
 			e += SHA1CircularShift(5,a) + F_00_19(b,c,d) + x + K0; \
 			b = SHA1CircularShift(30,b);
-
-	#define ROTATE1_W(w) \
-			temp = SHA1CircularShift(5,A) + F_00_19(B,C,D) + E + w + K0; \
-			E = D; D = C; \
-			C = SHA1CircularShift(30,B); \
-			B = A; A = temp;
 
 	#define ROTATE1_NULL \
 			temp = SHA1CircularShift(5,A) + F_00_19(B,C,D) + E + K0; \
@@ -237,21 +230,21 @@ void SHA1_NEW( unsigned char * pData, int length, unsigned char * pDigest)
 	
 	#define ROTATE2(t) \
 		temp = SHA1CircularShift(5,A) + F_20_39(B,C,D) + E + W[t] + K1; \
-        E = D; D = C; \
-        C = SHA1CircularShift(30,B); \
-        B = A; A = temp;
+		E = D; D = C; \
+		C = SHA1CircularShift(30,B); \
+		B = A; A = temp;
 
 	#define ROTATE2_W(w) \
 		temp = SHA1CircularShift(5,A) + F_20_39(B,C,D) + E + w + K1; \
-        E = D; D = C; \
-        C = SHA1CircularShift(30,B); \
-        B = A; A = temp;
+		E = D; D = C; \
+		C = SHA1CircularShift(30,B); \
+		B = A; A = temp;
 
 	#define ROTATE3(t) \
 		temp = SHA1CircularShift(5,A) + F_40_59(B,C,D) + E + W[t] + K2; \
-        E = D; D = C; \
-        C = SHA1CircularShift(30,B); \
-        B = A; A = temp;
+		E = D; D = C; \
+		C = SHA1CircularShift(30,B); \
+		B = A; A = temp;
 
 	#define ROTATE4(t) \
 		temp = SHA1CircularShift(5,A) + F_60_79(B,C,D) + E + W[t] + K3; \
@@ -260,16 +253,16 @@ void SHA1_NEW( unsigned char * pData, int length, unsigned char * pDigest)
 		B = A; A = temp;
 
 	A = H0;
-    B = H1;
-    C = H2;
-    D = H3;
-    E = H4;
+	B = H1;
+	C = H2;
+	D = H3;
+	E = H4;
 
-	
+
 	E = H2;
 	//D = 2079550178;
 	//C = 1506887872;
-	B = 2679412915 + W[0];
+	B = 2679412915u + W[0];
 	if (length < 4) {
 		A = SHA1CircularShift(5,B) + 1722862861;
 	}
@@ -314,36 +307,36 @@ void SHA1_NEW( unsigned char * pData, int length, unsigned char * pDigest)
 	ROTATE1_NULL_5_14;
 
 	ROTATE1_NEW( A, B, C, D, E, W_15 );
-    ROTATE1_NEW( E, A, B, C, D, W[16] );
-    ROTATE1_NEW( D, E, A, B, C, W[17] );
-    ROTATE1_NEW( C, D, E, A, B, W[18] );
-    ROTATE1_NEW( B, C, D, E, A, W[19] );
-	
-    for(t = 20; t < 40; t++)
-    {
+	ROTATE1_NEW( E, A, B, C, D, W[16] );
+	ROTATE1_NEW( D, E, A, B, C, W[17] );
+	ROTATE1_NEW( C, D, E, A, B, W[18] );
+	ROTATE1_NEW( B, C, D, E, A, W[19] );
+		
+	for(t = 20; t < 40; t++)
+	{
 		if (t == 21 && length < 8) {
 			ROTATE2_W((length<<5)); // *32
 		}
 		else {
 			ROTATE2(t);
 		}
-    }
+	}
 
-    for(t = 40; t < 60; t++)
-    {
-  		ROTATE3(t);
-    }
-
-    for(t = 60; t < 80; t++)
-    {
+	for(t = 40; t < 60; t++)
+	{
+		ROTATE3(t);
+	}
+	
+	for(t = 60; t < 80; t++)
+	{
 		ROTATE4(t);
-    }
-
-    Intermediate_Hash[0] += A;
-    Intermediate_Hash[1] += B;
-    Intermediate_Hash[2] += C;
-    Intermediate_Hash[3] += D;
-    Intermediate_Hash[4] += E;
+	}
+	
+	Intermediate_Hash[0] += A;
+	Intermediate_Hash[1] += B;
+	Intermediate_Hash[2] += C;
+	Intermediate_Hash[3] += D;
+	Intermediate_Hash[4] += E;
 
 	Endian_Reverse32(Intermediate_Hash[0]);
 	Endian_Reverse32(Intermediate_Hash[1]);

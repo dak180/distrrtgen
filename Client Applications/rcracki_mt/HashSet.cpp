@@ -1,8 +1,27 @@
 /*
-   RainbowCrack - a general propose implementation of Philippe Oechslin's faster time-memory trade-off technique.
-
-   Copyright (C) Zhu Shuanglei <shuanglei@hotmail.com>
-*/
+ * rcracki_mt is a multithreaded implementation and fork of the original 
+ * RainbowCrack
+ *
+ * Copyright (C) Zhu Shuanglei <shuanglei@hotmail.com>
+ * Copyright Martin Westergaard Jørgensen <martinwj2005@gmail.com>
+ * Copyright 2009, 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
+ * Copyright 2009, 2010 James Nobis <frt@quelrod.net>
+ *
+ * This file is part of racrcki_mt.
+ *
+ * rcracki_mt is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * rcracki_mt is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with rcracki_mt.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #ifdef _WIN32
 	#pragma warning(disable : 4786 4267 4018)
@@ -23,7 +42,7 @@ void CHashSet::AddHash(string sHash)
 	if (sHash == "aad3b435b51404ee")
 		return;
 
-	int i;
+	UINT4 i;
 	for (i = 0; i < m_vHash.size(); i++)
 	{
 		if (m_vHash[i] == sHash)
@@ -53,7 +72,7 @@ string CHashSet::GetHashInfo(int i)
 
 bool CHashSet::AnyhashLeft()
 {
-	int i;
+	UINT4 i;
 	for (i = 0; i < m_vHash.size(); i++)
 	{
 		if (!m_vFound[i])
@@ -65,11 +84,11 @@ bool CHashSet::AnyhashLeft()
 
 bool CHashSet::AnyHashLeftWithLen(int nLen)
 {
-	int i;
+	UINT4 i;
 	for (i = 0; i < m_vHash.size(); i++)
 	{
 		if (!m_vFound[i])
-			if (m_vHash[i].size() == nLen * 2)
+			if (m_vHash[i].size() == (unsigned long)nLen * 2)
 				return true;
 	}
 
@@ -80,18 +99,18 @@ void CHashSet::GetLeftHashWithLen(vector<string>& vHash, int nLen)
 {
 	vHash.clear();
 
-	int i;
+	UINT4 i;
 	for (i = 0; i < m_vHash.size(); i++)
 	{
 		if (!m_vFound[i])
-			if (m_vHash[i].size() == nLen * 2)
+			if (m_vHash[i].size() == (unsigned long)nLen * 2)
 				vHash.push_back(m_vHash[i]);
 	}
 }
 
 void CHashSet::AddHashInfo(string sHash, bool found, string sPlain, string sBinary)
 {
-	int i;
+	UINT4 i;
 	for (i = 0; i < m_vHash.size(); i++)
 	{
 		if (m_vHash[i] == sHash)
@@ -106,7 +125,7 @@ void CHashSet::AddHashInfo(string sHash, bool found, string sPlain, string sBina
 
 void CHashSet::SetPlain(string sHash, string sPlain, string sBinary)
 {
-	int i;
+	UINT4 i;
 	for (i = 0; i < m_vHash.size(); i++)
 	{
 		if (m_vHash[i] == sHash)
@@ -128,7 +147,7 @@ bool CHashSet::GetPlain(string sHash, string& sPlain, string& sBinary)
 		return true;
 	}
 
-	int i;
+	UINT4 i;
 	for (i = 0; i < m_vHash.size(); i++)
 	{
 		if (m_vHash[i] == sHash)
@@ -148,7 +167,7 @@ bool CHashSet::GetPlain(string sHash, string& sPlain, string& sBinary)
 int CHashSet::GetStatHashFound()
 {
 	int nHashFound = 0;
-	int i;
+	UINT4 i;
 	for (i = 0; i < m_vHash.size(); i++)
 	{
 		if (m_vFound[i])
@@ -160,5 +179,5 @@ int CHashSet::GetStatHashFound()
 
 int CHashSet::GetStatHashTotal()
 {
-	return m_vHash.size();
+	return (int) m_vHash.size();
 }

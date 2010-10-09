@@ -1,8 +1,28 @@
 /*
-   RainbowCrack - a general propose implementation of Philippe Oechslin's faster time-memory trade-off technique.
-
-   Copyright (C) Zhu Shuanglei <shuanglei@hotmail.com>
-*/
+ * rcracki_mt is a multithreaded implementation and fork of the original 
+ * RainbowCrack
+ *
+ * Copyright (C) Zhu Shuanglei <shuanglei@hotmail.com>
+ * Copyright Martin Westergaard Jørgensen <martinwj2005@gmail.com>
+ * Copyright 2009, 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
+ * Copyright 2009, 2010 James Nobis <frt@quelrod.net>
+ * Copyright 2010 uroskn
+ *
+ * This file is part of racrcki_mt.
+ *
+ * rcracki_mt is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * rcracki_mt is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with rcracki_mt.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #ifndef _CRACKENGINE_H
 #define _CRACKENGINE_H
@@ -28,6 +48,7 @@ public:
 private:
 	CChainWalkSet m_cws;
 	int maxThreads;
+	uint64 maxMem;
 	bool writeOutput;
 	bool resumeSession;
 	string outputFile;
@@ -41,6 +62,7 @@ private:
 	// Statistics
 	float m_fTotalDiskAccessTime;
 	float m_fTotalCryptanalysisTime;
+	float m_fTotalPrecalculationTime;
 	int m_nTotalChainWalkStep;
 	int m_nTotalFalseAlarm;
 	int m_nTotalChainWalkStepDueToFalseAlarm;
@@ -62,9 +84,10 @@ private:
 
 public:
 	void SearchRainbowTable(string sPathName, CHashSet& hs);
-	void Run(vector<string> vPathName, CHashSet& hs, int i_maxThreads, bool resume, bool bDebug);
+	void Run(vector<string> vPathName, CHashSet& hs, int i_maxThreads, uint64 i_maxMem, bool resume, bool bDebug);
 	float GetStatTotalDiskAccessTime();
 	float GetStatTotalCryptanalysisTime();
+	float GetStatTotalPrecalculationTime();
 	int   GetStatTotalChainWalkStep();
 	int   GetStatTotalFalseAlarm();
 	int   GetStatTotalChainWalkStepDueToFalseAlarm();

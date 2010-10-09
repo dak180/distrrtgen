@@ -1,10 +1,30 @@
 /*
-   RainbowCrack - a general propose implementation of Philippe Oechslin's faster time-memory trade-off technique.
+ * rcracki_mt is a multithreaded implementation and fork of the original 
+ * RainbowCrack
+ *
+ * Copyright (C) Zhu Shuanglei <shuanglei@hotmail.com>
+ * Copyright Martin Westergaard Jørgensen <martinwj2005@gmail.com>
+ * Copyright 2009, 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
+ * Copyright 2009, 2010 James Nobis <frt@quelrod.net>
+ * Copyright 2010 Yngve AAdlandsvik
+ *
+ * This file is part of racrcki_mt.
+ *
+ * rcracki_mt is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * rcracki_mt is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with rcracki_mt.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-   Copyright (C) Zhu Shuanglei <shuanglei@hotmail.com>
-*/
-
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(__GNUC__)
 	#pragma warning(disable : 4786 4267 4018)
 #endif
 
@@ -21,7 +41,7 @@ int CChainWalkContext::m_nPlainLenMinTotal = 0;
 int CChainWalkContext::m_nPlainLenMaxTotal = 0;
 int CChainWalkContext::m_nHybridCharset = 0;
 bool CChainWalkContext::isOldRtFormat = false;
-bool CChainWalkContext::isNewRtFormat = false;
+bool CChainWalkContext::isRti2RtFormat = false;
 vector<stCharset> CChainWalkContext::m_vCharset;
 uint64 CChainWalkContext::m_nPlainSpaceUpToX[MAX_PLAIN_LEN + 1];
 uint64 CChainWalkContext::m_nPlainSpaceTotal;
@@ -48,7 +68,7 @@ bool CChainWalkContext::LoadCharset(string sName)
 		stCharset tCharset;
 		int i;
 		for (i = 0x00; i <= 0xff; i++)
-			tCharset.m_PlainCharset[i] = i;
+			tCharset.m_PlainCharset[i] = (unsigned char) i;
 		tCharset.m_nPlainCharsetLen = 256;
 		tCharset.m_sPlainCharsetName = sName;
 		tCharset.m_sPlainCharsetContent = "0x00, 0x01, ... 0xff";
@@ -74,7 +94,7 @@ bool CChainWalkContext::LoadCharset(string sName)
 	}
 	if (readCharset)
 	{
-		int i;
+		UINT4 i;
 		for (i = 0; i < vLine.size(); i++)
 		{
 			// Filter comment
@@ -91,7 +111,7 @@ bool CChainWalkContext::LoadCharset(string sName)
 								
 				// sCharsetName charset check
 				bool fCharsetNameCheckPass = true;
-				int j;
+				UINT4 j;
 				for (j = 0; j < sCharsetName.size(); j++)
 				{
 					if (   !isalpha(sCharsetName[j])
@@ -133,7 +153,7 @@ bool CChainWalkContext::LoadCharset(string sName)
 					GetHybridCharsets(sName, vCharsets);
 					if(sCharsetName == vCharsets[m_vCharset.size()].sName)
 					{
-						stCharset tCharset = {0};
+						stCharset tCharset;
 						tCharset.m_nPlainCharsetLen = sCharsetContent.size();							
 						memcpy(tCharset.m_PlainCharset, sCharsetContent.c_str(), tCharset.m_nPlainCharsetLen);
 						tCharset.m_sPlainCharsetName = sCharsetName;
@@ -202,7 +222,7 @@ bool CChainWalkContext::SetPlainCharset(string sCharsetName, int nPlainLenMin, i
 	m_nPlainLenMaxTotal = 0;
 	m_nPlainLenMinTotal = 0;
 	uint64 nTemp = 1;
-	int j, k = 1;
+	UINT4 j, k = 1;
 	for(j = 0; j < m_vCharset.size(); j++)
 	{
 		int i;
@@ -250,7 +270,7 @@ bool CChainWalkContext::SetupWithPathName(string sPathName, int& nRainbowChainLe
 #ifdef _WIN32
 	int nIndex = sPathName.find_last_of('\\');
 #else
-	int nIndex = sPathName.find_last_of('/');
+	int nIndex = (int) sPathName.find_last_of('/');
 #endif
 	if (nIndex != -1)
 		sPathName = sPathName.substr(nIndex + 1);
@@ -262,7 +282,7 @@ bool CChainWalkContext::SetupWithPathName(string sPathName, int& nRainbowChainLe
 	}
 	if (sPathName.substr(sPathName.size() - 5) == ".rti2")
 	{
-		isNewRtFormat = true;
+		isRti2RtFormat = true;
 	}
 	else if (sPathName.substr(sPathName.size() - 4) == ".rti")
 	{
@@ -304,7 +324,7 @@ bool CChainWalkContext::SetupWithPathName(string sPathName, int& nRainbowChainLe
 	}
 	else
 	{
-		if (sCharsetDefinition.find('#') == -1)		// For backward compatibility, "#1-7" is implied
+		if (sCharsetDefinition.find('#') == (unsigned long)-1)		// For backward compatibility, "#1-7" is implied
 		{			
 			sCharsetName = sCharsetDefinition;
 			nPlainLenMin = 1;
@@ -389,7 +409,7 @@ void CChainWalkContext::Dump()
 	printf("hash length: %d\n", m_nHashLen);
 
 	printf("plain charset: ");
-	int i;
+	unsigned int i;
 	for (i = 0; i < m_vCharset[0].m_nPlainCharsetLen; i++)
 	{
 		if (isprint(m_vCharset[0].m_PlainCharset[i]))
@@ -416,7 +436,6 @@ void CChainWalkContext::Dump()
 	printf("\n");
 }
 
-
 void CChainWalkContext::SetIndex(uint64 nIndex)
 {
 	m_nIndex = nIndex;
@@ -431,6 +450,7 @@ void CChainWalkContext::IndexToPlain()
 {
 	int i;
 	m_nPlainLen = 0;
+///*
 	for (i = m_nPlainLenMaxTotal - 1; i >= m_nPlainLenMinTotal - 1; i--)
 	{
 		if (m_nIndex >= m_nPlainSpaceUpToX[i])
@@ -439,42 +459,55 @@ void CChainWalkContext::IndexToPlain()
 			break;
 		}
 	}
+
+	// this is an optimized version of the above
+/*
+	for (i = m_nPlainLenMaxTotal - 1; i >= m_nPlainLenMinTotal - 1
+		&& m_nIndex < m_nPlainSpaceUpToX[i]; i--)
+	{ }
+	
+	m_nPlainLen = i + 1;
+*/
+
 	if(m_nPlainLen == 0)
 		m_nPlainLen = m_nPlainLenMinTotal;
 	uint64 nIndexOfX = m_nIndex - m_nPlainSpaceUpToX[m_nPlainLen - 1];
 
-// maybe this code should be used for some other 64 bit systems as well, added check for LP64 to try this
-#if defined(_WIN64) || defined(_LP64)
+// this is the generic code for non x86/x86-64 platforms
+#if !defined(_M_X64) && !defined(_M_X86) && !defined(__i386__) && !defined(__x86_64__)
 	
-	// Slow version
+	// Slow/generic version
 	for (i = m_nPlainLen - 1; i >= 0; i--)
 	{
 		int nCharsetLen = 0;
-		for(int j = 0; j < m_vCharset.size(); i++)
+		for(UINT4 j = 0; j < m_vCharset.size(); j++)
 		{
 			nCharsetLen += m_vCharset[j].m_nPlainLenMax;
 			if(i < nCharsetLen) // We found the correct charset
 			{
-				m_Plain[i] = m_vCharset[j].m_PlainCharset[nIndexOfX % m_nPlainCharsetLen];
+				m_Plain[i] = m_vCharset[j].m_PlainCharset[nIndexOfX % m_vCharset[j].m_nPlainCharsetLen];
 				nIndexOfX /= m_vCharset[j].m_nPlainCharsetLen;
+				break;
 			}
 		}
 	}
 #else
 
 
-	// Fast version
+	// Fast ia32 version
 	for (i = m_nPlainLen - 1; i >= 0; i--)
 	{
-#ifdef _WIN32
+		// 0x100000000 = 2^32
+#if defined(_M_X64) || defined(_M_X86)
 		if (nIndexOfX < 0x100000000I64)
 			break;
 #else
 		if (nIndexOfX < 0x100000000llu)
 			break;
 #endif
+
 		int nCharsetLen = 0;
-		for(int j = 0; j < m_vCharset.size(); j++)
+		for(UINT4 j = 0; j < m_vCharset.size(); j++)
 		{
 			nCharsetLen += m_vCharset[j].m_nPlainLenMax;
 			if(i < nCharsetLen) // We found the correct charset
@@ -490,23 +523,28 @@ void CChainWalkContext::IndexToPlain()
 	for (; i >= 0; i--)
 	{
 		int nCharsetLen = 0;
-		for(int j = 0; j < m_vCharset.size(); j++)
+		for(UINT4 j = 0; j < m_vCharset.size(); j++)
 		{
 			nCharsetLen += m_vCharset[j].m_nPlainLenMax;
 			if(i < nCharsetLen) // We found the correct charset
 			{
 
-//		m_Plain[i] = m_PlainCharset[nIndexOfX32 % m_vCharset[j].m_nPlainCharsetLen];
+//		m_Plain[i] = m_vCharset[j].m_PlainCharset[nIndexOfX32 % m_vCharset[j].m_nPlainCharsetLen];
 //		nIndexOfX32 /= m_vCharset[j].m_nPlainCharsetLen;
 
-		unsigned int nPlainCharsetLen = m_vCharset[j].m_nPlainCharsetLen;
-		unsigned int nTemp;
-#ifdef _WIN32
+
+//	moving nPlainCharsetLen into the asm body and avoiding the extra temp
+//	variable results in a performance gain
+//				unsigned int nPlainCharsetLen = m_vCharset[j].m_nPlainCharsetLen;
+				unsigned int nTemp;
+
+#if defined(_WIN32) && !defined(__GNUC__)
+
 		__asm
 		{
 			mov eax, nIndexOfX32
 			xor edx, edx
-			div nPlainCharsetLen
+			div m_vCharset[j].m_nPlainCharsetLen
 			mov nIndexOfX32, eax
 			mov nTemp, edx
 		}
@@ -518,7 +556,7 @@ void CChainWalkContext::IndexToPlain()
 								"mov %%eax, %0;"
 								"mov %%edx, %1;"
 								: "=m"(nIndexOfX32), "=m"(nTemp)
-								: "m"(nIndexOfX32), "m"(nPlainCharsetLen)
+								: "m"(nIndexOfX32), "m"(m_vCharset[j].m_nPlainCharsetLen)
 								: "%eax", "%edx"
 							 );
 		m_Plain[i] = m_vCharset[j].m_PlainCharset[nTemp];
@@ -556,11 +594,7 @@ string CChainWalkContext::GetPlain()
 	for (i = 0; i < m_nPlainLen; i++)
 	{
 		char c = m_Plain[i];
-		//if (c >= 32 && c <= 126)
-		//if (c >= 32)
-			sRet += c;
-		//else
-		//	sRet += '?';
+		sRet += c;
 	}
 	
 	return sRet;
@@ -570,24 +604,7 @@ string CChainWalkContext::GetBinary()
 {
 	return HexToStr(m_Plain, m_nPlainLen);
 }
-/*
-string CChainWalkContext::GetPlainBinary()
-{
-	string sRet;
-	sRet += GetPlain();
-	int i;
-	for (i = 0; i < m_nPlainLenMax - m_nPlainLen; i++)
-		sRet += ' ';
 
-	sRet += "|";
-
-	sRet += GetBinary();
-	for (i = 0; i < m_nPlainLenMax - m_nPlainLen; i++)
-		sRet += "  ";
-
-	return sRet;
-}
-*/
 string CChainWalkContext::GetHash()
 {
 	return HexToStr(m_Hash, m_nHashLen);
@@ -605,8 +622,8 @@ bool CChainWalkContext::isOldFormat()
 {
 	return isOldRtFormat;
 }
-bool CChainWalkContext::isNewFormat()
-{
-	return isNewRtFormat;
-}
 
+bool CChainWalkContext::isRti2Format()
+{
+	return isRti2RtFormat;
+}

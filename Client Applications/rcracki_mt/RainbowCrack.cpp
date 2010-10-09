@@ -1,15 +1,36 @@
 /*
-   RainbowCrack - a general propose implementation of Philippe Oechslin's faster time-memory trade-off technique.
-
-   Copyright (C) Zhu Shuanglei <shuanglei@hotmail.com>
-
-   Modified by Martin Westergaard Jørgensen <martinwj2005@gmail.com> to support indexed and hybrid tables
-
-   Modified by neinbrucke to support multi threading and a bunch of other stuff :)
-
-      2009-01-04 - <james.dickson@comhem.se> - Slightly modified (or "fulhack" as we say in sweden)  
-				to support cain .lst files.
-*/
+ * rcracki_mt is a multithreaded implementation and fork of the original 
+ * RainbowCrack
+ *
+ * Copyright (C) Zhu Shuanglei <shuanglei@hotmail.com>
+ * Copyright Martin Westergaard Jørgensen <martinwj2005@gmail.com>
+ * Copyright 2009, 2010  Daniël Niggebrugge <niggebrugge@fox-it.com>
+ * Copyright 2009 James Dickson
+ * Copyright 2009, 2010 James Nobis <frt@quelrod.net>
+ * Copyright 2010 uroskn
+ *
+ * Modified by Martin Westergaard Jørgensen <martinwj2005@gmail.com> to support  * indexed and hybrid tables
+ *
+ * Modified by neinbrucke to support multi threading and a bunch of other stuff :)
+ *
+ * 2009-01-04 - <james.dickson@comhem.se> - Slightly modified (or "fulhack" as 
+ * we say in sweden)  to support cain .lst files.
+ *
+ * This file is part of racrcki_mt.
+ *
+ * rcracki_mt is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * rcracki_mt is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with rcracki_mt.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #ifdef _WIN32
 	#pragma warning(disable : 4786 4267 4018)
@@ -18,8 +39,6 @@
 #include "CrackEngine.h"
 #include "lm2ntlm.h"
 #include <algorithm>
-
-
 
 #ifdef _WIN32
 	#include <io.h>
@@ -30,7 +49,6 @@
 	#include <dirent.h>
 #endif
 
-#include <openssl/md4.h>
 #ifdef _WIN32
 	#pragma comment(lib, "libeay32.lib")
 #endif
@@ -143,6 +161,13 @@ void GetTableList(string sWildCharPathName, vector<string>& vPathName)
 					//printf("sPathName_sub: %s\n", sPathName_sub.c_str());
 				}
 			}
+			if ( sWildCharPathName.size() > 5 )
+			{
+				if ( sWildCharPathName.substr( sWildCharPathName.size() - 5, 5 ) == ".rti2" )
+				{
+					vPathName.push_back( sWildCharPathName );
+				}
+			}
 		}
 	}
 }
@@ -158,11 +183,11 @@ bool NormalizeHash(string& sHash)
 		return false;
 
 	// Make lower
-	int i;
+	UINT4 i;
 	for (i = 0; i < sNormalizedHash.size(); i++)
 	{
 		if (sNormalizedHash[i] >= 'A' && sNormalizedHash[i] <= 'F')
-			sNormalizedHash[i] = sNormalizedHash[i] - 'A' + 'a';
+			sNormalizedHash[i] = (char) sNormalizedHash[i] - 'A' + 'a';
 	}
 
 	// Character check
@@ -182,7 +207,7 @@ void LoadLMHashFromPwdumpFile(string sPathName, vector<string>& vUserName, vecto
 	vector<string> vLine;
 	if (ReadLinesFromFile(sPathName, vLine))
 	{
-		int i;
+		UINT4 i;
 		for (i = 0; i < vLine.size(); i++)
 		{
 			vector<string> vPart;
@@ -210,13 +235,13 @@ void LoadLMHashFromPwdumpFile(string sPathName, vector<string>& vUserName, vecto
 		printf("can't open %s\n", sPathName.c_str());
 }
 
-// 2009-01-04 - james - Added this so we can load hashes from cain .LST files.
+// 2009-01-04 - james.dickson - Added this so we can load hashes from cain .LST files.
 void LoadLMHashFromCainLSTFile(string sPathName, vector<string>& vUserName, vector<string>& vLMHash, vector<string>& vNTLMHash)
 {
 	vector<string> vLine;
 	if (ReadLinesFromFile(sPathName, vLine))
 	{
-		int i;
+		UINT4 i;
 		for (i = 0; i < vLine.size(); i++)
 		{
 			vector<string> vPart;
@@ -249,9 +274,10 @@ bool NTLMPasswordSeek(unsigned char* pLMPassword, int nLMPasswordLen, int nLMPas
 {
 	if (nLMPasswordNext == nLMPasswordLen)
 	{
-		unsigned char md[16];
-		MD4(pLMPassword, nLMPasswordLen * 2, md);
-		if (memcmp(md, pNTLMHash, 16) == 0)
+		unsigned char md[MD4_DIGEST_LENGTH];
+		MD4_NEW(pLMPassword, nLMPasswordLen * 2, md);
+
+		if (memcmp(md, pNTLMHash, MD4_DIGEST_LENGTH) == 0)
 		{
 			sNTLMPassword = "";
 			int i;
@@ -269,10 +295,10 @@ bool NTLMPasswordSeek(unsigned char* pLMPassword, int nLMPasswordLen, int nLMPas
 	if (   pLMPassword[nLMPasswordNext * 2] >= 'A'
 		&& pLMPassword[nLMPasswordNext * 2] <= 'Z')
 	{
-		pLMPassword[nLMPasswordNext * 2] = pLMPassword[nLMPasswordNext * 2] - 'A' + 'a';
+		pLMPassword[nLMPasswordNext * 2] = (unsigned char) pLMPassword[nLMPasswordNext * 2] - 'A' + 'a';
 		if (NTLMPasswordSeek(pLMPassword, nLMPasswordLen, nLMPasswordNext + 1, pNTLMHash, sNTLMPassword))
 			return true;
-		pLMPassword[nLMPasswordNext * 2] = pLMPassword[nLMPasswordNext * 2] - 'a' + 'A';
+		pLMPassword[nLMPasswordNext * 2] = (unsigned char) pLMPassword[nLMPasswordNext * 2] - 'a' + 'A';
 	}
 
 	return false;
@@ -287,7 +313,7 @@ bool LMPasswordCorrectCase(string sLMPassword, unsigned char* pNTLMHash, string&
 	}
 
 	unsigned char* pLMPassword = new unsigned char[sLMPassword.size() * 2];
-	int i;
+	UINT4 i;
 	for (i = 0; i < sLMPassword.size(); i++)
 	{
 		pLMPassword[i * 2    ] = sLMPassword[i];
@@ -320,6 +346,7 @@ void Usage()
 	printf("                  -o [output_file] write (temporary) results to this file\n");
 	printf("                  -s [session_name] write session data with this name\n");
 	printf("                  -k keep precalculation on disk\n");
+	printf("                  -m [megabytes] limit memory usage\n");
 	printf("                  -v show debug information\n");
 	printf("\n");
 #ifdef _WIN32
@@ -330,7 +357,6 @@ void Usage()
 	printf("         rcracki_mt -l hash.txt [path_to_specific_table]/*\n");
 #endif
 	printf("         rcracki_mt -f hash.txt -t 4 -o results.txt *.rti\n");
-
 }
 
 int main(int argc, char* argv[])
@@ -343,22 +369,23 @@ int main(int argc, char* argv[])
 
 	vector<string> vPathName;
 	vector<string> vDefaultRainbowTablePath;
-	string sWildCharPathName = "";
-	string sInputType        = "";
-	string sInput            = "";
-	string outputFile		 = "";
-	string sApplicationPath  = "";
-	string sIniPathName      = "rcracki_mt.ini";
-	bool writeOutput		 = false;
-	string sSessionPathName  = "rcracki.session";
-	string sProgressPathName = "rcracki.progress";
-	string sPrecalcPathName  = "rcracki.precalc";
-	bool resumeSession       = false;
-	bool useDefaultRainbowTablePath = false;
-	bool debug               = false;
-	bool keepPrecalcFiles    = false;
-	string sAlgorithm		 = "";
-	int maxThreads			 = 1;
+	string sWildCharPathName			= "";
+	string sInputType						= "";
+	string sInput							= "";
+	string outputFile						= "";
+	string sApplicationPath				= "";
+	string sIniPathName					= "rcracki_mt.ini";
+	bool writeOutput						= false;
+	string sSessionPathName				= "rcracki.session";
+	string sProgressPathName			= "rcracki.progress";
+	string sPrecalcPathName				= "rcracki.precalc";
+	bool resumeSession					= false;
+	bool useDefaultRainbowTablePath	= false;
+	bool debug								= false;
+	bool keepPrecalcFiles				= false;
+	string sAlgorithm						= "";
+	int maxThreads							= 1;
+	uint64 maxMem							= 0;
 	CHashSet hs;
 
 	// Read defaults from ini file;
@@ -372,7 +399,7 @@ int main(int argc, char* argv[])
 	}
 	if (readFromIni)
 	{
-		int i;
+		UINT4 i;
 		for (i = 0; i < vLine.size(); i++)
 		{
 			if (vLine[i].substr(0,1) != "#")
@@ -385,6 +412,9 @@ int main(int argc, char* argv[])
 					
 					if (sOption == "Threads") {
 						maxThreads = atoi(sValue.c_str());
+					}
+					else if (sOption == "MaxMemoryUsage" ) {
+						maxMem = atoi(sValue.c_str()) * 1024 *1024;
 					}
 					else if (sOption == "DefaultResultsFile") {
 						outputFile = sValue;
@@ -457,6 +487,11 @@ int main(int argc, char* argv[])
 			if (i < argc)
 				maxThreads = atoi(argv[i]);
 		}
+		else if ( cla == "-m" ) {
+			i++;
+			if ( i < argc )
+				maxMem = atoi(argv[i]) * 1024 * 1024;
+		}
 		else if (cla == "-o") {
 			writeOutput = true;
 			i++;
@@ -505,7 +540,7 @@ int main(int argc, char* argv[])
 		vector<string> sSessionData;
 		if (ReadLinesFromFile(sSessionPathName.c_str(), sSessionData))
 		{
-			int i;
+			UINT4 i;
 			for (i = 0; i < sSessionData.size(); i++)
 			{
 				vector<string> vPart;
@@ -546,7 +581,7 @@ int main(int argc, char* argv[])
 	// don't load these if we are resuming a session that already has a list of tables
 	if (useDefaultRainbowTablePath && !resumeSession)
 	{
-		int i;
+		UINT4 i;
 		for (i = 0; i < vDefaultRainbowTablePath.size(); i++)
 		{
 			vector<string> vPart;
@@ -569,7 +604,8 @@ int main(int argc, char* argv[])
 		printf("no rainbow table found\n");
 		return 0;
 	}
-	printf("Found %d rainbowtable files...\n\n", vPathName.size());
+	printf("Found %lu rainbowtable files...\n\n",
+		(unsigned long)vPathName.size());
 
 	bool fCrackerType;			// true: hash cracker, false: lm cracker
 	vector<string> vHash;		// hash cracker
@@ -594,7 +630,7 @@ int main(int argc, char* argv[])
 		vector<string> vLine;
 		if (ReadLinesFromFile(sPathName, vLine))
 		{
-			int i;
+			UINT4 i;
 			for (i = 0; i < vLine.size(); i++)
 			{
 				string sHash = vLine[i];
@@ -616,7 +652,7 @@ int main(int argc, char* argv[])
 	}
 	else if (sInputType == "-c")
 	{
-		// 2009-01-04 - james - Added this for cain-files.
+		// 2009-01-04 - james.dickson - Added this for cain-files.
 		fCrackerType = false;
 		string sPathName = sInput;
 		LoadLMHashFromCainLSTFile(sPathName, vUserName, vLMHash, vNTLMHash);
@@ -640,13 +676,13 @@ int main(int argc, char* argv[])
 
 	if (fCrackerType)
 	{
-		int i;
+		UINT4 i;
 		for (i = 0; i < vHash.size(); i++)
 			hs.AddHash(vHash[i]);
 	}
 	else
 	{
-		int i;
+		UINT4 i;
 		for (i = 0; i < vLMHash.size(); i++)
 		{
 			hs.AddHash(vLMHash[i].substr(0, 16));
@@ -660,7 +696,7 @@ int main(int argc, char* argv[])
 		vector<string> sSessionData;
 		if (ReadLinesFromFile(sSessionPathName.c_str(), sSessionData))
 		{
-			int i;
+			UINT4 i;
 			for (i = 0; i < sSessionData.size(); i++)
 			{
 				vector<string> vPart;
@@ -696,7 +732,7 @@ int main(int argc, char* argv[])
 			buffer += "sInputType=" + sInputType + "\n";
 			buffer += "sInput=" + sInput + "\n";
 
-			int i;
+			UINT4 i;
 			for (i = 0; i < vPathName.size(); i++)
 			{
 				buffer += "sPathName=" + vPathName[i] + "\n";
@@ -720,10 +756,11 @@ int main(int argc, char* argv[])
 	if (writeOutput)
 		ce.setOutputFile(outputFile);
 	ce.setSession(sSessionPathName, sProgressPathName, sPrecalcPathName, keepPrecalcFiles);
-	ce.Run(vPathName, hs, maxThreads, resumeSession, debug);
+	ce.Run(vPathName, hs, maxThreads, maxMem, resumeSession, debug);
 
 	// Remove session files
 	if (debug) printf("Debug: Removing session files.\n");
+
 	if (remove(sSessionPathName.c_str()) == 0)
 		remove(sProgressPathName.c_str());
 	else
@@ -732,13 +769,14 @@ int main(int argc, char* argv[])
 	// Statistics
 	printf("statistics\n");
 	printf("-------------------------------------------------------\n");
-	printf("plaintext found:          %d of %d (%.2f%%)\n", hs.GetStatHashFound(),
+	printf("plaintext found:            %d of %d (%.2f%%)\n", hs.GetStatHashFound(),
 															hs.GetStatHashTotal(),
 															100.0f * hs.GetStatHashFound() / hs.GetStatHashTotal());
-	printf("total disk access time:   %.2f s\n", ce.GetStatTotalDiskAccessTime());
-	printf("total cryptanalysis time: %.2f s\n", ce.GetStatTotalCryptanalysisTime());
-	printf("total chain walk step:    %d\n",     ce.GetStatTotalChainWalkStep());
-	printf("total false alarm:        %d\n",     ce.GetStatTotalFalseAlarm());
+	printf("total disk access time:     %.2f s\n", ce.GetStatTotalDiskAccessTime());
+	printf("total cryptanalysis time:   %.2f s\n", ce.GetStatTotalCryptanalysisTime());
+	printf("total pre-calculation time: %.2f s\n", ce.GetStatTotalPrecalculationTime());
+	printf("total chain walk step:      %d\n",     ce.GetStatTotalChainWalkStep());
+	printf("total false alarm:          %d\n",     ce.GetStatTotalFalseAlarm());
 	printf("total chain walk step due to false alarm: %d\n", ce.GetStatTotalChainWalkStepDueToFalseAlarm());
 //	printf("total chain walk step skipped due to checkpoints: %d\n", ce.GetStatTotalFalseAlarmSkipped()); // Checkpoints not used - yet
 	printf("\n");
@@ -748,7 +786,7 @@ int main(int argc, char* argv[])
 	printf("-------------------------------------------------------\n");
 	if (fCrackerType)
 	{
-		int i;
+		UINT4 i;
 		for (i = 0; i < vHash.size(); i++)
 		{
 			string sPlain, sBinary;
@@ -763,7 +801,7 @@ int main(int argc, char* argv[])
 	}
 	else
 	{
-		int i;
+		UINT4 i;
 		for (i = 0; i < vLMHash.size(); i++)
 		{
 			string sPlain1, sBinary1;

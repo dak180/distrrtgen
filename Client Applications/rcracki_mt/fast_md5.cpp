@@ -9,11 +9,30 @@
  *  - For lengths < 16, transformation steps are "unrolled" using macros/defines
  *  - Constants used whenever possible, it's the compiler's job to sort them out
  *  - Padding is done on 4-byte words, and memory copied as last resort.
+ *
+ * rcracki_mt is a multithreaded implementation and fork of the original 
+ * RainbowCrack
+ *
+ * Copyright 2009, 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
+ * Copyright 2009, 2010 James Nobis <frt@quelrod.net>
+ *
+ * This file is part of racrcki_mt.
+ *
+ * rcracki_mt is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * rcracki_mt is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with rcracki_mt.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-typedef unsigned int UINT4;
-
+#include "fast_md5.h"
 
 /* MD5 defines as per RFC reference implementation */
 
@@ -115,9 +134,9 @@ typedef unsigned int UINT4;
 
 // md5 step
 #define MD5STEP(f, a, b, c, d, AC, x, s) {	\
-    (a) += f ((b), (c), (d));		\
+	(a) += f ((b), (c), (d));		\
 	(a) += (AC) + (x);				\
-    (a) = ROTATE_LEFT ((a), (s));	\
+	(a) = ROTATE_LEFT ((a), (s));	\
 	(a) += (b);						\
 }
 
@@ -228,6 +247,7 @@ typedef unsigned int UINT4;
 #ifndef MD5_pad_w1
 static inline UINT4 MD5_pad_w1(UINT4 data)
 {
+// XXX x86 specific
 	__asm__ (
 		"movb 	%%al, 	%%cl	\n\t"
 		"xorl 	%1,		%1		\n\t"
@@ -245,6 +265,7 @@ static inline UINT4 MD5_pad_w1(UINT4 data)
 #ifndef MD5_pad_w3
 static inline UINT4 MD5_pad_w3(UINT4 data)
 {
+// XXX x86 specific
 	__asm__ (
 		"roll 	$8,		%1		\n\t"
 		"movb	$128, 	%%al	\n\t"

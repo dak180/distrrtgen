@@ -1,3 +1,26 @@
+/*
+ * rcracki_mt is a multithreaded implementation and fork of the original 
+ * RainbowCrack
+ *
+ * Copyright 2009, 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
+ * Copyright 2009, 2010 James Nobis <frt@quelrod.net>
+ *
+ * This file is part of racrcki_mt.
+ *
+ * rcracki_mt is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * rcracki_mt is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with rcracki_mt.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #ifdef _WIN32
 	#pragma warning(disable : 4786 4267 4018)
 #endif
@@ -18,10 +41,10 @@ rcrackiThread::rcrackiThread(unsigned char* TargetHash, int thread_id, int nRain
 }
 
 // create job for false alarm checking
-rcrackiThread::rcrackiThread(unsigned char* pHash)
+rcrackiThread::rcrackiThread(unsigned char* pHash, bool oldFormat)
 {
 	falseAlarmChecker = true;
-	falseAlarmCheckerO = false;
+	falseAlarmCheckerO = oldFormat;
 	t_pChainsFound.clear();
 	t_nGuessedPoss.clear();
 	t_pHash = pHash;
@@ -29,20 +52,6 @@ rcrackiThread::rcrackiThread(unsigned char* pHash)
 	t_nFalseAlarm = 0;
 	foundHash = false;
 }
-
-// create job for false alarm checking OLD format
-rcrackiThread::rcrackiThread(unsigned char* pHash, bool oldFormat)
-{
-	falseAlarmChecker = true;
-	falseAlarmCheckerO = true;
-	t_pChainsFoundO.clear();
-	t_nGuessedPoss.clear();
-	t_pHash = pHash;
-	t_nChainWalkStepDueToFalseAlarm = 0;
-	t_nFalseAlarm = 0;
-	foundHash = false;
-}
-
 
 void rcrackiThread::AddAlarmCheck(RainbowChain* pChain, int nGuessedPos)
 {
@@ -118,7 +127,6 @@ void rcrackiThread::PreCalculate()
 		t_cwc.HashToIndex(t_nPos);
 		int i;
 		for (i = t_nPos + 1; i <= t_nRainbowChainLen - 2; i++)
-		//for (i = t_nPos + 1; i <= 10; i++)
 		{
 			t_cwc.IndexToPlain();
 			t_cwc.PlainToHash();
@@ -131,7 +139,7 @@ void rcrackiThread::PreCalculate()
 
 void rcrackiThread::CheckAlarm()
 {
-	int i;
+	UINT4 i;
 	for (i = 0; i < t_pChainsFound.size(); i++)
 	{
 		RainbowChain* t_pChain = t_pChainsFound[i];
@@ -171,7 +179,7 @@ void rcrackiThread::CheckAlarm()
 
 void rcrackiThread::CheckAlarmO()
 {
-	int i;
+	UINT4 i;
 	for (i = 0; i < t_pChainsFoundO.size(); i++)
 	{
 		RainbowChainO* t_pChain = t_pChainsFoundO[i];

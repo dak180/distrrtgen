@@ -1,8 +1,25 @@
 /*
-   RainbowCrack - a general propose implementation of Philippe Oechslin's faster time-memory trade-off technique.
-
-   Copyright (C) Zhu Shuanglei <shuanglei@hotmail.com>
-*/
+ * rcracki_mt is a multithreaded implementation and fork of the original 
+ * RainbowCrack
+ *
+ * Copyright (C) Zhu Shuanglei <shuanglei@hotmail.com>
+ * Copyright 2009, 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
+ * Copyright 2009, 2010 James Nobis <frt@quelrod.net>
+ *
+ * This file is part of racrcki_mt.
+ *
+ * rcracki_mt is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 2 of the License.
+ *
+ * rcracki_mt is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with rcracki_mt.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #ifndef _PUBLIC_H
 #define _PUBLIC_H
@@ -14,17 +31,11 @@
 #include <string>
 #include <vector>
 #include <list>
+
+#include "global.h"
+
 using namespace std;
 
-#ifdef _WIN32
-	#define uint64 unsigned __int64
-#else
-	#ifndef u_int64_t
-		#define uint64 unsigned long long
-	#else
-		#define uint64 u_int64_t
-	#endif
-#endif
 
 struct RainbowChainO
 {
@@ -38,7 +49,6 @@ struct RainbowChainO
 //	int nIndexE;
 //	int nCheckPoint;
 //};
-
 union RainbowChain
 {
 	//uint64 nChain;
@@ -87,6 +97,7 @@ typedef struct
 #define MAX_HASH_LEN  256
 #define MAX_SALT_LEN  256
 
+// XXX nmap is GPL2, will check newer releases regarding license
 // Code comes from nmap, used for the linux implementation of kbhit()
 #ifndef _WIN32
 #include <unistd.h>
@@ -97,9 +108,15 @@ int tty_getchar();
 void tty_done();
 void tty_init();
 void tty_flush(void);
+// end nmap code
 
+#include <sys/time.h>
+
+#else
+	int gettimeofday( struct timeval *tv, struct timezone *tz );
 #endif
 
+timeval sub_timeofday( timeval tv2, timeval tv );
 
 unsigned int GetFileLen(FILE* file);
 string TrimString(string s);
@@ -108,7 +125,7 @@ bool SeperateString(string s, string sSeperator, vector<string>& vPart);
 string uint64tostr(uint64 n);
 string uint64tohexstr(uint64 n);
 string HexToStr(const unsigned char* pData, int nLen);
-unsigned int GetAvailPhysMemorySize();
+uint64 GetAvailPhysMemorySize();
 string GetApplicationPath();
 void ParseHash(string sHash, unsigned char* pHash, int& nHashLen);
 bool GetHybridCharsets(string sCharset, vector<tCharset>& vCharset);

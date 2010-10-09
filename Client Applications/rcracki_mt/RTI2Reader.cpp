@@ -1,6 +1,31 @@
+/*
+ * rcracki_mt is a multithreaded implementation and fork of the original 
+ * RainbowCrack
+ *
+ * Copyright 2010 Martin Westergaard Jørgensen <martinwj2005@gmail.com>
+ * Copyright 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
+ * Copyright 2010 James Nobis <frt@quelrod.net>
+ *
+ * This file is part of racrcki_mt.
+ *
+ * rcracki_mt is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * rcracki_mt is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with rcracki_mt.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "RTI2Reader.h"
 
 #include <math.h>
+
 RTI2Header *RTI2Reader::m_pHeader = NULL;
 RTI2Reader::RTI2Reader(string Filename)
 {
@@ -78,7 +103,12 @@ int RTI2Reader::ReadChains(unsigned int &numChains, RainbowChainO *pData)
 	{
 		// ALERT: Possible problem here if m_indexrowsizebytes > 1 as pNumChains is a unsigned char.
 		unsigned int NumChainsInRow = (unsigned int)*(pNumChains + indexRow * m_indexrowsizebytes);
-		if(m_indexrowsizebytes > 1)	{ printf("Have to find a solution to this problem"); exit(2);}
+		if(m_indexrowsizebytes > 1)
+		{
+			//XXX Have to find a solution to this problem
+			printf( "FATAL: m_indexrowsizebytes > 1: %d\n", m_indexrowsizebytes ); 
+			exit(2);
+		}
 		if(i + NumChainsInRow > m_chainPosition)
 		{
 			curRowPosition = m_chainPosition - i;
@@ -114,7 +144,7 @@ int RTI2Reader::ReadChains(unsigned int &numChains, RainbowChainO *pData)
 		// Load the ending point prefix	
 		pData[chainsProcessed].nIndexE = m_pHeader->prefixstart + indexRow << m_pHeader->rti_endptlength;
 		// Append the ending point suffix
-		pData[chainsProcessed].nIndexE |= (chainrow & (0xFFFFFFFFFFFFFFFF >> m_pHeader->rti_cplength)) >> m_pHeader->rti_startptlength;
+		pData[chainsProcessed].nIndexE |= (chainrow & (0xFFFFFFFFFFFFFFFFllu >> m_pHeader->rti_cplength)) >> m_pHeader->rti_startptlength;
 		//pData[chainsProcessed].nCheckPoint = (chainrow >> m_pHeader->rti_startptlength + m_pHeader->rti_endptlength);
 		curRowPosition++;
 		chainsProcessed++;
