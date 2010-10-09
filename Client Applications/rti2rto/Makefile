@@ -2,9 +2,8 @@ SHELL = /bin/sh
 CC = g++
 OPTIMIZATION = -O3
 INCLUDES = -I../../Common/rt\ api -I../../Server\ Applications/rsearchi
-# XXX todo currently only 32-bit targets work
-CFLAGS = -Wall -m32 -std=c++98 $(INCLUDES) $(OPTIMIZATION) -c
-LFLAGS = -Wall -m32 -std=c++98 $(INCLUDES) $(OPTIMIZATION)
+CFLAGS = -Wall -ansi $(INCLUDES) $(OPTIMIZATION) -c $(DEBUG)
+LFLAGS = -Wall -ansi $(INCLUDES) $(OPTIMIZATION) $(DEBUG)
 LIBS = 
 OBJS = MemoryPool.o Public.o RTI2Reader.o RTIReader.o
 COMMON_API_PATH = ../../Common/rt\ api
@@ -16,6 +15,9 @@ rti2rto: $(OBJS)
 
 clean:
 	rm -f *.o rti2rto
+
+debug: DEBUG += -DDEBUG -g
+debug: all
 
 rebuild: clean all
 

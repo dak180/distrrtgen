@@ -98,6 +98,7 @@ void ConvertRainbowTable(string sPathName, string sResultFileName, string sType)
 	static CMemoryPool mp;
 	unsigned int nAllocatedSize;
 	BaseRTReader *reader = NULL;
+
 	if(sType == "RTI2")
 		reader = (BaseRTReader*)new RTI2Reader(sFileName);
 	else if(sType == "RTI")
@@ -107,6 +108,7 @@ void ConvertRainbowTable(string sPathName, string sResultFileName, string sType)
 		printf("Invalid table type '%s'", sType.c_str());
 		return ;
 	}
+
 	RainbowChainCP* pChain = (RainbowChainCP*)mp.Allocate(reader->GetChainsLeft() * sizeof(RainbowChainCP), nAllocatedSize);
 	if (pChain != NULL)
 	{
@@ -115,7 +117,7 @@ void ConvertRainbowTable(string sPathName, string sResultFileName, string sType)
 		while(reader->GetChainsLeft() > 0)
 		{
 			reader->ReadChains(nChains, pChain);
-			for(int i = 0; i < nChains; i++)
+			for(UINT4 i = 0; i < nChains; i++)
 			{
 				fwrite(&pChain[i], 1, 16, fResult);
 			}
@@ -156,7 +158,7 @@ int main(int argc, char* argv[])
 		printf("no rainbow table found\n");
 		return 0;
 	}
-	for (int i = 0; i < vPathName.size(); i++)
+	for (UINT4 i = 0; i < vPathName.size(); i++)
 	{
 		string sResultFile, sType;
 			
