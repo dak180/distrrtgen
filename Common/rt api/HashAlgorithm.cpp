@@ -1,16 +1,49 @@
 /*
-   RainbowCrack - a general propose implementation of Philippe Oechslin's faster time-memory trade-off technique.
-
-   Copyright (C) Zhu Shuanglei <shuanglei@hotmail.com>
-*/
+ * freerainbowtables is a project for generating, distributing, and using
+ * perfect rainbow tables
+ *
+ * Copyright (C) Zhu Shuanglei <shuanglei@hotmail.com>
+ * Copyright Martin Westergaard Jørgensen <martinwj2005@gmail.com>
+ * Copyright 2009, 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
+ * Copyright 2009, 2010 James Nobis <frt@quelrod.net>
+ *
+ * This file is part of freerainbowtables.
+ *
+ * freerainbowtables is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * freerainbowtables is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with freerainbowtables.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Changes: not using OpenSSL routines the slow way anymore, as suggested by jci.
+ */
 
 #include "HashAlgorithm.h"
 
 #include "Public.h"
+
 #include <string.h>
+
+//#include <openssl/md2.h>
 #include "md4.h"
 #include "md5.h"
 #include "des.h"
+//#include "sha1.h"
+#if defined(_WIN32) && !defined(__GNUC__)
+	#pragma comment(lib, "libeay32.lib")
+#endif
+
+#ifdef __NetBSD__
+	#include <des.h>
+#endif
+
 #define MSCACHE_HASH_SIZE 16
 void setup_des_key(unsigned char key_56[], des_key_schedule &ks)
 {
@@ -97,32 +130,38 @@ void HashHALFLMCHALL(unsigned char* pPlain, int nPlainLen, unsigned char* pHash)
 
 void HashNTLMCHALL(unsigned char* pPlain, int nPlainLen, unsigned char* pHash)
 {
-  unsigned char UnicodePlain[MAX_PLAIN_LEN];
-  static unsigned char spoofed_challange[] = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88}; 
-  
-  int len = (nPlainLen < 127) ? nPlainLen : 127;
-  int i;
-  
-  for (i = 0; i < len; i++)
-  {
-    UnicodePlain[i * 2] = pPlain[i];
-    UnicodePlain[i * 2 + 1] = 0x00;
-  }
-
-  des_key_schedule ks;
-  unsigned char lm[21];
-
-  MD4_NEW(UnicodePlain, len * 2, lm);
-  lm[16] = lm[17] = lm[18] = lm[19] = lm[20] = 0;
-
-  setup_des_key(lm, ks);
-  des_ecb_encrypt((des_cblock*)spoofed_challange, (des_cblock*)pHash, ks, DES_ENCRYPT);
-
-  setup_des_key(&lm[7], ks);
-  des_ecb_encrypt((des_cblock*)spoofed_challange, (des_cblock*)&pHash[8], ks, DES_ENCRYPT);
-
-  setup_des_key(&lm[14], ks);
-  des_ecb_encrypt((des_cblock*)spoofed_challange, (des_cblock*)&pHash[16], ks, DES_ENCRYPT);
+	unsigned char UnicodePlain[MAX_PLAIN_LEN];
+	static unsigned char spoofed_challange[] = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88}; 
+	
+	int len = (nPlainLen < 127) ? nPlainLen : 127;
+	int i;
+	
+	for (i = 0; i < len; i++)
+	{
+	UnicodePlain[i * 2] = pPlain[i];
+	UnicodePlain[i * 2 + 1] = 0x00;
+	}
+	
+	des_key_schedule ks;
+	unsigned char lm[21];
+	
+	/*MD4_CTX ctx;
+	MD4_Init(&ctx);
+	MD4_Update(&ctx, UnicodePlain, len * 2);
+	MD4_Final(lm, &ctx);  */
+	MD4_NEW(UnicodePlain, len * 2, lm);
+	
+	//MD4(UnicodePlain, len * 2, lm);
+	lm[16] = lm[17] = lm[18] = lm[19] = lm[20] = 0;
+	
+	setup_des_key(lm, ks);
+	des_ecb_encrypt((des_cblock*)spoofed_challange, (des_cblock*)pHash, ks, DES_ENCRYPT);
+	
+	setup_des_key(&lm[7], ks);
+	des_ecb_encrypt((des_cblock*)spoofed_challange, (des_cblock*)&pHash[8], ks, DES_ENCRYPT);
+	
+	setup_des_key(&lm[14], ks);
+	des_ecb_encrypt((des_cblock*)spoofed_challange, (des_cblock*)&pHash[16], ks, DES_ENCRYPT);
 }
 
 /*
@@ -183,12 +222,19 @@ void HashNTLM(unsigned char* pPlain, int nPlainLen, unsigned char* pHash)
 
 	MD4_NEW(UnicodePlain, nPlainLen * 2, pHash);
 }
+
 /*
 void HashMD2(unsigned char* pPlain, int nPlainLen, unsigned char* pHash)
 {
-	MD2(pPlain, nPlainLen, pHash);
+	MD2_CTX ctx;
+	MD2_Init(&ctx);
+	MD2_Update(&ctx, pPlain, nPlainLen);
+	MD2_Final(pHash, &ctx);
+
+	//MD2(pPlain, nPlainLen, pHash);
 }
 */
+
 void HashMD4(unsigned char* pPlain, int nPlainLen, unsigned char* pHash)
 {
 	MD4_NEW(pPlain, nPlainLen, pHash);
@@ -205,15 +251,24 @@ void HashDoubleMD5(unsigned char* pPlain, int nPlainLen, unsigned char* pHash)
 	memcpy(hash, pHash, 16);
 	MD5_NEW(hash, 16, pHash);
 }
+
 /*
 void HashSHA1(unsigned char* pPlain, int nPlainLen, unsigned char* pHash)
 {
-	SHA1(pPlain, nPlainLen, pHash);
+	SHA_CTX ctx;
+	SHA1_Init(&ctx);
+	SHA1_Update(&ctx, (unsigned char *) pPlain, nPlainLen);
+	SHA1_Final(pHash, &ctx);
 }
 
 void HashRIPEMD160(unsigned char* pPlain, int nPlainLen, unsigned char* pHash)
 {
-	RIPEMD160(pPlain, nPlainLen, pHash);
+	RIPEMD160_CTX ctx;
+	RIPEMD160_Init(&ctx);
+	RIPEMD160_Update(&ctx, pPlain, nPlainLen);
+	RIPEMD160_Final(pHash, &ctx);  
+
+	//RIPEMD160(pPlain, nPlainLen, pHash);
 }
 
 void HashMSCACHE(unsigned char *pPlain, int nPlainLen, unsigned char* pHash)
@@ -241,9 +296,7 @@ void HashMSCACHE(unsigned char *pPlain, int nPlainLen, unsigned char* pHash)
 		unicode_user[i*2+1] = 0x00;
 	}
 
-	MD4_Init(&ctx);
-	MD4_Update(&ctx,unicode_pwd,nPlainLen*2);
-	MD4_Final(final1,&ctx);
+	MD4_NEW( (unsigned char*)unicode_pwd, nPlainLen*2, final1 );
 
 	MD4_Init(&ctx);
 	MD4_Update(&ctx,final1,MD4_DIGEST_LENGTH);
@@ -256,7 +309,7 @@ void HashMSCACHE(unsigned char *pPlain, int nPlainLen, unsigned char* pHash)
 	{
 		unicode_pwd[i*2] = pPlain[i];
 		unicode_pwd[i*2+1] = 0x00;
-	}*/	
+	}*/
 	/*
 	unsigned char *buf = (unsigned char*)calloc(MSCACHE_HASH_SIZE + nSaltLength, sizeof(unsigned char));	
 	HashNTLM(pPlain, nPlainLen, buf, NULL);
@@ -273,19 +326,19 @@ void HashMSCACHE(unsigned char *pPlain, int nPlainLen, unsigned char* pHash)
 /*
 inline void mysql_hash_password_323(unsigned long *result, const char *password) 
 {
-  register unsigned long nr=1345345333L, add=7, nr2=0x12345671L;
-  unsigned long tmp;
-  for (; *password ; password++) 
-  {
-    if (*password == ' ' || *password == '\t') continue;
-	tmp= (unsigned long) (unsigned char) *password;
-	nr^= (((nr & 63)+add)*tmp)+ (nr << 8);
-	nr2+=(nr2 << 8) ^ nr;
-	add+=tmp;
-  }
-  result[0]=nr & (((unsigned long) 1L << 31) -1L); ;
-  result[1]=nr2 & (((unsigned long) 1L << 31) -1L);
-  return;
+	register unsigned long nr=1345345333L, add=7, nr2=0x12345671L;
+	unsigned long tmp;
+	for (; *password ; password++) 
+	{
+		if (*password == ' ' || *password == '\t') continue;
+		tmp= (unsigned long) (unsigned char) *password;
+		nr^= (((nr & 63)+add)*tmp)+ (nr << 8);
+		nr2+=(nr2 << 8) ^ nr;
+		add+=tmp;
+	}
+	result[0]=nr & (((unsigned long) 1L << 31) -1L); // Don't use sign bit (str2int)
+	result[1]=nr2 & (((unsigned long) 1L << 31) -1L);
+	return;
 }
 
 void HashMySQL323(unsigned char* pPlain, int nPlainLen, unsigned char* pHash)
@@ -316,18 +369,19 @@ void HashMySQLSHA1(unsigned char* pPlain, int nPlainLen, unsigned char* pHash)
 	SHA1_Final(pHash, &ctx);
 }
 */
+
 //*********************************************************************************
 // Code for PIX password hashing
 //*********************************************************************************
 static char itoa64[] =          /* 0 ... 63 => ascii - 64 */
-        "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+	"./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
 void _crypt_to64(char *s, unsigned long v, int n)
 {
-        while (--n >= 0) {
-                *s++ = itoa64[v&0x3f];
-                v >>= 6;
-        }
+	while (--n >= 0) {
+		*s++ = itoa64[v&0x3f];
+		v >>= 6;
+	}
 }
 /*
 void HashPIX(unsigned char* pPlain, int nPlainLen, unsigned char* pHash)
@@ -342,6 +396,7 @@ void HashPIX(unsigned char* pPlain, int nPlainLen, unsigned char* pHash)
 	MD5_Init(&ctx);
 	MD5_Update(&ctx, (unsigned char *) pass, MD5_DIGEST_LENGTH);
 	MD5_Final(final, &ctx);
+	MD5_NEW((unsigned char *) pass, MD5_DIGEST_LENGTH, final);
 
 	char* p = (char*) temp;
 	_crypt_to64(p,*(unsigned long*) (final+0),4); p += 4;
@@ -355,3 +410,15 @@ void HashPIX(unsigned char* pPlain, int nPlainLen, unsigned char* pHash)
 	free (pass);
 }
 */
+#if !defined(_WIN32) || defined(__GNUC__)
+char *strupr(char *s1)
+{
+	char *p = s1;
+	while(*p)
+	{
+		*p = (char) toupper(*p);
+		p++;
+	}
+	return s1;
+}
+#endif

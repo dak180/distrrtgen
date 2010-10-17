@@ -1,7 +1,26 @@
 /*
-   RainbowCrack - a general propose implementation of Philippe Oechslin's faster time-memory trade-off technique.
-
-   Copyright (C) Zhu Shuanglei <shuanglei@hotmail.com>
+ * freerainbowtables is a project for generating, distributing, and using
+ * perfect rainbow tables
+ *
+ * Copyright (C) Zhu Shuanglei <shuanglei@hotmail.com>
+ * Copyright Martin Westergaard Jørgensen <martinwj2005@gmail.com>
+ * Copyright 2009, 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
+ * Copyright 2009, 2010 James Nobis <frt@quelrod.net>
+ *
+ * This file is part of freerainbowtables.
+ *
+ * freerainbowtables is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * freerainbowtables is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with freerainbowtables.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #ifdef _WIN32
@@ -31,8 +50,18 @@
 
 #ifdef _WIN32
 	#include <windows.h>
-#else
-	#include <sys/sysinfo.h>
+#elif defined(__APPLE__) || \
+	((defined(__unix__) || defined(unix)) && !defined(USG))
+
+	#include <sys/param.h>
+
+	#if defined(BSD)
+		#include <sys/sysctl.h>
+	#elif defined(__linux__)
+		#include <sys/sysinfo.h>
+	#else
+		#error Unsupported Operating system
+	#endif
 #endif
 
 //////////////////////////////////////////////////////////////////////
@@ -72,12 +101,13 @@ bool GetHybridCharsets(string sCharset, vector<tCharset>& vCharset)
 	// Example: hybrid(mixalpha-numeric-all-space#1-6,numeric#1-4)
 	if(sCharset.substr(0, 6) != "hybrid") // Not hybrid charset
 		return false;
-	size_t nEnd = sCharset.rfind(')');
-	size_t nStart = sCharset.rfind('(');
+
+	UINT4 nEnd = (int) sCharset.rfind(')');
+	UINT4 nStart = (int) sCharset.rfind('(');
 	string sChar = sCharset.substr(nStart + 1, nEnd - nStart - 1);
 	vector<string> vParts;
 	SeperateString(sChar, ",", vParts);
-	for(int i = 0; i < vParts.size(); i++)
+	for(UINT4 i = 0; i < vParts.size(); i++)
 	{
 		tCharset stCharset;
 		vector<string> vParts2;
@@ -95,15 +125,16 @@ bool GetHybridCharsets(string sCharset, vector<tCharset>& vCharset)
 bool boinc_ReadLinesFromFile(string sPathName, vector<string>& vLine)
 {
 	vLine.clear();
-    char input_path[512];
-    boinc_resolve_filename(sPathName.c_str(), input_path, sizeof(input_path));
-    FILE *file = boinc_fopen(input_path, "rb");
-    if (!file) {
-        fprintf(stderr,
-            "Couldn't find input file, resolved name %s.\n", input_path
-        );
-        exit(-1);
-    }
+	char input_path[512];
+	boinc_resolve_filename(sPathName.c_str(), input_path, sizeof(input_path));
+	FILE *file = boinc_fopen(input_path, "rb");
+	if (!file) {
+		fprintf(stderr,
+			"Couldn't find input file, resolved name %s.\n", input_path
+		);
+		exit(-1);
+	}
+
 	if (file != NULL)
 	{
 		unsigned int len = GetFileLen(file);
@@ -112,7 +143,7 @@ bool boinc_ReadLinesFromFile(string sPathName, vector<string>& vLine)
 		data[len] = '\0';
 		string content = data;
 		content += "\n";
-		delete data;
+		delete [] data;
 
 		unsigned int i;
 		for (i = 0; i < content.size(); i++)
@@ -253,9 +284,38 @@ unsigned int GetAvailPhysMemorySize()
 #endif
 }
 
+string GetApplicationPath()
+{
+	char fullPath[FILENAME_MAX];
+
+#ifdef _WIN32
+	GetModuleFileName(NULL, fullPath, FILENAME_MAX);
+#else
+	char szTmp[32];
+	// XXX linux/proc file system dependent
+	sprintf(szTmp, "/proc/%d/exe", getpid());
+	int bytes = readlink(szTmp, fullPath, FILENAME_MAX);
+
+	if( bytes >= 0 )
+		fullPath[bytes] = '\0';
+#endif
+
+	string sApplicationPath = fullPath;
+#ifdef _WIN32
+	int nIndex = sApplicationPath.find_last_of('\\');
+#else
+	int nIndex = sApplicationPath.find_last_of('/');
+#endif
+
+	if ( nIndex != -1 )
+		sApplicationPath = sApplicationPath.substr(0, nIndex+1);
+
+	return sApplicationPath;
+}
+
 void ParseHash(string sHash, unsigned char* pHash, int& nHashLen)
 {
-	int i;
+	uint32 i;
 	for (i = 0; i < sHash.size() / 2; i++)
 	{
 		string sSub = sHash.substr(i * 2, 2);

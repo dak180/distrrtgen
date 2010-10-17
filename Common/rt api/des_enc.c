@@ -60,6 +60,7 @@
  */
 
 #include "des_locl.h"
+#include "spr.h"
 
 extern	const DES_LONG des_SPtrans[8][64];
 void des_encrypt1(DES_LONG *data, des_key_schedule ks, int enc)

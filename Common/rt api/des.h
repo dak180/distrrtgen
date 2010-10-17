@@ -54,8 +54,11 @@
 #ifdef  __cplusplus
 extern "C" {
 #endif
-typedef unsigned int u_int32_t;
 
+#ifndef u_int32_t
+	typedef unsigned int u_int32_t;
+#endif
+		
 /* must be 32bit quantity */
 #define DES_LONG u_int32_t
 

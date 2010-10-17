@@ -1,8 +1,28 @@
 /*
-   RainbowCrack - a general propose implementation of Philippe Oechslin's faster time-memory trade-off technique.
-
-   Copyright (C) Zhu Shuanglei <shuanglei@hotmail.com>
-*/
+ * freerainbowtables is a multithreaded implementation and fork of the original 
+ * RainbowCrack
+ *
+ * Copyright (C) Zhu Shuanglei <shuanglei@hotmail.com>
+ * Copyright Martin Westergaard Jørgensen <martinwj2005@gmail.com>
+ * Copyright 2009, 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
+ * Copyright 2009, 2010 James Nobis <frt@quelrod.net>
+ * Copyright 2010 Yngve AAdlandsvik
+ *
+ * This file is part of rcracki_mt.
+ *
+ * freerainbowtables is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * freerainbowtables is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with freerainbowtables.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #ifdef _WIN32
 	#pragma warning(disable : 4786)
@@ -58,10 +78,23 @@ bool CChainWalkContext::LoadCharset(string sName)
 	{
 		m_nHybridCharset = 1;		
 	}
+
+	bool readCharset = false;
 	vector<string> vLine;
-	if (ReadLinesFromFile("charset.txt", vLine))
+
+	#ifdef BOINC
+		if ( boinc_ReadLinesFromFile( "charset.txt", vLine ) )
+			readCharset = true;
+	#else
+		if ( ReadLinesFromFile("charset.txt", vLine) )
+			readCharset = true;
+		else if ( ReadLinesFromFile(GetApplicationPath() + "charset.txt", vLine) )
+			readCharset = true;
+	#endif
+
+	if ( readCharset )
 	{
-		int i;
+		uint32 i;
 		for (i = 0; i < vLine.size(); i++)
 		{
 			// Filter comment
@@ -78,7 +111,7 @@ bool CChainWalkContext::LoadCharset(string sName)
 								
 				// sCharsetName charset check
 				bool fCharsetNameCheckPass = true;
-				int j;
+				uint32 j;
 				for (j = 0; j < sCharsetName.size(); j++)
 				{
 					if (   !isalpha(sCharsetName[j])
@@ -120,7 +153,7 @@ bool CChainWalkContext::LoadCharset(string sName)
 					GetHybridCharsets(sName, vCharsets);
 					if(sCharsetName == vCharsets[m_vCharset.size()].sName)
 					{
-						stCharset tCharset = {0};
+						stCharset tCharset;
 						tCharset.m_nPlainCharsetLen = sCharsetContent.size();							
 						memcpy(tCharset.m_PlainCharset, sCharsetContent.c_str(), tCharset.m_nPlainCharsetLen);
 						tCharset.m_sPlainCharsetName = sCharsetName;
@@ -149,6 +182,7 @@ bool CChainWalkContext::LoadCharset(string sName)
 	}
 	else
 		printf("can't open charset configuration file\n");
+
 	return false;
 }
 
@@ -189,7 +223,7 @@ bool CChainWalkContext::SetPlainCharset(string sCharsetName, int nPlainLenMin, i
 	m_nPlainLenMaxTotal = 0;
 	m_nPlainLenMinTotal = 0;
 	uint64 nTemp = 1;
-	int j, k = 1;
+	uint32 j, k = 1;
 	for(j = 0; j < m_vCharset.size(); j++)
 	{
 		int i;
@@ -280,7 +314,7 @@ bool CChainWalkContext::SetupWithPathName(string sPathName, int& nRainbowChainLe
 	}
 	else
 	{
-		if (sCharsetDefinition.find('#') == -1)		// For backward compatibility, "#1-7" is implied
+		if ( sCharsetDefinition.find('#') == string::npos )		// For backward compatibility, "#1-7" is implied
 		{			
 			sCharsetName = sCharsetDefinition;
 			nPlainLenMin = 1;
@@ -424,29 +458,32 @@ void CChainWalkContext::IndexToPlain()
 		m_nPlainLen = m_nPlainLenMinTotal;
 	uint64 nIndexOfX = m_nIndex - m_nPlainSpaceUpToX[m_nPlainLen - 1];
 
-#ifdef _WIN64
+// this is the generic code for non ia32 x86 platforms
+#if !defined(_M_X86) && !defined(__i386__)
 	
-	// Slow version
+	// 32-bit/generic version (slow for non 64-bit platforms)
 	for (i = m_nPlainLen - 1; i >= 0; i--)
 	{
 		int nCharsetLen = 0;
-		for(int j = 0; j < m_vCharset.size(); i++)
+		for(uint32 j = 0; j < m_vCharset.size(); i++)
 		{
 			nCharsetLen += m_vCharset[j].m_nPlainLenMax;
 			if(i < nCharsetLen) // We found the correct charset
 			{
-				m_Plain[i] = m_vCharset[j].m_PlainCharset[nIndexOfX % m_nPlainCharsetLen];
+				m_Plain[i] = m_vCharset[j].m_PlainCharset[nIndexOfX % m_vCharset[j].m_nPlainCharsetLen];
 				nIndexOfX /= m_vCharset[j].m_nPlainCharsetLen;
+				break;
 			}
 		}
 	}
 #else
 
 
-	// Fast version
+	// Fast ia32 version
 	for (i = m_nPlainLen - 1; i >= 0; i--)
 	{
-#ifdef _WIN32
+		// 0x100000000 = 2^32
+#ifdef _M_X86
 		if (nIndexOfX < 0x100000000I64)
 			break;
 #else
@@ -454,7 +491,7 @@ void CChainWalkContext::IndexToPlain()
 			break;
 #endif
 		int nCharsetLen = 0;
-		for(int j = 0; j < m_vCharset.size(); j++)
+		for(uint32 j = 0; j < m_vCharset.size(); j++)
 		{
 			nCharsetLen += m_vCharset[j].m_nPlainLenMax;
 			if(i < nCharsetLen) // We found the correct charset
@@ -466,27 +503,30 @@ void CChainWalkContext::IndexToPlain()
 		}
 	}
 
-	unsigned int nIndexOfX32 = (unsigned int)nIndexOfX;
+	uint32 nIndexOfX32 = (uint32)nIndexOfX;
 	for (; i >= 0; i--)
 	{
 		int nCharsetLen = 0;
-		for(int j = 0; j < m_vCharset.size(); j++)
+		for(uint32 j = 0; j < m_vCharset.size(); j++)
 		{
 			nCharsetLen += m_vCharset[j].m_nPlainLenMax;
 			if(i < nCharsetLen) // We found the correct charset
 			{
 
-//		m_Plain[i] = m_PlainCharset[nIndexOfX32 % m_vCharset[j].m_nPlainCharsetLen];
+//		m_Plain[i] = m_vCharset[j].m_PlainCharset[nIndexOfX32 % m_vCharset[j].m_nPlainCharsetLen];
 //		nIndexOfX32 /= m_vCharset[j].m_nPlainCharsetLen;
 
-		unsigned int nPlainCharsetLen = m_vCharset[j].m_nPlainCharsetLen;
+// moving nPlainCharsetLen into the asm body and avoiding the extra temp
+// variable results in performance gain
+//		unsigned int nPlainCharsetLen = m_vCharset[j].m_nPlainCharsetLen;
 		unsigned int nTemp;
-#ifdef _WIN32
+
+#if defined(_WIN32) && !defined(__GNUC__)
 		__asm
 		{
 			mov eax, nIndexOfX32
 			xor edx, edx
-			div nPlainCharsetLen
+			div m_vCharset[j].m_nPlainCharsetLen
 			mov nIndexOfX32, eax
 			mov nTemp, edx
 		}
@@ -498,7 +538,7 @@ void CChainWalkContext::IndexToPlain()
 								"mov %%eax, %0;"
 								"mov %%edx, %1;"
 								: "=m"(nIndexOfX32), "=m"(nTemp)
-								: "m"(nIndexOfX32), "m"(nPlainCharsetLen)
+								: "m"(nIndexOfX32), "m"(m_vCharset[j].m_nPlainCharsetLen)
 								: "%eax", "%edx"
 							 );
 		m_Plain[i] = m_vCharset[j].m_PlainCharset[nTemp];

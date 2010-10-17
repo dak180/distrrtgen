@@ -58,9 +58,6 @@
 #include "Public.h"
 // Rainbowcrack code
 #include "ChainWalkContext.h"
-typedef unsigned int uint32;
-//typedef unsigned __int64 uint64;
-
 
 using std::string;
 
@@ -72,7 +69,7 @@ double cpu_time = 20, comp_result;
 */
 int QuickSortPartition(RainbowChainCP* pChain, int nLow, int nHigh)
 {
-	int nRandomIndex = nLow + ((unsigned int)rand() * (RAND_MAX + 1) + (unsigned int)rand()) % (nHigh - nLow + 1);
+	int nRandomIndex = nLow + ((uint32)rand() * ((uint32)RAND_MAX + 1) + (uint32)rand()) % (nHigh - nLow + 1);
 	RainbowChainCP TempChain;
 	TempChain = pChain[nLow];
 	pChain[nLow] = pChain[nRandomIndex];
@@ -130,7 +127,7 @@ int main(int argc, char **argv) {
 		return -1;
 	}
 	string sHashRoutineName, sCharsetName, sSalt, sCheckPoints;
-	uint32 nRainbowChainCount, nPlainLenMin, nPlainLenMax, nRainbowTableIndex, nRainbowChainLen;
+	int nRainbowChainCount, nPlainLenMin, nPlainLenMax, nRainbowTableIndex, nRainbowChainLen;
 	uint64 nChainStart;
 	sHashRoutineName = argv[1];
 	sCharsetName = argv[2];
@@ -242,7 +239,7 @@ int main(int argc, char **argv) {
 //	std::cout << "Starting to generate chains" << std::endl;
 	for(int nCurrentCalculatedChains = nDataLen / 18; nCurrentCalculatedChains < nRainbowChainCount; nCurrentCalculatedChains++)
 	{		
-		int cpcheck = 0;
+		uint32 cpcheck = 0;
 		unsigned short checkpoint = 0;
 		fd = (double)nCurrentCalculatedChains / (double)nRainbowChainCount;
 		boinc_fraction_done(fd);
