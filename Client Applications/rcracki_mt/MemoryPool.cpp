@@ -8,7 +8,7 @@
  * Copyright 2009, 2010 James Nobis <frt@quelrod.net>
  * Copyright 2010 uroskn
  *
- * This file is part of racrcki_mt.
+ * This file is part of rcracki_mt.
  *
  * rcracki_mt is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,7 +37,11 @@ CMemoryPool::CMemoryPool(unsigned int bytesSaved, bool bDebug, uint64 maxMem)
 
 	if ( debug )
 	{
-		printf( "Debug: nAvailPhys: %llu\n", nAvailPhys );
+		#ifdef _WIN32
+			printf( "Debug: nAvailPhys: %I64u\n", nAvailPhys );
+		#else
+			printf( "Debug: nAvailPhys: %llu\n", nAvailPhys );
+		#endif
 		printf( "Debug: bytesSaved: %d\n", bytesSaved );
 	}
 

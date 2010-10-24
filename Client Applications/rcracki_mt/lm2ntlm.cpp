@@ -5,7 +5,7 @@
  * Copyright 2009, 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
  * Copyright 2009, 2010 James Nobis <frt@quelrod.net>
  *
- * This file is part of racrcki_mt.
+ * This file is part of rcracki_mt.
  *
  * rcracki_mt is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
  * along with rcracki_mt.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(__GNUC__)
 	#pragma warning(disable : 4786 4267 4018)
 #endif
 

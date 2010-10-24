@@ -7,7 +7,7 @@
  * Copyright 2009, 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
  * Copyright 2009, 2010 James Nobis <frt@quelrod.net>
  *
- * This file is part of racrcki_mt.
+ * This file is part of rcracki_mt.
  *
  * rcracki_mt is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,22 +28,25 @@
 
 void HashLM(unsigned char* pPlain, int nPlainLen, unsigned char* pHash);
 void HashNTLM(unsigned char* pPlain, int nPlainLen, unsigned char* pHash);
-void HashMD2(unsigned char* pPlain, int nPlainLen, unsigned char* pHash);
+//void HashMD2(unsigned char* pPlain, int nPlainLen, unsigned char* pHash);
 void HashMD4(unsigned char* pPlain, int nPlainLen, unsigned char* pHash);
 void HashMD5(unsigned char* pPlain, int nPlainLen, unsigned char* pHash);
 void HashDoubleMD5(unsigned char* pPlain, int nPlainLen, unsigned char* pHash);
 void HashSHA1(unsigned char* pPlain, int nPlainLen, unsigned char* pHash);
 //void HashRIPEMD160(unsigned char* pPlain, int nPlainLen, unsigned char* pHash);
 void HashMSCACHE(unsigned char *pPlain, int nPlainLen, unsigned char* pHash);
+
 //****************************************************************************
 // MySQL Password Hashing
 //****************************************************************************
+
 void HashMySQL323(unsigned char* pPlain, int nPlainLen, unsigned char* pHash);
 void HashMySQLSHA1(unsigned char* pPlain, int nPlainLen, unsigned char* pHash);
 
 //****************************************************************************
 // Cisco PIX Password Hashing
 //****************************************************************************
+
 void HashPIX(unsigned char* pPlain, int nPlainLen, unsigned char* pHash);
 
 //****************************************************************************

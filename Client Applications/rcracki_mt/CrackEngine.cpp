@@ -8,7 +8,7 @@
  * Copyright 2009, 2010 James Nobis <frt@quelrod.net>
  * Copyright 2010 uroskn
  *
- * This file is part of racrcki_mt.
+ * This file is part of rcracki_mt.
  *
  * rcracki_mt is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,12 +24,16 @@
  * along with rcracki_mt.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(__GNUC__)
 	#pragma warning(disable : 4786 4267 4018)
 #endif
 
 #include "CrackEngine.h"
 #include "RTI2Reader.h"
+
+#ifndef _WIN32
+	#include <sys/resource.h>
+#endif
 
 CCrackEngine::CCrackEngine()
 {
@@ -299,15 +303,28 @@ void CCrackEngine::SearchTableChunkOld(RainbowChainO* pChain, int nRainbowChainL
 	vector<rcrackiThread*> threadPool;
 	vector<pthread_t> pThreads;
 
+	#ifndef _WIN32
+		/*
+		 * On linux you cannot set the priority of a thread in the non real time
+		 * scheduling groups.  You can set the priority of the process.  In
+		 * windows BELOW_NORMAL represents a 1/8th drop in priority and this would
+		 * be 20 * 1/8 on linux or about 2.5
+		 */
+		setpriority( PRIO_PROCESS, 0, 2 );
+	#endif
+
 	pthread_attr_t attr;
 	pthread_attr_init(&attr);
 	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 	#ifdef _WIN32
 	sched_param param;
+	/*
+	 * windows scheduling is 0 to 32 (low to high) with 8 as normal and 7 as
+	 * BELOW_NORMAL
+	 */
 	param.sched_priority = THREAD_PRIORITY_BELOW_NORMAL;
 	pthread_attr_setschedparam (&attr, &param);
 	#endif
-	// XXX else set it to 5 or something (for linux)?
 
 	bool pausing = false;
 
@@ -615,6 +632,16 @@ void CCrackEngine::SearchTableChunk(RainbowChain* pChain, int nRainbowChainLen, 
 
 	vector<rcrackiThread*> threadPool;
 	vector<pthread_t> pThreads;
+	
+	#ifndef _WIN32
+		/*
+		 * On linux you cannot set the priority of a thread in the non real time
+		 * scheduling groups.  You can set the priority of the process.  In
+		 * windows BELOW_NORMAL represents a 1/8th drop in priority and this would
+		 * be 20 * 1/8 on linux or about 2.5
+		 */
+		setpriority( PRIO_PROCESS, 0, 2 );
+	#endif
 
 	pthread_attr_t attr;
 	pthread_attr_init(&attr);
@@ -943,12 +970,12 @@ void CCrackEngine::SearchRainbowTable(string sPathName, CHashSet& hs)
 
 	// FileName
 #ifdef _WIN32
-	int nIndex = sPathName.find_last_of('\\');
+	string::size_type nIndex = sPathName.find_last_of('\\');
 #else
-	int nIndex = (int) sPathName.find_last_of('/');
+	string::size_type nIndex = sPathName.find_last_of('/');
 #endif
 	string sFileName;
-	if (nIndex != -1)
+	if (nIndex != string::npos)
 		sFileName = sPathName.substr(nIndex + 1);
 	else
 		sFileName = sPathName;
@@ -1018,7 +1045,12 @@ void CCrackEngine::SearchRainbowTable(string sPathName, CHashSet& hs)
 
 				static CMemoryPool mp(bytesForChainWalkSet, debug, maxMem);
 				RainbowChainO* pChain = (RainbowChainO*)mp.Allocate(nFileLen, nAllocatedSize);
-				if (debug) printf("Allocated %llu bytes, filelen %lu\n", nAllocatedSize, (unsigned long)nFileLen);
+				#ifdef _WIN32
+					if (debug) printf("Allocated %I64u bytes, filelen %lu\n", nAllocatedSize, (unsigned long)nFileLen);
+				#else
+					if (debug) printf("Allocated %llu bytes, filelen %lu\n", nAllocatedSize, (unsigned long)nFileLen);
+				#endif
+
 				if (pChain != NULL)
 				{
 					nAllocatedSize = nAllocatedSize / sizeOfChain * sizeOfChain;		// Round to sizeOfChain boundary
@@ -1136,7 +1168,11 @@ void CCrackEngine::SearchRainbowTable(string sPathName, CHashSet& hs)
 						//printf("index nSize: %d\n", nSize);
 						//pIndex = (IndexChain*)new unsigned char[nSize];
 						IndexChain *pIndex = (IndexChain*)mpIndex.Allocate(nFileLenIndex, nAllocatedSizeIndex);
-						if (debug) printf("Debug: Allocated %llu bytes for index with filelen %u\n", nAllocatedSizeIndex, nFileLenIndex);
+						#ifdef _WIN32
+							if (debug) printf("Debug: Allocated %I64u bytes for index with filelen %u\n", nAllocatedSizeIndex, nFileLenIndex);
+						#else
+							if (debug) printf("Debug: Allocated %llu bytes for index with filelen %u\n", nAllocatedSizeIndex, nFileLenIndex);
+						#endif
 				
 						static CMemoryPool mp(bytesForChainWalkSet + nAllocatedSizeIndex, debug, maxMem);
 						
@@ -1149,7 +1185,11 @@ void CCrackEngine::SearchRainbowTable(string sPathName, CHashSet& hs)
 							while ( (unsigned long)ftell(fIndex) != nFileLenIndex )	// Index chunk read loop
 							{
 								// Load index chunk
+#ifdef _WIN32
+								if (debug) printf("Debug: Setting index to 0x00 in memory, %I64u bytes\n", nAllocatedSizeIndex);
+#else
 								if (debug) printf("Debug: Setting index to 0x00 in memory, %llu bytes\n", nAllocatedSizeIndex);
+#endif
 								memset(pIndex, 0x00, nAllocatedSizeIndex);
 								printf("reading index... ");
 								gettimeofday( &tv, NULL );
@@ -1172,7 +1212,11 @@ void CCrackEngine::SearchRainbowTable(string sPathName, CHashSet& hs)
 
 								//RainbowChain* pChain = (RainbowChain*)mp.Allocate(nFileLen, nAllocatedSize);
 								RainbowChain* pChain = (RainbowChain*)mp.Allocate(nCoveredRainbowTableChains * sizeOfChain, nAllocatedSize);
-								if (debug) printf("Debug: Allocated %llu bytes for %u chains, filelen %lu\n", nAllocatedSize, nCoveredRainbowTableChains, (unsigned long)nFileLen);
+								#ifdef _WIN32
+									if (debug) printf("Debug: Allocated %I64u bytes for %u chains, filelen %lu\n", nAllocatedSize, nCoveredRainbowTableChains, (unsigned long)nFileLen);
+								#else
+									if (debug) printf("Debug: Allocated %llu bytes for %u chains, filelen %lu\n", nAllocatedSize, nCoveredRainbowTableChains, (unsigned long)nFileLen);
+								#endif
 
 								if (pChain != NULL && nAllocatedSize > 0)
 								{

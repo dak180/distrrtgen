@@ -7,7 +7,7 @@
  * Copyright 2009, 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
  * Copyright 2009, 2010 James Nobis <frt@quelrod.net>
  *
- * This file is part of racrcki_mt.
+ * This file is part of rcracki_mt.
  *
  * rcracki_mt is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,13 +32,12 @@
 #include <openssl/des.h>
 //#include <openssl/md2.h>
 #include <openssl/md4.h>
-//#include <openssl/md5.h>
 #include <openssl/sha.h>
 //#include <openssl/ripemd.h>
 #include "fast_md5.h"
 #include "md4.h"
 //#include "sha1.h"
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(__GNUC__)
 	#pragma comment(lib, "libeay32.lib")
 #endif
 
@@ -166,7 +165,6 @@ void HashNTLMCHALL(unsigned char* pPlain, int nPlainLen, unsigned char* pHash)
 	des_ecb_encrypt((des_cblock*)spoofed_challange, (des_cblock*)&pHash[16], ks, DES_ENCRYPT);
 }
 
-
 void HashORACLE(unsigned char* pPlain, int nPlainLen, unsigned char* pHash)
 {
 	char ToEncrypt[256];
@@ -177,11 +175,17 @@ void HashORACLE(unsigned char* pPlain, int nPlainLen, unsigned char* pHash)
 	DES_key_schedule ks1,ks2;
 	unsigned char deskey_fixed[]={ 0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef};
 	int i,j;
-
-	strcpy (username, "SYS");
+#if defined(_WIN32) && !defined(__GNUC__)
+	strcpy_s(username, sizeof(username), "SYS");
+#else
+	strcpy(username, "SYS");
+#endif
 	int userlen = 3;
-	
-	strupr ((char*) pPlain);
+#if defined(_WIN32) && !defined(__GNUC__)
+	_strupr((char*) pPlain);
+#else
+	strupr((char*) pPlain);
+#endif
 	memset (ToEncrypt,0,sizeof(ToEncrypt));
 
 	for (i=1,j=0; j<userlen; i++,j++)
@@ -216,12 +220,6 @@ void HashNTLM(unsigned char* pPlain, int nPlainLen, unsigned char* pHash)
 		UnicodePlain[i * 2 + 1] = 0x00;
 	}
 
-	/*MD4_CTX ctx;
-	MD4_Init(&ctx);
-	MD4_Update(&ctx, UnicodePlain, nPlainLen * 2);
-	MD4_Final(pHash, &ctx);*/
-
-	//MD4(UnicodePlain, nPlainLen * 2, pHash);
 	MD4_NEW(UnicodePlain, nPlainLen * 2, pHash);
 }
 
@@ -239,13 +237,7 @@ void HashMD2(unsigned char* pPlain, int nPlainLen, unsigned char* pHash)
 
 void HashMD4(unsigned char* pPlain, int nPlainLen, unsigned char* pHash)
 {
-	/*MD4_CTX ctx;
-	MD4_Init(&ctx);
-	MD4_Update(&ctx, pPlain, nPlainLen);
-	MD4_Final(pHash, &ctx);*/
-
 	MD4_NEW(pPlain, nPlainLen, pHash);
-	//MD4(pPlain, nPlainLen, pHash);
 }
 
 void HashMD5(unsigned char* pPlain, int nPlainLen, unsigned char* pHash)

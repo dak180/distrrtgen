@@ -8,7 +8,7 @@
  * Copyright 2009, 2010 James Nobis <frt@quelrod.net>
  * Copyright 2010 Yngve AAdlandsvik
  *
- * This file is part of racrcki_mt.
+ * This file is part of rcracki_mt.
  *
  * rcracki_mt is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -76,22 +76,18 @@ bool CChainWalkContext::LoadCharset(string sName)
 		return true;
 	}
 	if(sName.substr(0, 6) == "hybrid") // Hybrid charset consisting of 2 charsets
-	{
 		m_nHybridCharset = 1;		
-	}
 	else
-	{
 		m_nHybridCharset = 0;
-	}
 	
 	bool readCharset = false;
 	vector<string> vLine;
-	if (ReadLinesFromFile("charset.txt", vLine)) {
+
+	if ( ReadLinesFromFile("charset.txt", vLine) )
 		readCharset = true;
-	}
-	else if (ReadLinesFromFile(GetApplicationPath() + "charset.txt", vLine)) {
+	else if ( ReadLinesFromFile(GetApplicationPath() + "charset.txt", vLine) )
 		readCharset = true;
-	}
+
 	if (readCharset)
 	{
 		UINT4 i;
@@ -268,11 +264,11 @@ bool CChainWalkContext::SetupWithPathName(string sPathName, int& nRainbowChainLe
 	// something like lm_alpha#1-7_0_100x16_test.rt
 
 #ifdef _WIN32
-	int nIndex = sPathName.find_last_of('\\');
+	string::size_type nIndex = sPathName.find_last_of('\\');
 #else
-	int nIndex = (int) sPathName.find_last_of('/');
+	string::size_type nIndex = sPathName.find_last_of('/');
 #endif
-	if (nIndex != -1)
+	if (nIndex != string::npos)
 		sPathName = sPathName.substr(nIndex + 1);
 
 	if (sPathName.size() < 3)
@@ -324,7 +320,7 @@ bool CChainWalkContext::SetupWithPathName(string sPathName, int& nRainbowChainLe
 	}
 	else
 	{
-		if (sCharsetDefinition.find('#') == (unsigned long)-1)		// For backward compatibility, "#1-7" is implied
+		if ( sCharsetDefinition.find('#') == string::npos )		// For backward compatibility, "#1-7" is implied
 		{			
 			sCharsetName = sCharsetDefinition;
 			nPlainLenMin = 1;
@@ -473,10 +469,10 @@ void CChainWalkContext::IndexToPlain()
 		m_nPlainLen = m_nPlainLenMinTotal;
 	uint64 nIndexOfX = m_nIndex - m_nPlainSpaceUpToX[m_nPlainLen - 1];
 
-// this is the generic code for non x86/x86-64 platforms
-#if !defined(_M_X64) && !defined(_M_X86) && !defined(__i386__) && !defined(__x86_64__)
+// this is the generic code for non x86/x86_64 platforms
+#if !defined(_M_X64) && !defined(_M_IX86) && !defined(__i386__) && !defined(__x86_64__)
 	
-	// Slow/generic version
+	// generic version (slow for non 64-bit platforms and gcc < 4.5.x)
 	for (i = m_nPlainLen - 1; i >= 0; i--)
 	{
 		int nCharsetLen = 0;
@@ -491,14 +487,14 @@ void CChainWalkContext::IndexToPlain()
 			}
 		}
 	}
-#else
 
+#elif defined(_M_X64) || defined(_M_IX86) || defined(__i386__) || defined(__x86_64__)
 
 	// Fast ia32 version
 	for (i = m_nPlainLen - 1; i >= 0; i--)
 	{
 		// 0x100000000 = 2^32
-#if defined(_M_X64) || defined(_M_X86)
+#ifdef _M_IX86
 		if (nIndexOfX < 0x100000000I64)
 			break;
 #else
@@ -519,7 +515,7 @@ void CChainWalkContext::IndexToPlain()
 		}
 	}
 
-	unsigned int nIndexOfX32 = (unsigned int)nIndexOfX;
+	UINT4 nIndexOfX32 = (UINT4)nIndexOfX;
 	for (; i >= 0; i--)
 	{
 		int nCharsetLen = 0;
@@ -540,11 +536,14 @@ void CChainWalkContext::IndexToPlain()
 
 #if defined(_WIN32) && !defined(__GNUC__)
 
+		// VC++ still needs this
+		unsigned int nPlainCharsetLen = m_vCharset[j].m_nPlainCharsetLen;
+
 		__asm
 		{
 			mov eax, nIndexOfX32
 			xor edx, edx
-			div m_vCharset[j].m_nPlainCharsetLen
+			div nPlainCharsetLen
 			mov nIndexOfX32, eax
 			mov nTemp, edx
 		}

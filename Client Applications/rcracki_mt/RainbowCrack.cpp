@@ -16,7 +16,7 @@
  * 2009-01-04 - <james.dickson@comhem.se> - Slightly modified (or "fulhack" as 
  * we say in sweden)  to support cain .lst files.
  *
- * This file is part of racrcki_mt.
+ * This file is part of rcracki_mt.
  *
  * rcracki_mt is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@
  * along with rcracki_mt.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(__GNUC__)
 	#pragma warning(disable : 4786 4267 4018)
 #endif
 
@@ -49,7 +49,7 @@
 	#include <dirent.h>
 #endif
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(__GNUC__)
 	#pragma comment(lib, "libeay32.lib")
 #endif
 
@@ -61,15 +61,15 @@ void GetTableList(string sWildCharPathName, vector<string>& vPathName)
 	//vPathName.clear();
 
 	string sPath;
-	int n = sWildCharPathName.find_last_of('\\');
+	string::size_type n = sWildCharPathName.find_last_of('\\');
 
-	if (n == (sWildCharPathName.size() - 1))
+	if ( n == (sWildCharPathName.size() - 1) )
 	{
 		sWildCharPathName = sWildCharPathName.substr(0, n);
 		n = sWildCharPathName.find_last_of('\\');
 	}
 
-	if (n != -1)
+	if (n != string::npos)
 		sPath = sWildCharPathName.substr(0, n + 1);
 
 	_finddata_t fd;

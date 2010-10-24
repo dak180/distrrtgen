@@ -6,7 +6,7 @@
  * Copyright 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
  * Copyright 2010 James Nobis <frt@quelrod.net>
  *
- * This file is part of racrcki_mt.
+ * This file is part of rcracki_mt.
  *
  * rcracki_mt is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -59,8 +59,8 @@ RTI2Reader::RTI2Reader(string Filename)
 	memcpy(m_pHeader, m_pIndex, sizeof(RTI2Header));
 	m_pHeader->m_cppos = (unsigned int*)(m_pIndex + 8);
 	m_pHeader->prefixstart = *(uint64*)(m_pIndex + 8 + (m_pHeader->rti_cplength * 4));
-	m_chainsizebytes = ceil((float)(m_pHeader->rti_startptlength + m_pHeader->rti_endptlength + m_pHeader->rti_cplength) / 8); // Get the size of each chain in bytes
-	m_indexrowsizebytes = ceil((float)m_pHeader->rti_index_numchainslength / 8);
+	m_chainsizebytes = (UINT4)ceil((float)(m_pHeader->rti_startptlength + m_pHeader->rti_endptlength + m_pHeader->rti_cplength) / 8); // Get the size of each chain in bytes
+	m_indexrowsizebytes = (UINT4)ceil((float)m_pHeader->rti_index_numchainslength / 8);
 	// Check the filesize
 	fseek(m_pFile, 0, SEEK_END);
 	len = ftell(m_pFile);
@@ -121,7 +121,7 @@ int RTI2Reader::ReadChains(unsigned int &numChains, RainbowChainO *pData)
 	uint64 chainrow = 0; // Buffer to store a single read chain
 	unsigned int chainsProcessed = 0; // Number of chains processed
 
-	// ALERT: same problem with unsigned char here.
+	// XXX: same problem with unsigned char here.
 	unsigned int NumChainsInRow = *(pNumChains + indexRow);
 	while(chainsProcessed < numChains && fread(&chainrow, 1, m_chainsizebytes, m_pFile) == m_chainsizebytes)
 	{
@@ -138,13 +138,17 @@ int RTI2Reader::ReadChains(unsigned int &numChains, RainbowChainO *pData)
 			curRowPosition = 0;
 		}
 		// Load the starting point from the data
-		pData[chainsProcessed].nIndexS = chainrow << 64 - m_pHeader->rti_startptlength;
-		pData[chainsProcessed].nIndexS = pData[chainsProcessed].nIndexS >> 64 - m_pHeader->rti_startptlength;
+		pData[chainsProcessed].nIndexS = chainrow << ( 64 - m_pHeader->rti_startptlength );
+		pData[chainsProcessed].nIndexS = pData[chainsProcessed].nIndexS >> ( 64 - m_pHeader->rti_startptlength );
 
 		// Load the ending point prefix	
-		pData[chainsProcessed].nIndexE = m_pHeader->prefixstart + indexRow << m_pHeader->rti_endptlength;
+		pData[chainsProcessed].nIndexE = ( m_pHeader->prefixstart + indexRow ) << m_pHeader->rti_endptlength;
 		// Append the ending point suffix
+#if defined(_WIN32) && !defined(__GNUC__)
+		pData[chainsProcessed].nIndexE |= (chainrow & (0xFFFFFFFFFFFFFFFFI64 >> m_pHeader->rti_cplength)) >> m_pHeader->rti_startptlength;
+#else
 		pData[chainsProcessed].nIndexE |= (chainrow & (0xFFFFFFFFFFFFFFFFllu >> m_pHeader->rti_cplength)) >> m_pHeader->rti_startptlength;
+#endif
 		//pData[chainsProcessed].nCheckPoint = (chainrow >> m_pHeader->rti_startptlength + m_pHeader->rti_endptlength);
 		curRowPosition++;
 		chainsProcessed++;

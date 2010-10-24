@@ -6,7 +6,7 @@
  * Copyright 2009, 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
  * Copyright 2009, 2010 James Nobis <frt@quelrod.net>
  *
- * This file is part of racrcki_mt.
+ * This file is part of rcracki_mt.
  *
  * rcracki_mt is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -109,11 +109,14 @@ void tty_done();
 void tty_init();
 void tty_flush(void);
 // end nmap code
+#endif
 
-#include <sys/time.h>
-
-#else
+#if defined(_WIN32) && !defined(__GNUC__)
 	int gettimeofday( struct timeval *tv, struct timezone *tz );
+#endif
+
+#if !defined(_WIN32) || defined(__GNUC__)
+	#include <sys/time.h>
 #endif
 
 timeval sub_timeofday( timeval tv2, timeval tv );

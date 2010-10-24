@@ -7,7 +7,7 @@
  * Copyright 2009, 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
  * Copyright 2009, 2010 James Nobis <frt@quelrod.net>
  *
- * This file is part of racrcki_mt.
+ * This file is part of rcracki_mt.
  *
  * rcracki_mt is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,13 +22,17 @@
  * along with rcracki_mt.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(__GNUC__)
 	#pragma warning(disable : 4786 4267 4018)
 #endif
 
 #include "Public.h"
 
 #ifdef _WIN32
+	#include <windows.h>
+#endif
+
+#if defined(_WIN32) && !defined(__GNUC__)
 	#include <windows.h>
 	#include <time.h>
 
@@ -161,8 +165,8 @@ bool GetHybridCharsets(string sCharset, vector<tCharset>& vCharset)
 	if(sCharset.substr(0, 6) != "hybrid") // Not hybrid charset
 		return false;
 
-	UINT4 nEnd = (int) sCharset.rfind(')');
-	UINT4 nStart = (int) sCharset.rfind('(');
+	string::size_type nEnd = sCharset.rfind(')');
+	string::size_type nStart = (int) sCharset.rfind('(');
 	string sChar = sCharset.substr(nStart + 1, nEnd - nStart - 1);
 	vector<string> vParts;
 	SeperateString(sChar, ",", vParts);
@@ -202,8 +206,8 @@ bool ReadLinesFromFile(string sPathName, vector<string>& vLine)
 				content[i] = '\n';
 		}
 
-		int n;
-		while ((n = content.find("\n", 0)) != -1)
+		string::size_type n;
+		while ((n = content.find("\n", 0)) != string::npos)
 		{
 			string line = content.substr(0, n);
 			line = TrimString(line);
@@ -241,8 +245,8 @@ bool SeperateString(string s, string sSeperator, vector<string>& vPart)
 	unsigned int i;
 	for (i = 0; i < sSeperator.size(); i++)
 	{
-		int n = s.find(sSeperator[i]);
-		if (n != -1)
+		string::size_type n;
+		if ( (n = s.find(sSeperator[i])) != string::npos)
 		{
 			vPart.push_back(s.substr(0, n));
 			s = s.substr(n + 1);
@@ -301,7 +305,7 @@ string HexToStr(const unsigned char* pData, int nLen)
 
 uint64 GetAvailPhysMemorySize()
 {
-#ifdef _WIN32
+#if defined(_WIN32)
 	MEMORYSTATUS ms;
 	GlobalMemoryStatus(&ms);
 	return ms.dwAvailPhys;
@@ -331,6 +335,7 @@ string GetApplicationPath()
 	GetModuleFileName(NULL, fullPath, FILENAME_MAX);
 #else
 	char szTmp[32];
+	// XXX linux/proc file system dependen
 	sprintf(szTmp, "/proc/%d/exe", getpid());
 	int bytes = readlink(szTmp, fullPath, FILENAME_MAX);
 	if(bytes >= 0)
@@ -339,12 +344,12 @@ string GetApplicationPath()
 
 	string sApplicationPath = fullPath;
 #ifdef _WIN32
-	int nIndex = sApplicationPath.find_last_of('\\');
+	string::size_type nIndex = sApplicationPath.find_last_of('\\');
 #else
-	int nIndex = sApplicationPath.find_last_of('/');
+	string::size_type nIndex = sApplicationPath.find_last_of('/');
 #endif
 
-	if (nIndex != -1)
+	if ( nIndex != string::npos )
 		sApplicationPath = sApplicationPath.substr(0, nIndex+1);
 
 	//printf ("\n\nDebug: The application directory is %s\n", sApplicationPath.c_str());

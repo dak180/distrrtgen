@@ -1,6 +1,33 @@
 [rcracki_mt ChangeLog]
 
-0.6.2 (2 Juli 2009, 13:37):
+0.6.5 (24 Oct 2010, 18:21:25):
+* code changes to allow building via mingw and avoid VC++
+* linux thread priority set to nice value of 2
+* rti2 support
+* replaced clock_t usage with gettimeofday
+* add pre-calculation timing per feature request #3025688 from sourceforge
+* fix bug #3050821 from sourceforge - missing break for non x86/x86_64 arch
+* improve hash performance by moving off openssl to the local faster methods
+* sha1 local implementation was *slower* than openssl for x86/x86_64
+
+0.6.4 (05 Jul 2010, 03:12):
+* add -m to allow users to limit memory usage - courtesy of uroskn
+* fix memory code that made incorrect assumptions about the MemoryPool
+* fix linux memory code - using only info.freeram is incorrect
+* cleanup of the nested if/elif/else stuctures
+* annotate x86 specific sections of code
+* licensing review and GPLv2 compliance
+* cleanup of unused items
+* restructure Makefile
+* cleanup memory leaks
+
+0.6.3 (21 Oct 2009, 21:05):
+* Fixed x86_64 linux compilation
+* Fixed x86_64 linux segmentation fault
+* Fixed 64bit support in md4 code
+* Added support for: FreeBSD, NetBSD, OpenBSD, and MacOSX
+
+0.6.2 (2 Jul 2009, 13:37):
 * Fixed linux support (tty stuff and now actually compiles)
 * Fixed precalculation code
 

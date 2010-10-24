@@ -5,7 +5,7 @@
 # Copyright 2009, 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
 # Copyright 2009, 2010 James Nobis <frt@quelrod.net>
 #
-# This file is part of racrcki_mt.
+# This file is part of rcracki_mt.
 #
 # rcracki_mt is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,16 +23,18 @@
 SHELL = /bin/sh
 BIN = $(DESTDIR)/usr/bin
 CC = g++
-OPTIMIZATION = -O3
-INCLUDES = -I../../Common/rt\ api
+OPTIMIZATION = -O3 -mtune=native
 CFLAGS = -Wall -ansi $(OPTIMIZATION) -c $(DEBUG)
-LFLAGS = -Wall -ansi $(OPTIMIZATION) $(DEBUG)
+LFLAGS = -Wall -ansi -filt $(OPTIMIZATION) $(DEBUG)
 LIBS = -lcrypto -lpthread
-OBJS = BaseRTReader.o ChainWalkContext.o ChainWalkSet.o CrackEngine.o fast_md5.o HashAlgorithm.o HashRoutine.o HashSet.o lm2ntlm.o md4.o MemoryPool.o Public.o RainbowCrack.o rcrackiThread.o RTI2Reader.o sha1.o
-COMMON_API_PATH = ../../Common/rt\ api
+OBJS = BaseRTReader.o ChainWalkContext.o ChainWalkSet.o CrackEngine.o fast_md5.o HashAlgorithm.o HashRoutine.o HashSet.o lm2ntlm.o md4.o MemoryPool.o Public.o RainbowCrack.o rcrackiThread.o RTI2Reader.o
+#sha1.o
+WARNALL = -Wextra -Wunused-macros -Wunsafe-loop-optimizations -Wundef -Woverlength-strings -Wdisabled-optimization -Wformat-extra-args -Wformat-security -Winline
 
 OSNAME = $(shell uname -s)
-STRIP = $(shell which strip) --strip-debug
+# apparently --string-debug works on Linux, OpenBSD, NetBSD, and FreeBSD
+# but not on OSX so to the short name -S
+STRIP = $(shell which strip) -S
 
 #LIBS_Darwin = -lcrypto
 LIBS_NetBSD = -ldes
@@ -51,8 +53,50 @@ clean:
 debug: DEBUG += -DDEBUG -g
 debug: rcracki_mt
 
-debugall: DEBUG += -DDEBUG -g -Wextra -Wunused-macros -Wunsafe-loop-optimizations -Wundef -Woverlength-strings -Wdisabled-optimization -Wformat-extra-args -Wformat-security -Winline
+debugall: DEBUG += -DDEBUG -g $(WARNALL)
 debugall: rcracki_mt
+
+dumpasmall: DEBUG += -S -fverbose-asm
+dumpasmall: rcracki_mt
+
+dumpasmprofileuseall: DEBUG += -S -fverbose-asm
+dumpasmprofileuseall: profileuseall
+
+debugprofileuseall: DEBUG += -fprofile-use
+debugprofileuseall: debugall
+
+m32: DEBUG += -m32
+m32: rcracki_mt
+
+m32debug: DEBUG += -m32
+m32debug: debug
+
+m32debugall: DEBUG += -m32
+m32debugall: debugll
+
+m32dumpasmall: DEBUG += -m32
+m32dumpasmall: dumpasmall
+
+m32dumpasmprofileuseall: DEBUG += -S -fverbose-asm -m32
+m32dumpasmprofileuseall: profileuseall
+
+m32profilegenall: DEBUG += -m32
+m32profilegenall: profilegenall
+
+m32profileuseall: DEBUG += -m32
+m32profileuseall: profileuseall
+
+profilegenall: DEBUG += -fprofile-generate $(WARNALL)
+profilegenall: rcracki_mt
+
+profileuseall: DEBUG += -fprofile-use $(WARNALL)
+profileuseall: rcracki_mt
+
+gcovall: DEBUG += -DDEBUG -g -fprofile-arcs -ftest-coverage
+gcovall: rcracki_mt
+
+gprofall: DEBUG += -DDEBUG -g -pg
+gprofall: rcracki_mt
 
 install:
 	install -d $(BIN)
@@ -78,13 +122,11 @@ ChainWalkSet.o: Public.h ChainWalkSet.h ChainWalkSet.cpp
 CrackEngine.o: CrackEngine.h CrackEngine.cpp Public.h HashSet.h ChainWalkContext.h MemoryPool.h ChainWalkSet.h rcrackiThread.h RTI2Reader.h
 	 $(CC) $(CFLAGS) CrackEngine.cpp
 
-fast_md5.o: $(COMMON_API_PATH)/fast_md5.h $(COMMON_API_PATH)/fast_md5.cpp \
-	$(COMMON_API_PATH)/global.h
-	 $(CC) $(CFLAGS) $(COMMON_API_PATH)/fast_md5.cpp
+fast_md5.o: fast_md5.h fast_md5.cpp global.h
+	 $(CC) $(CFLAGS) fast_md5.cpp
 
 #HashAlgorithm.o: HashAlgorithm.h HashAlgorithm.cpp Public.h fast_md5.h md4.h sha1.h
-HashAlgorithm.o: HashAlgorithm.h HashAlgorithm.cpp Public.h \
-	$(COMMON_API_PATH)/fast_md5.h md4.h
+HashAlgorithm.o: HashAlgorithm.h HashAlgorithm.cpp Public.h fast_md5.h md4.h
 	 $(CC) $(CFLAGS) HashAlgorithm.cpp
 
 HashRoutine.o: HashRoutine.h HashRoutine.cpp global.h HashAlgorithm.h
@@ -114,5 +156,5 @@ rcrackiThread.o: rcrackiThread.h rcrackiThread.cpp ChainWalkContext.h Public.h H
 RTI2Reader.o: RTI2Reader.h RTI2Reader.cpp BaseRTReader.h
 	$(CC) $(CFLAGS) RTI2Reader.cpp
 
-sha1.o: sha1.h sha1.cpp global.h
-	 $(CC) $(CFLAGS) sha1.cpp
+#sha1.o: sha1.h sha1.cpp global.h
+#	 $(CC) $(CFLAGS) sha1.cpp
