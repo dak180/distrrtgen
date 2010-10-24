@@ -24,14 +24,13 @@
  * along with freerainbowtables.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(__GNUC__)
 	#pragma warning(disable : 4786)
 #endif
 
 #include "ChainWalkContext.h"
 
 #include <ctype.h>
-
 
 //////////////////////////////////////////////////////////////////////
 
@@ -67,7 +66,7 @@ bool CChainWalkContext::LoadCharset(string sName)
 		stCharset tCharset;
 		int i;
 		for (i = 0x00; i <= 0xff; i++)
-			tCharset.m_PlainCharset[i] = i;
+			tCharset.m_PlainCharset[i] = (unsigned char) i;
 		tCharset.m_nPlainCharsetLen = 256;
 		tCharset.m_sPlainCharsetName = sName;
 		tCharset.m_sPlainCharsetContent = "0x00, 0x01, ... 0xff";
@@ -75,10 +74,10 @@ bool CChainWalkContext::LoadCharset(string sName)
 		return true;
 	}
 	if(sName.substr(0, 6) == "hybrid") // Hybrid charset consisting of 2 charsets
-	{
 		m_nHybridCharset = 1;		
-	}
-
+	else
+		m_nHybridCharset = 0;
+	
 	bool readCharset = false;
 	vector<string> vLine;
 
@@ -269,11 +268,11 @@ bool CChainWalkContext::SetupWithPathName(string sPathName, int& nRainbowChainLe
 	// something like lm_alpha#1-7_0_100x16_test.rt
 
 #ifdef _WIN32
-	int nIndex = sPathName.find_last_of('\\');
+	string::size_type nIndex = sPathName.find_last_of('\\');
 #else
-	int nIndex = sPathName.find_last_of('/');
+	string::size_type nIndex = sPathName.find_last_of('/');
 #endif
-	if (nIndex != -1)
+	if (nIndex != string::npos)
 		sPathName = sPathName.substr(nIndex + 1);
 
 	if (sPathName.size() < 3)
@@ -399,7 +398,7 @@ void CChainWalkContext::Dump()
 	printf("hash length: %d\n", m_nHashLen);
 
 	printf("plain charset: ");
-	int i;
+	unsigned int i;
 	for (i = 0; i < m_vCharset[0].m_nPlainCharsetLen; i++)
 	{
 		if (isprint(m_vCharset[0].m_PlainCharset[i]))
@@ -458,14 +457,14 @@ void CChainWalkContext::IndexToPlain()
 		m_nPlainLen = m_nPlainLenMinTotal;
 	uint64 nIndexOfX = m_nIndex - m_nPlainSpaceUpToX[m_nPlainLen - 1];
 
-// this is the generic code for non ia32 x86 platforms
-#if !defined(_M_X86) && !defined(__i386__)
+// this is the generic code for non x86/x86_64 platforms
+#if !defined(_M_X64) && !defined(_M_IX86) && !defined(__i386__) && !defined(__x86_64__)
 	
-	// 32-bit/generic version (slow for non 64-bit platforms)
+	// generic version (slow for non 64-bit platforms and gcc < 4.5.x)
 	for (i = m_nPlainLen - 1; i >= 0; i--)
 	{
 		int nCharsetLen = 0;
-		for(uint32 j = 0; j < m_vCharset.size(); i++)
+		for(uint32 j = 0; j < m_vCharset.size(); j++)
 		{
 			nCharsetLen += m_vCharset[j].m_nPlainLenMax;
 			if(i < nCharsetLen) // We found the correct charset
@@ -476,14 +475,13 @@ void CChainWalkContext::IndexToPlain()
 			}
 		}
 	}
-#else
-
+#elif defined(_M_X64) || defined(_M_IX86) || defined(__i386__) || defined(__x86_64__)
 
 	// Fast ia32 version
 	for (i = m_nPlainLen - 1; i >= 0; i--)
 	{
 		// 0x100000000 = 2^32
-#ifdef _M_X86
+#ifdef _M_IX86
 		if (nIndexOfX < 0x100000000I64)
 			break;
 #else
@@ -516,17 +514,20 @@ void CChainWalkContext::IndexToPlain()
 //		m_Plain[i] = m_vCharset[j].m_PlainCharset[nIndexOfX32 % m_vCharset[j].m_nPlainCharsetLen];
 //		nIndexOfX32 /= m_vCharset[j].m_nPlainCharsetLen;
 
-// moving nPlainCharsetLen into the asm body and avoiding the extra temp
-// variable results in performance gain
-//		unsigned int nPlainCharsetLen = m_vCharset[j].m_nPlainCharsetLen;
-		unsigned int nTemp;
+//	moving nPlainCharsetLen into the asm body and avoiding the extra temp
+//	variable results in a performance gain
+//				unsigned int nPlainCharsetLen = m_vCharset[j].m_nPlainCharsetLen;
+				unsigned int nTemp;
 
 #if defined(_WIN32) && !defined(__GNUC__)
+		// VC++ still needs this
+		unsigned int nPlainCharsetLen = m_vCharset[j].m_nPlainCharsetLen;
+
 		__asm
 		{
 			mov eax, nIndexOfX32
 			xor edx, edx
-			div m_vCharset[j].m_nPlainCharsetLen
+			div nPlainCharsetLen
 			mov nIndexOfX32, eax
 			mov nTemp, edx
 		}
