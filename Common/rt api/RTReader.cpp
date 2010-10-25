@@ -9,7 +9,7 @@ RTReader::~RTReader(void)
 {
 }
 
-int RTReader::ReadChains(unsigned int &numChains, RainbowChainCP *pData)
+int RTReader::ReadChains(unsigned int &numChains, RainbowChain *pData)
 {
 	unsigned int numRead = fread(pData, 1, 16 * numChains, m_pFile);
 	numChains = numRead / 16;

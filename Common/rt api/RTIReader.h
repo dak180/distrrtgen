@@ -20,7 +20,7 @@ public:
 	RTIReader(string Filename);
 	~RTIReader(void);
 
-	int ReadChains(unsigned int &numChains, RainbowChainCP *pData);
+	int ReadChains(unsigned int &numChains, RainbowChain *pData);
 	unsigned int GetChainsLeft();
 
 };

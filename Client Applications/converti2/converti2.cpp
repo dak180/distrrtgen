@@ -1,8 +1,7 @@
 #include <string>
 #include <vector>
 #ifdef _WIN32
-	#include <io.h>
-	#include <conio.h>
+#include <io.h>
 #else
 	#include <sys/types.h>
 	#include <sys/stat.h>
@@ -14,9 +13,12 @@
 #include <time.h>
 #include <math.h>
 #include <vector>
-
+#include <conio.h>
+#include <sstream>
 #include "Public.h"
 #include "MemoryPool.h"
+#include "RTIReader.h"
+#include "RTReader.h"
 
 using namespace std;
 
@@ -246,13 +248,10 @@ void GetTableList(string sWildCharPathName, vector<string>& vPathName)
 
 	_finddata_t fd;
 	long handle = _findfirst(sWildCharPathName.c_str(), &fd);
-	if (handle != -1)
-	{
-		do
-		{
+	if (handle != -1) {
+		do	{
 			string sName = fd.name;
-			if (sName != "." && sName != ".." && !(fd.attrib & _A_SUBDIR))
-			{
+			if (sName != "." && sName != ".." && !(fd.attrib & _A_SUBDIR))	{
 				string sPathName = sPath + sName;
 				vPathName.push_back(sPathName);
 			}
@@ -290,108 +289,91 @@ void ConvertRainbowTable(string sPathName, string sResultFileName, unsigned int 
 	int nIndex = sPathName.find_last_of('/');
 #endif
 	string sFileName;
-	if (nIndex != -1)
+	if (nIndex != -1) {
 		sFileName = sPathName.substr(nIndex + 1);
-	else
+	}
+	else {
 		sFileName = sPathName;
-	// Info
-	printf("%s:\n", sFileName.c_str());
-	FILE* file = fopen(sPathName.c_str(), "rb");
-	FILE* fileR = fopen(sResultFileName.c_str(), "wb");
+	}
 	unsigned int distribution[64] = {0};
 	unsigned int numProcessedChains = 0;
-	
-	if (file != NULL && fileR != NULL)
-	{
+	FILE* fileR;
+	BaseRTReader *reader = NULL;
+	if(sPathName.substr(sPathName.length() - 2, sPathName.length()) == "rt")
+		reader = (BaseRTReader*)new RTReader(sPathName);
+	else if(sPathName.substr(sPathName.length() - 3, sPathName.length()) == "rti")
+		reader = (BaseRTReader*)new RTIReader(sPathName);
+	if(reader == NULL) {
+		printf("%s is not a supported file (Only RT and RTI is supported)\n", sPathName.c_str());
+		return;
+	}
+	// Info
+	printf("%s:\n", sFileName.c_str());
+	if(showDistribution == 0) {
+		fileR = fopen(sResultFileName.c_str(), "wb");
+	}
+	if (fileR != NULL || showDistribution == 1) {
 		// File length check
-		UINT4 nFileLen = GetFileLen(file);
-		UINT4 nTotalChainCount = 0;
-		if(hascp == 0) nTotalChainCount = nFileLen / 16;
-		else nTotalChainCount = nFileLen / 18;
-		if ((hascp == 0 && nFileLen % 16 != 0) || (hascp == 1 && nFileLen % 18 != 0))
-		{
-			printf("file length mismatch\n");
-		}
-		else
-		{
+
+		int size = reader->GetChainsLeft() * sizeof(RainbowChain);
 			static CMemoryPool mp;
 			unsigned int nAllocatedSize;
-			RainbowChainCP* pChain = (RainbowChainCP*)mp.Allocate(nFileLen, nAllocatedSize);
-			
+			RainbowChain* pChain = (RainbowChain*)mp.Allocate(size, nAllocatedSize);			
 			unsigned int chainrowsize = ceil((float)(rti_startptlength + rti_endptlength + rti_cplength) / 8) * 8 ; // The size in bits (in whole bytes)
 			unsigned int chainrowsizebytes = chainrowsize / 8;
 
-
-			if (pChain != NULL)
-			{
-				nAllocatedSize = nAllocatedSize / sizeof(RainbowChainCP) * sizeof(RainbowChainCP);
-				fseek(file, 0, SEEK_SET);
+			if (pChain != NULL)	{
+				nAllocatedSize = nAllocatedSize / sizeof(RainbowChain) * sizeof(RainbowChain);
+				unsigned int nChains = nAllocatedSize / sizeof(RainbowChain);
 				uint64 curPrefix = 0, prefixStart = 0;
 				vector<IndexRow> indexes;
-				UINT4 nRainbowChainCountRead = 0;
-				while (true)	// Chunk read loop
-				{
+				while(reader->GetChainsLeft() > 0) {
+					
 /*					if (ftell(file) == nFileLen)
 						break;*/
-					UINT4 nReadThisRound;
-					memset(pChain, 0x00, nAllocatedSize);
-					printf("reading...\n");
+					int nReadThisRound;
 					clock_t t1 = clock();
-					for(nReadThisRound = 0; nReadThisRound < nAllocatedSize / sizeof(RainbowChainCP) && nRainbowChainCountRead < nTotalChainCount; nReadThisRound++)
-					{						
-						if(fread(&pChain[nReadThisRound], 16, 1, file) != 1) 
-						{ 
-							printf("Error reading file\n"); exit(1);
-						}
-						if(hascp == 1)
-						{
-							if(fread(&pChain[nReadThisRound].nCheckPoint, 2, 1, file) != 1) 
-							{ 
-								printf("Error reading file\n"); exit(2);
-							}
-						}
-						nRainbowChainCountRead++;
-					}
+					printf("reading...\n");
+#ifdef _MEMORYDEBUG
+			printf("Grabbing %i chains from file\n", nChains);
+#endif
+			reader->ReadChains(nChains, pChain);
+#ifdef _MEMORYDEBUG
+			printf("Recieved %i chains from file\n", nChains);
+#endif
 					clock_t t2 = clock();
 					float fTime = 1.0f * (t2 - t1) / CLOCKS_PER_SEC;
-					int nDataRead = nRainbowChainCountRead * 16;
-					if(hascp == 1) nDataRead += nRainbowChainCountRead * 2; // Add the index readings too
-					printf("%u bytes read, disk access time: %.2f s\n", nDataRead , fTime);
+					printf("reading time: %.2f s\n", fTime);		
+					printf("converting %i chains...\n", nChains);
 					t1 = clock();
-
-					for(UINT4 i = 0; i < nReadThisRound; i++)
-					{
-						if(showDistribution == 1)
-						{
+					for(int i = 0; i < nChains; i++)	{
+						if(showDistribution == 1) {
 							distribution[GetMaxBits(pChain[i].nIndexS)-1]++;
 						}
 						else
 						{
 							uint64 chainrow = pChain[i].nIndexS; // Insert the complete start point								 
 							chainrow |= ((uint64)pChain[i].nIndexE & (0xffffffff >> (32 - rti_endptlength))) << rti_startptlength; // 
-							if(hascp == 1 && rti_cplength > 0) 
-							{
+/*							if(hascp == 1 && rti_cplength > 0) {
 								chainrow |= (uint64)pChain[i].nCheckPoint << rti_startptlength + rti_endptlength;
-							}
+							}*/
 							fwrite(&chainrow, 1, chainrowsizebytes, fileR);			
 							uint64 prefix = pChain[i].nIndexE >> rti_endptlength;
 							if(i == 0) curPrefix = prefix;
-							if(prefix != curPrefix && numProcessedChains - prefixStart > 0)
-							{
-									if(prefix < curPrefix)
-									{
-										printf("**** Error writeChain(): Prefix is smaller than previous prefix. %llu < %llu****\n", prefix, curPrefix);
-										exit(1);									
-									}
-									//unsigned char index[11] = {0}; // [0 - 10]
-									unsigned int numchains = numProcessedChains - prefixStart;
-									IndexRow index;
-									index.prefix = curPrefix;
+							if(prefix != curPrefix && numProcessedChains - prefixStart > 0)	{
+								if(prefix < curPrefix) {
+									printf("**** Error writeChain(): Prefix is smaller than previous prefix. %llu < %llu****\n", prefix, curPrefix);
+									exit(1);									
+								}
+								//unsigned char index[11] = {0}; // [0 - 10]
+								unsigned int numchains = numProcessedChains - prefixStart;
+								IndexRow index;
+								index.prefix = curPrefix;
 //										index.prefixstart = prefixStart;
-									index.numchains = numchains;
-									indexes.push_back(index);
-									prefixStart = numProcessedChains;
-									curPrefix = prefix; 
+								index.numchains = numchains;
+								indexes.push_back(index);
+								prefixStart = numProcessedChains;
+								curPrefix = prefix; 
 							}
 						}
 						numProcessedChains++;
@@ -399,14 +381,11 @@ void ConvertRainbowTable(string sPathName, string sResultFileName, unsigned int 
 					t2 = clock();
 					fTime = 1.0f * (t2 - t1) / CLOCKS_PER_SEC;
 					printf("conversion time: %.2f s\n", fTime);		
-					if(nRainbowChainCountRead == nTotalChainCount)
-						break;
-					if(showDistribution == 1)
-					{
-						for(int i = 0; i < 64; i++)
-						{
+					if(showDistribution == 1) {
+						for(int i = 0; i < 64; i++)	{
 							printf("%u - %u\n", (i+1), distribution[i]);
 						}
+						delete reader;
 						return;
 					}
 
@@ -444,23 +423,23 @@ void ConvertRainbowTable(string sPathName, string sResultFileName, unsigned int 
 				fwrite(&rti_endptlength, 1, 1, pFileIndex);
 				fwrite(&rti_cplength, 1, 1, pFileIndex);
 //					fwrite(&m_rti_index_indexlength , 1, 1, pFileIndex);
+
 				fwrite(&m_rti_index_numchainslength, 1, 1, pFileIndex);
-				for(UINT4 i = 0; i < rti_cppos.size(); i++)
-				{
+				for(UINT4 i = 0; i < rti_cppos.size(); i++)	{
 					fwrite(&rti_cppos[i], 1, 4, pFileIndex); // The position of the checkpoints
 				}
 //					fwrite(&m_rti_index_prefixlength, 1, 1, pFileIndex);
 				int zero = 0;
 				fwrite(&indexes[0].prefix, 1, 8, pFileIndex); // Write the first prefix
 				unsigned int lastPrefix = 0;
-				for(UINT4 i = 0; i < indexes.size(); i++)
-				{
-					if(i == 0)
+				for(UINT4 i = 0; i < indexes.size(); i++)	{
+					if(i == 0) {
 						lastPrefix = indexes[0].prefix;
+					}
+					unsigned int indexrow = 0;
 					// Checks how big a distance there is between the current and the next prefix. eg cur is 3 and next is 10 = 7.
 					unsigned int diffSize = indexes[i].prefix - lastPrefix; 
-					if(i > 0 && diffSize > 1)
-					{
+					if(i > 0 && diffSize > 1) {
 						//indexrow |= indexes[i].prefixstart;
 						//printf("Diffsize is %u\n", diffSize);
 
@@ -486,17 +465,20 @@ void ConvertRainbowTable(string sPathName, string sResultFileName, unsigned int 
 				}
 				fclose(pFileIndex);
 			}
-			else printf("memory allocation fail\n");
-
-			
-					// Already finished?
-
-		}
-		fclose(file);
+			else {
+				printf("memory allocation fail\n");
+			}			
+			// Already finished?
 	}
-	else
+	else {
 		printf("can't open file\n");
-
+	}
+	if(reader != NULL)
+		delete reader;
+	if(fileR != NULL) {
+		fclose(fileR);
+	}
+		
 }
 
 int main(int argc, char* argv[])
@@ -507,76 +489,63 @@ int main(int argc, char* argv[])
 	int usecp = 0;// How many bits to use from the index
 	int hascp = 0; 
 	vector<unsigned int> cppositions;
-	if (argc == 1)
-	{
+	if (argc == 1) {
 		Usage();		
 		return 0;
 	}
-	else if(argc > 2)
-	{
+	else if(argc > 2) {
 		for (; argi < argc; argi++)
 		{
-			if (strcmp(argv[argi], "-d") == 0 && (argsUsed & 0x8) == 0)
-			{
+			if(strcmp(argv[argi], "-d") == 0 && (argsUsed & 0x8) == 0) {
 				// Enable verbose mode
 				argsUsed |= 0x8;				
 				showDistribution = 1;
 			}			
-			else if (strncmp(argv[argi], "-sptl=", 6) == 0 && (argsUsed & 0x1) == 0)
-			{
+			else if (strncmp(argv[argi], "-sptl=", 6) == 0 && (argsUsed & 0x1) == 0) {
 				// Maximum index for starting point
 				argsUsed |= 0x1;
 				sptl = 0;
-				for (i = 6; argv[argi][i] >= '0' && argv[argi][i] <= '9'; i++)
-				{
+				for (i = 6; argv[argi][i] >= '0' && argv[argi][i] <= '9'; i++) {
 					sptl *= 10;
 					sptl += ((int) argv[argi][i]) - 0x30;
 				}
-				if (argv[argi][i] != '\0')
-				{
+				if (argv[argi][i] != '\0') {
 					printf("Error: Invalid number.\n\n");
 					Usage();
 					return 1;
 				}
-				if (i > 23) // i - 3 > 20
-				{
+				if (i > 23) { // i - 3 > 20				
 					printf("Error: Number is too large.\n\n");
 					Usage();
 					return 1;
 				}			
 			}
 
-			else if (strncmp(argv[argi], "-eptl=", 6) == 0 && (argsUsed & 0x2) == 0)
-			{
+			else if (strncmp(argv[argi], "-eptl=", 6) == 0 && (argsUsed & 0x2) == 0) {
 				// Maximum index for ending points
 				argsUsed |= 0x2;
 				eptl = 0;
-				for (i = 6; argv[argi][i] >= '0' && argv[argi][i] <= '9'; i++)
-				{
+				for (i = 6; argv[argi][i] >= '0' && argv[argi][i] <= '9'; i++) {
 					eptl *= 10;
 					eptl += ((int) argv[argi][i]) - 0x30;
 				}
-				if (argv[argi][i] != '\0')
-				{
+				if (argv[argi][i] != '\0') {
 					printf("Error: Invalid number.\n\n");
 					Usage();
 					return 1;
 				}
-				if (i > 23) // i - 3 > 20
-				{
+				if (i > 23) { // i - 3 > 20				
 					printf("Error: Number is too large.\n\n");
 					Usage();
 					return 1;
 				}			
 			}
-			else if(strncmp(argv[argi], "-usecp=", 7) == 0 && (argsUsed & 0x4) == 0)
-			{
+			else if(strncmp(argv[argi], "-usecp=", 7) == 0 && (argsUsed & 0x4) == 0) {
 				argsUsed |= 0x4;
 				hascp = 1;
 				usecp = 0;
 				unsigned int cppos = 0;
-				for(i = 7; argv[argi][i] != ' ' && argv[argi][i] != '\n' && argv[argi][i] != 0;)
-				{
+				for(i = 7; argv[argi][i] != ' ' && argv[argi][i] != '\n' && argv[argi][i] != 0;) {
 					if(cppositions.size() > 0) i++;
 					for (; argv[argi][i] >= '0' && argv[argi][i] <= '9'; i++)
 					{
@@ -590,19 +559,19 @@ int main(int argc, char* argv[])
 						cppos = 0;
 					//}
 				}
-				if (argv[argi][i] != '\0')
-				{
+				if (argv[argi][i] != '\0') {
 					printf("Error: Invalid number.\n\n");
 					Usage();
 					return 1;
 				}
-				if (usecp > 16) // i - 3 > 20
-				{
+				if (usecp > 16) { // i - 3 > 20
 					printf("Error: Number is too large.\n\n");
 					Usage();
 					return 1;
 				}				
-				else printf("Using %i bits of the checkpoints\n", usecp);
+				else {
+					printf("Using %i bits of the checkpoints\n", usecp);
+				}
 			}
 
 		}		
@@ -614,22 +583,32 @@ int main(int argc, char* argv[])
 #else
 	GetTableList(argc, argv, vPathName);
 #endif
-	if (vPathName.size() == 0)
-	{
+	if (vPathName.size() == 0) {
 		printf("no rainbow table found\n");
 		return 0;
 	}
-	for (UINT4 i = 0; i < vPathName.size(); i++)
-	{
+	for (UINT4 i = 0; i < vPathName.size(); i++) {
 		string sResultFile;
 		int n = vPathName[i].find_last_of('\\');
-		if (n != -1)
-			sResultFile = vPathName[i].substr(n+1, vPathName[i].length()) + "i2";
-		else 
-			sResultFile = vPathName[i] + "i2"; // Resulting file is .rt, not .rti
-		printf("Using %i of 64 bits. sptl: %i, eptl: %i, cp: %i. Chains will be %i bytes in size\n", (sptl + eptl + usecp), sptl, eptl, usecp, ((sptl + eptl + usecp) / 8));
-		if(sptl + eptl + usecp > 64)
-		{
+		if (n != -1) {
+			if(vPathName[i].substr(vPathName[i].length() - 3, vPathName[i].length()) == "rti")	{
+				sResultFile = vPathName[i].substr(n+1, vPathName[i].length()) + "2";				
+			}
+			else {
+				sResultFile = vPathName[i].substr(n+1, vPathName[i].length()) + "i2";
+			}
+		}
+		else {
+			if(vPathName[i].substr(vPathName[i].length() - 3, vPathName[i].length()) == "rti")	{
+				sResultFile = vPathName[i] + "2";				
+			} else {
+				sResultFile = vPathName[i] + "i2"; // Resulting file is .rt, not .rti
+			}
+		}
+		if(usecp == 0 && showDistribution == 0) {
+			printf("Using %i of 64 bits. sptl: %i, eptl: %i, cp: %i. Chains will be %i bytes in size\n", (sptl + eptl + usecp), sptl, eptl, usecp, ((sptl + eptl + usecp) / 8));
+		}
+		if(sptl + eptl + usecp > 64) {
 			exit(1);
 		}
 		ConvertRainbowTable(vPathName[i], sResultFile, sptl, eptl, showDistribution, hascp, usecp, cppositions);

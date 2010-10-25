@@ -33,7 +33,7 @@ private:
 public:
 	RTI2Reader(string Filename);
 	~RTI2Reader(void);
-	int ReadChains(unsigned int &numChains, RainbowChainCP *pData);
+	int ReadChains(unsigned int &numChains, RainbowChain *pData);
 	unsigned int GetChainsLeft();
 	static RTI2Header *GetHeader() { return m_pHeader; }
 };

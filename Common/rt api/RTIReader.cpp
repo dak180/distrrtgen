@@ -29,11 +29,25 @@ RTIReader::RTIReader(string Filename)
 			printf("index file length mismatch (%u bytes)\n", nIndexFileLen);
 		else
 		{
-			m_pIndex = new IndexChain[nIndexFileLen / 11];
+			if(m_pIndex != NULL) {
+				delete m_pIndex;
+				m_pIndex = NULL;
+			}
+#ifdef _MEMORYDEBUG
+			printf("Allocating %u MB memory for RTIReader::m_pIndex", nIndexFileLen / 11 / (1024 * 1024));
+#endif
+			m_pIndex = new (nothrow) IndexChain[nIndexFileLen / 11];
+			if(m_pIndex == NULL) {
+				printf("\nFailed allocating %i MB memory.\n", nIndexFileLen / 11 / (1024 * 1024));
+				exit(-2);
+			}
+#ifdef _MEMORYDEBUG
+			printf(" - success!\n");
+#endif			
 			memset(m_pIndex, 0x00, sizeof(IndexChain) * (nIndexFileLen / 11));
 			fseek(pFileIndex, 0, SEEK_SET);
 			int nRead = 0;
-			int nRows;
+			UINT4 nRows;
 			for(nRows = 0; (nRows * 11) < nIndexFileLen; nRows++)
 			{
 				if(fread(&m_pIndex[nRows].nPrefix, 5, 1, pFileIndex) != 1) break;							
@@ -60,7 +74,7 @@ RTIReader::RTIReader(string Filename)
 			}
 			if(m_pIndex[m_nIndexSize - 1].nFirstChain + m_pIndex[m_nIndexSize - 1].nChainCount > nTotalChainCount) // +1 is not needed here
 			{
-				printf("Corrupted index detected: The index is covering more than the file\n");
+				printf("Corrupted index detected: The index is covering more than the file (%i chains of %i chains)\n", m_pIndex[m_nIndexSize - 1].nFirstChain + m_pIndex[m_nIndexSize - 1].nChainCount, nTotalChainCount);
 				exit(-1);
 			}
 
@@ -76,13 +90,13 @@ RTIReader::RTIReader(string Filename)
 
 }
 
-int RTIReader::ReadChains(unsigned int &numChains, RainbowChainCP *pData)
+int RTIReader::ReadChains(unsigned int &numChains, RainbowChain *pData)
 {	
 	// We HAVE to reset the data to 0x00's or we will get in trouble
-	memset(pData, 0x00, sizeof(RainbowChainCP) * numChains);
+	memset(pData, 0x00, sizeof(RainbowChain) * numChains);
 	unsigned int readChains = 0;
 	unsigned int chainsleft = GetChainsLeft();
-	for(int i = 0; i < m_nIndexSize; i++)
+	for(UINT4 i = 0; i < m_nIndexSize; i++)
 	{
 		if(m_chainPosition + readChains > m_pIndex[i].nFirstChain + m_pIndex[i].nChainCount) // We found the matching index
 			continue;

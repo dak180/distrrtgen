@@ -23,7 +23,11 @@ RTI2Reader::RTI2Reader(string Filename)
 	unsigned int len = GetFileLen(pFileIndex);
 	fseek(pFileIndex, 0, SEEK_SET);
 
-	m_pIndex = new unsigned char[len];
+	m_pIndex = new (nothrow) unsigned char[len];
+	if(m_pIndex == NULL) {
+		printf("Error allocating %u MB memory for index in RTI2Reader::RTI2Reader()", len / (1024 * 1024));
+		exit(-2);
+	}
 	if(fread(m_pIndex, 1, len, pFileIndex) != len)
 	{
 		printf("Error while reading index file");
@@ -62,7 +66,7 @@ unsigned int RTI2Reader::GetChainsLeft()
 	return len / m_chainsizebytes - m_chainPosition;
 }
 
-int RTI2Reader::ReadChains(unsigned int &numChains, RainbowChainCP *pData)
+int RTI2Reader::ReadChains(unsigned int &numChains, RainbowChain *pData)
 {
 	if(strncmp(m_pHeader->header, "RTI2", 4) != 0)
 	{
@@ -115,7 +119,7 @@ int RTI2Reader::ReadChains(unsigned int &numChains, RainbowChainCP *pData)
 		pData[chainsProcessed].nIndexE = m_pHeader->prefixstart + indexRow << m_pHeader->rti_endptlength;
 		// Append the ending point suffix
 		pData[chainsProcessed].nIndexE |= (chainrow & (0xFFFFFFFFFFFFFFFF >> m_pHeader->rti_cplength)) >> m_pHeader->rti_startptlength;
-		pData[chainsProcessed].nCheckPoint = (chainrow >> m_pHeader->rti_startptlength + m_pHeader->rti_endptlength);
+		//pData[chainsProcessed].nCheckPoint = (chainrow >> m_pHeader->rti_startptlength + m_pHeader->rti_endptlength);
 		curRowPosition++;
 		chainsProcessed++;
 	}
