@@ -28,20 +28,20 @@ BOINC_DIR = /usr/share/boinc-dev
 BOINC_API_DIR = $(BOINC_DIR)/api
 BOINC_LIB_DIR = $(BOINC_DIR)/lib
 COMMON_LIB_DIR = /usr/lib
+INCLUDES = -I../../../Common/rt\ api -I$(BOINC_DIR) -I$(BOINC_LIB_DIR) -I$(BOINC_API_DIR) 
+COMMON_API_PATH = ../../../Common/rt\ api
 
 OPTIMIZATION = -O3
 
 CXXFLAGS = -g \
     -static -static-libgcc \
-    -I$(BOINC_DIR) \
-    -I$(BOINC_LIB_DIR) \
-    -I$(BOINC_API_DIR) \
 	 -Wall \
 	 -c \
 	 -DBOINC \
+	 $(INCLUDES) \
 	 $(OPTIMIZATION)
 
-LFLAGS = -static -static-libgcc -Wall $(OPTIMIZATION) -L$(BOINC_API_DIR) \
+LFLAGS = -static -static-libgcc -Wall $(INCLUDES) $(OPTIMIZATION) -L$(BOINC_API_DIR) \
 	-L$(BOINC_LIB_DIR) -L /usr/X11R6/lib -L.
 
 LIBS = -lboinc_api -lboinc -lpthread -lssl libstdc++.a $(COMMON_LIB_DIR)/libssl.a $(COMMON_LIB_DIR)/libpthread.a
@@ -65,32 +65,32 @@ distclean:
 
 rebuild: clean all
 
-ChainWalkContext.o: ChainWalkContext.h ChainWalkContext.cpp HashRoutine.h Public.h
-	$(CXX) $(CXXFLAGS) ChainWalkContext.cpp
+ChainWalkContext.o: $(COMMON_API_PATH)/ChainWalkContext.h $(COMMON_API_PATH)/ChainWalkContext.cpp $(COMMON_API_PATH)/HashRoutine.h $(COMMON_API_PATH)/Public.h
+	$(CXX) $(CXXFLAGS) $(COMMON_API_PATH)/ChainWalkContext.cpp
 
-des_enc.o: des_enc.c des_locl.h spr.h
-	$(CXX) $(CXXFLAGS) des_enc.c
+des_enc.o: $(COMMON_API_PATH)/des_enc.c $(COMMON_API_PATH)/des_locl.h $(COMMON_API_PATH)/spr.h
+	$(CXX) $(CXXFLAGS) $(COMMON_API_PATH)/des_enc.c
 
-des_setkey.o: des_setkey.c des_locl.h podd.h sk.h
-	$(CXX) $(CXXFLAGS) des_setkey.c
+des_setkey.o: $(COMMON_API_PATH)/des_setkey.c $(COMMON_API_PATH)/des_locl.h $(COMMON_API_PATH)/podd.h $(COMMON_API_PATH)/sk.h
+	$(CXX) $(CXXFLAGS) $(COMMON_API_PATH)/des_setkey.c
 
-distrrtgen.o: distrrtgen.cpp distrrtgen.h ChainWalkContext.h Public.h
+distrrtgen.o: distrrtgen.cpp distrrtgen.h $(COMMON_API_PATH)/ChainWalkContext.h $(COMMON_API_PATH)/Public.h
 	$(CXX) $(CXXFLAGS) distrrtgen.cpp
 
-ecb_enc.o: ecb_enc.c des_locl.h spr.h
-	$(CXX) $(CXXFLAGS) ecb_enc.c
+ecb_enc.o: $(COMMON_API_PATH)/ecb_enc.c $(COMMON_API_PATH)/des_locl.h $(COMMON_API_PATH)/spr.h
+	$(CXX) $(CXXFLAGS) $(COMMON_API_PATH)/ecb_enc.c
 
-HashAlgorithm.o: HashAlgorithm.h HashAlgorithm.cpp Public.h md4.h md5.h
-	$(CXX) $(CXXFLAGS) HashAlgorithm.cpp
+HashAlgorithm.o: $(COMMON_API_PATH)/HashAlgorithm.h $(COMMON_API_PATH)/HashAlgorithm.cpp $(COMMON_API_PATH)/Public.h $(COMMON_API_PATH)/md4.h $(COMMON_API_PATH)/md5.h
+	$(CXX) $(CXXFLAGS) $(COMMON_API_PATH)/HashAlgorithm.cpp
 
-HashRoutine.o: HashRoutine.h HashRoutine.cpp global.h HashAlgorithm.h
-	$(CXX) $(CXXFLAGS) HashRoutine.cpp
+HashRoutine.o: $(COMMON_API_PATH)/HashRoutine.h $(COMMON_API_PATH)/HashRoutine.cpp $(COMMON_API_PATH)/global.h $(COMMON_API_PATH)/HashAlgorithm.h
+	$(CXX) $(CXXFLAGS) $(COMMON_API_PATH)/HashRoutine.cpp
 
-md4.o: md4.h md4.cpp global.h
-	$(CXX) $(CXXFLAGS) md4.cpp
+md4.o: $(COMMON_API_PATH)/md4.h $(COMMON_API_PATH)/md4.cpp $(COMMON_API_PATH)/global.h
+	$(CXX) $(CXXFLAGS) $(COMMON_API_PATH)/md4.cpp
 
-md5.o: md5.h md5.cpp global.h
-	$(CXX) $(CXXFLAGS) md5.cpp
+md5.o: $(COMMON_API_PATH)/md5.h $(COMMON_API_PATH)/md5.cpp $(COMMON_API_PATH)/global.h
+	$(CXX) $(CXXFLAGS) $(COMMON_API_PATH)/md5.cpp
 
-Public.o: Public.h Public.cpp global.h
-	$(CXX) $(CXXFLAGS) Public.cpp
+Public.o: $(COMMON_API_PATH)/Public.h $(COMMON_API_PATH)/Public.cpp $(COMMON_API_PATH)/global.h
+	$(CXX) $(CXXFLAGS) $(COMMON_API_PATH)/Public.cpp
