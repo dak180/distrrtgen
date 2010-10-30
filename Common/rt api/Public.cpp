@@ -125,6 +125,9 @@ bool GetHybridCharsets(string sCharset, vector<tCharset>& vCharset)
 bool boinc_ReadLinesFromFile(string sPathName, vector<string>& vLine)
 {
 	vLine.clear();
+	vLine.push_back("loweralpha-space            = [abcdefghijklmnopqrstuvwxyz ]");
+	vLine.push_back("loweralpha                  = [abcdefghijklmnopqrstuvwxyz]");
+/*
 	char input_path[512];
 	boinc_resolve_filename(sPathName.c_str(), input_path, sizeof(input_path));
 	FILE *file = boinc_fopen(input_path, "rb");
@@ -166,7 +169,7 @@ bool boinc_ReadLinesFromFile(string sPathName, vector<string>& vLine)
 	}
 	else
 		return false;
-
+		*/
 	return true;
 }
 #endif 

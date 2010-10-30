@@ -114,11 +114,11 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <WholeProgramOptimization>true</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>C:\Users\mwj\git\Common\rt api;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_MT;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Users\mwj\Desktop\frt\rti2\Common\rt api;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>BOINC;WIN32;NDEBUG;_MT;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
-      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
@@ -126,7 +126,7 @@
       <BufferSecurityCheck>false</BufferSecurityCheck>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>odbc32.lib;odbccp32.lib;libcmt.lib;libcpmt.lib;libboinc_staticcrt.lib;libboincapi_staticcrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>odbc32.lib;odbccp32.lib;libcmt.lib;libcpmt.lib;C:\lib\boinc\Win32\Release\2010\libboinc_staticcrt.lib;C:\lib\boinc\Win32\Release\2010\libboincapi_staticcrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
@@ -213,6 +213,7 @@
     <ClInclude Include="..\..\..\Common\rt api\ChainWalkContext.h" />
     <ClInclude Include="..\..\..\Common\rt api\des.h" />
     <ClInclude Include="..\..\..\Common\rt api\des_locl.h" />
+    <ClInclude Include="..\..\..\Common\rt api\global.h" />
     <ClInclude Include="distrrtgen.h" />
     <ClInclude Include="..\..\..\Common\rt api\HashAlgorithm.h" />
     <ClInclude Include="..\..\..\Common\rt api\HashRoutine.h" />

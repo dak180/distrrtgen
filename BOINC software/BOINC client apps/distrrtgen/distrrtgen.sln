@@ -1,9 +1,9 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "distrrtgen", "distrrtgen.vcproj", "{A3BDF5F8-4D0A-4B27-B1D9-7E77CBDA86C7}"
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "distrrtgen", "distrrtgen.vcxproj", "{A3BDF5F8-4D0A-4B27-B1D9-7E77CBDA86C7}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "index_calculator", "..\index_calculator\index_calculator.vcproj", "{C7A957CF-9FDC-4C72-9C3E-7C029E915D1E}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "index_calculator", "..\index_calculator\index_calculator.vcxproj", "{C7A957CF-9FDC-4C72-9C3E-7C029E915D1E}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rti2rto", "..\..\standalone\rti2rto\rti2rto.vcproj", "{E0FBC06A-C902-4468-A614-CBF9F591AA7C}"
 EndProject
@@ -15,7 +15,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rtperfectp", "..\..\standal
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rcracki", "..\..\standalone\rcracki\rcracki.vcproj", "{966DA4B4-E13C-449D-9A93-303C6FEA25C4}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "chain_checker", "..\chain_checker\chain_checker.vcproj", "{74C09EAC-2EA2-4548-9B61-0FEE56147DFE}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "chain_checker", "..\chain_checker\chain_checker.vcxproj", "{74C09EAC-2EA2-4548-9B61-0FEE56147DFE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
