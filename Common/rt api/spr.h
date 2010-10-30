@@ -59,6 +59,8 @@
  * [including the GNU Public Licence.]
  */
 
+#ifndef __SPR_H__
+#define __SPR_H__
 const DES_LONG des_SPtrans[8][64]={
 {
 /* nibble 0 */
@@ -205,3 +207,5 @@ const DES_LONG des_SPtrans[8][64]={
 0x00000080L, 0x20820000L, 0x00820080L, 0x00000000L,
 0x20000000L, 0x20800080L, 0x00020000L, 0x00820080L,
 }};
+
+#endif
