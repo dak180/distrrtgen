@@ -1044,7 +1044,12 @@ void CCrackEngine::SearchRainbowTable(string sPathName, CHashSet& hs)
 				}
 
 				static CMemoryPool mp(bytesForChainWalkSet, debug, maxMem);
-				RainbowChainO* pChain = (RainbowChainO*)mp.Allocate(nFileLen, nAllocatedSize);
+				RainbowChainO* pChain = NULL;
+				if(doRti2Format) {
+					pChain = (RainbowChainO*)mp.Allocate(pReader->GetChainsLeft() * 16, nAllocatedSize);
+				} else {
+					pChain = (RainbowChainO*)mp.Allocate(nFileLen, nAllocatedSize);
+				}
 				#ifdef _WIN32
 					if (debug) printf("Allocated %I64u bytes, filelen %lu\n", nAllocatedSize, (unsigned long)nFileLen);
 				#else
@@ -1069,11 +1074,10 @@ void CCrackEngine::SearchRainbowTable(string sPathName, CHashSet& hs)
 						if ( doRti2Format )
 						{
 							nDataRead = nAllocatedSize / 16;
-							pReader->ReadChains(nDataRead, pChain);
+							if(pReader->GetChainsLeft() <= 0) // No more data
+								break; 
+							pReader->ReadChains(nDataRead, (RainbowChain*)pChain);
 							nDataRead *= 8; // Convert from chains read to bytes
-
-							if ( nDataRead == 0 ) // No more data
-								break;
 						}
 						else
 						{
@@ -1087,7 +1091,9 @@ void CCrackEngine::SearchRainbowTable(string sPathName, CHashSet& hs)
 						m_fTotalDiskAccessTime += fTime;
 
 						int nRainbowChainCountRead = nDataRead / 16;
-
+						if(doRti2Format) {
+							nRainbowChainCountRead = nDataRead / 8;
+						}
 						// Verify table chunk
 						if (!fVerified)
 						{

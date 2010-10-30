@@ -11,8 +11,8 @@ using namespace std;
 class BaseRTReader
 {
 public:
-	virtual int ReadChains(unsigned int &numChains, RainbowChain *pData) = 0;
-	virtual unsigned int GetChainsLeft() = 0;
+	virtual int ReadChains(UINT4 &numChains, RainbowChain *pData) = 0;
+	virtual UINT4 GetChainsLeft() = 0;
 	
 	virtual ~BaseRTReader()  { };
 };

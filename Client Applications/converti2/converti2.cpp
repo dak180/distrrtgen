@@ -327,17 +327,19 @@ void ConvertRainbowTable(string sPathName, string sResultFileName, unsigned int 
 				unsigned int nChains = nAllocatedSize / sizeof(RainbowChain);
 				uint64 curPrefix = 0, prefixStart = 0;
 				vector<IndexRow> indexes;
-				while(reader->GetChainsLeft() > 0) {
+				unsigned int chainsLeft;
+				while((chainsLeft = reader->GetChainsLeft()) > 0) {
 					
 /*					if (ftell(file) == nFileLen)
 						break;*/
+					printf("%u chains left to read\n", chainsLeft);
 					int nReadThisRound;
 					clock_t t1 = clock();
 					printf("reading...\n");
 #ifdef _MEMORYDEBUG
 			printf("Grabbing %i chains from file\n", nChains);
 #endif
-			reader->ReadChains(nChains, pChain);
+					reader->ReadChains(nChains, pChain);
 #ifdef _MEMORYDEBUG
 			printf("Recieved %i chains from file\n", nChains);
 #endif

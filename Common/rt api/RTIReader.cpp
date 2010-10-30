@@ -112,15 +112,17 @@ int RTIReader::ReadChains(unsigned int &numChains, RainbowChain *pData)
 		}
 		if(readChains == numChains) break;		
 	}
-	if(readChains != numChains) numChains = readChains; // Update how many chains we read
+	if(readChains != numChains) { 
+		numChains = readChains; // Update how many chains we read
+	}
 	m_chainPosition += readChains;
+	printf("Chain position is now %u\n", m_chainPosition);
 	return 0;
 }
 
-unsigned int RTIReader::GetChainsLeft()
-{
-	int len = GetFileLen(m_pFile) / 8 - m_chainPosition;
-	return len;
+UINT4 RTIReader::GetChainsLeft()
+{	
+	return (GetFileLen(m_pFile) / 8) - m_chainPosition;
 }
 
 RTIReader::~RTIReader(void)
