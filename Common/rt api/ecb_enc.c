@@ -51,10 +51,12 @@
 
 #include <stdio.h>
 #include "des_locl.h"
-#include "spr.h"
+//#include "spr.h"
 
 /* char *libdes_version="libdes v 3.24 - 20-Apr-1996 - eay"; */ /* wrong */
 /* char *DES_version="DES part of SSLeay 0.6.4 30-Aug-1996"; */
+
+extern	const DES_LONG des_SPtrans[8][64];
 
 char *des_options(void)
         {
