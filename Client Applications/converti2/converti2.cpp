@@ -447,7 +447,7 @@ void ConvertRainbowTable(string sPathName, string sResultFileName, unsigned int 
 
 						// then write the distance amount of 00's
 						if(diffSize > 1000) {
-							printf("WARNING! The distance to the next prefix is %i. Do you want to continue writing %i bytes of 0x00? Press y to continue", diffSize, diffSize);
+							printf("WARNING! The distance to the next prefix is %i. Do you want to continue writing %i bytes of 0x00? Press y to continue", diffSize, (diffSize*m_indexrowsizebytes));
 							#ifdef _WIN32
 							if ( _getch() != 'y' ) {
 							#else
