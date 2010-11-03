@@ -8,7 +8,7 @@
  * Copyright 2009, 2010 James Nobis <frt@quelrod.net>
  * Copyright 2010 Yngve AAdlandsvik
  *
- * This file is part of rcracki_mt.
+ * This file is part of freerainbowtables.
  *
  * freerainbowtables is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,6 +40,8 @@ int CChainWalkContext::m_nHashLen;
 int CChainWalkContext::m_nPlainLenMinTotal = 0;
 int CChainWalkContext::m_nPlainLenMaxTotal = 0;
 int CChainWalkContext::m_nHybridCharset = 0;
+bool CChainWalkContext::isOldRtFormat = false;
+bool CChainWalkContext::isRti2RtFormat = false;
 vector<stCharset> CChainWalkContext::m_vCharset;
 uint64 CChainWalkContext::m_nPlainSpaceUpToX[MAX_PLAIN_LEN + 1];
 uint64 CChainWalkContext::m_nPlainSpaceTotal;
@@ -280,13 +282,24 @@ bool CChainWalkContext::SetupWithPathName(string sPathName, int& nRainbowChainLe
 		printf("%s is not a rainbow table\n", sPathName.c_str());
 		return false;
 	}
-	/*
-	if (sPathName.substr(sPathName.size() - 4) != ".rti")
+	if (sPathName.substr(sPathName.size() - 5) == ".rti2")
+	{
+		isRti2RtFormat = true;
+	}
+	else if (sPathName.substr(sPathName.size() - 4) == ".rti")
+	{
+		isOldRtFormat = false;
+	}
+	else if (sPathName.substr(sPathName.size() - 3) == ".rt")
+	{
+		isOldRtFormat = true;
+	}
+	else
 	{
 		printf("%s is not a rainbow table\n", sPathName.c_str());
 		return false;
 	}
-*/
+
 	// Parse
 	vector<string> vPart;
 	if (!SeperateString(sPathName, "___x_", vPart))
@@ -475,6 +488,7 @@ void CChainWalkContext::IndexToPlain()
 			}
 		}
 	}
+
 #elif defined(_M_X64) || defined(_M_IX86) || defined(__i386__) || defined(__x86_64__)
 
 	// Fast ia32 version
@@ -488,6 +502,7 @@ void CChainWalkContext::IndexToPlain()
 		if (nIndexOfX < 0x100000000llu)
 			break;
 #endif
+
 		int nCharsetLen = 0;
 		for(uint32 j = 0; j < m_vCharset.size(); j++)
 		{
@@ -619,4 +634,14 @@ bool CChainWalkContext::CheckHash(unsigned char* pHash)
 		return true;
 
 	return false;
+}
+
+bool CChainWalkContext::isOldFormat()
+{
+	return isOldRtFormat;
+}
+
+bool CChainWalkContext::isRti2Format()
+{
+	return isRti2RtFormat;
 }

@@ -20,11 +20,11 @@
     (a) = ROTATE_LEFT ((a), (s)); \
   }
 #define GG(a, b, c, d, x, s) { \
-    (a) += G ((b), (c), (d)) + (x) + (UINT4)0x5a827999; \
+    (a) += G ((b), (c), (d)) + (x) + (uint32)0x5a827999; \
     (a) = ROTATE_LEFT ((a), (s)); \
   }
 #define HH(a, b, c, d, x, s) { \
-    (a) += H ((b), (c), (d)) + (x) + (UINT4)0x6ed9eba1; \
+    (a) += H ((b), (c), (d)) + (x) + (uint32)0x6ed9eba1; \
     (a) = ROTATE_LEFT ((a), (s)); \
   }
 #define S11 3
@@ -45,10 +45,10 @@
 void MD4_NEW( unsigned char * pData, int length, unsigned char * pDigest)
 {
 	// For the hash working space
-	UINT4 b0,b1, b2, b3, b4, b5, b6, b7, b8, b9, b10, b11, b12, b13, b14, b15;
+	uint32 b0,b1, b2, b3, b4, b5, b6, b7, b8, b9, b10, b11, b12, b13, b14, b15;
 
 	// For the output result
-	UINT4 a,b,c,d;
+	uint32 a,b,c,d;
 
 	b0 = 0x00000000;
 	b1 = 0x00000000;
@@ -76,7 +76,7 @@ void MD4_NEW( unsigned char * pData, int length, unsigned char * pDigest)
 			memcpy(in, pData, length);
 			in[2] = 0x80;
 			in[3] = 0x00;
-			UINT4 * pUiIn = (UINT4 *) in;
+			uint32 * pUiIn = (uint32 *) in;
 			b0 = pUiIn[0];
 		}
 		break;
@@ -84,7 +84,7 @@ void MD4_NEW( unsigned char * pData, int length, unsigned char * pDigest)
 		{
 			unsigned char in[4];
 			memcpy(in, pData, length);
-			UINT4 * pUiIn = (UINT4 *) in;
+			uint32 * pUiIn = (uint32 *) in;
 			b0 = pUiIn[0];
 			b1 = 0x00000080;
 		}
@@ -95,7 +95,7 @@ void MD4_NEW( unsigned char * pData, int length, unsigned char * pDigest)
 			memcpy(in, pData, length);
 			in[6] = 0x80;
 			in[7] = 0x00;
-			UINT4 * pUiIn = (UINT4 *) in;
+			uint32 * pUiIn = (uint32 *) in;
 			b0 = pUiIn[0];
 			b1 = pUiIn[1];
 		}
@@ -104,7 +104,7 @@ void MD4_NEW( unsigned char * pData, int length, unsigned char * pDigest)
 		{
 			unsigned char in[8];
 			memcpy(in, pData, length);
-			UINT4 * pUiIn = (UINT4 *) in;
+			uint32 * pUiIn = (uint32 *) in;
 			b0 = pUiIn[0];
 			b1 = pUiIn[1];
 			b2 = 0x00000080;
@@ -116,7 +116,7 @@ void MD4_NEW( unsigned char * pData, int length, unsigned char * pDigest)
 			memcpy(in, pData, length);
 			in[10] = 0x80;
 			in[11] = 0x00;
-			UINT4 * pUiIn = (UINT4 *) in;
+			uint32 * pUiIn = (uint32 *) in;
 			b0 = pUiIn[0];
 			b1 = pUiIn[1];
 			b2 = pUiIn[2];
@@ -128,7 +128,7 @@ void MD4_NEW( unsigned char * pData, int length, unsigned char * pDigest)
 			memcpy(in, pData, length);
 			in[length] = 0x80;
 			memset(in + length + 1, 0, 32 - length - 1);
-			UINT4 * pUiIn = (UINT4 *) in;
+			uint32 * pUiIn = (uint32 *) in;
 			b0 = pUiIn[0];
 			b1 = pUiIn[1];
 			b2 = pUiIn[2];
@@ -209,7 +209,7 @@ void MD4_NEW( unsigned char * pData, int length, unsigned char * pDigest)
 	c += 0x98badcfe;
 	d += 0x10325476;
 
-	UINT4 buf[4] = { a, b, c, d};
+	uint32 buf[4] = { a, b, c, d};
 	memcpy(pDigest, buf, 16);
 
 	return;

@@ -1,8 +1,26 @@
 /*
-   RainbowCrack - a general propose implementation of Philippe Oechslin's faster time-memory trade-off technique.
-
-   Copyright (C) Zhu Shuanglei <shuanglei@hotmail.com>
-*/
+ * freerainbowtables is a project for generating, distributing, and using
+ * perfect rainbow tables
+ *
+ * Copyright (C) Zhu Shuanglei <shuanglei@hotmail.com>
+ * Copyright 2009, 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
+ * Copyright 2009, 2010 James Nobis <frt@quelrod.net>
+ *
+ * This file is part of freerainbowtables.
+ *
+ * freerainbowtables is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * freerainbowtables is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with freerainbowtables.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #ifndef _CHAINWALKCONTEXT_H
 #define _CHAINWALKCONTEXT_H
@@ -13,7 +31,7 @@
 typedef struct 
 {
 	unsigned char m_PlainCharset[255];
-	int m_nPlainCharsetLen;
+	unsigned int m_nPlainCharsetLen;
 	int m_nPlainLenMin;
 	int m_nPlainLenMax;
 	string m_sPlainCharsetName;
@@ -25,17 +43,16 @@ public:
 	CChainWalkContext();
 	virtual ~CChainWalkContext();
 
-private:
+//private:
 	static string m_sHashRoutineName;	
 	static HASHROUTINE m_pHashRoutine;							// Configuration
 	static int m_nHashLen;										// Configuration
-
-//	static unsigned char m_PlainCharset[256];					// Configuration
-//	static unsigned char m_PlainCharset2[256];					// Configuration
+	static bool isOldRtFormat;
+	static bool isRti2RtFormat;
 	static vector<stCharset> m_vCharset;
 	static int m_nPlainLenMinTotal, m_nPlainLenMaxTotal;
-	static uint64 m_nPlainSpaceUpToX[MAX_PLAIN_LEN + 1];		// Performance consideration
 	static uint64 m_nPlainSpaceTotal;							// Performance consideration
+	static uint64 m_nPlainSpaceUpToX[MAX_PLAIN_LEN + 1];		// Performance consideration
 	static int m_nHybridCharset;
 	static int m_nRainbowTableIndex;							// Configuration
 	static uint64 m_nReduceOffset;								// Performance consideration
@@ -65,8 +82,9 @@ public:
 	static uint64 GetPlainSpaceTotal();
 	static int GetRainbowTableIndex();
 	static void Dump();
+	static bool isOldFormat();
+	static bool isRti2Format();
 
-//	void GenerateRandomIndex();
 	void SetIndex(uint64 nIndex);
 	void SetHash(unsigned char* pHash);		// The length should be m_nHashLen
 

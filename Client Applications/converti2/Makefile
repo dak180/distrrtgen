@@ -19,8 +19,8 @@ clean:
 
 rebuild: clean all
 
-MemoryPool.o: $(COMMON_API_PATH)/MemoryPool.h $(COMMON_API_PATH)/MemoryPool.cpp Public.h
+MemoryPool.o: $(COMMON_API_PATH)/MemoryPool.h $(COMMON_API_PATH)/MemoryPool.cpp $(COMMON_API_PATH)/Public.h
 	$(CC) $(CFLAGS) $(COMMON_API_PATH)/MemoryPool.cpp
 
-Public.o: Public.h Public.cpp
-	$(CC) $(CFLAGS) Public.cpp
+Public.o: $(COMMON_API_PATH)/Public.h $(COMMON_API_PATH)/Public.cpp
+	$(CC) $(CFLAGS) $(COMMON_API_PATH)/Public.cpp

@@ -1,8 +1,27 @@
 /*
-   RainbowCrack - a general propose implementation of Philippe Oechslin's faster time-memory trade-off technique.
-
-   Copyright (C) Zhu Shuanglei <shuanglei@hotmail.com>
-*/
+ * freerainbowtables is a project for generating, distributing, and using
+ * perfect rainbow tables
+ *
+ * Copyright (C) Zhu Shuanglei <shuanglei@hotmail.com>
+ * Copyright Martin Westergaard Jørgensen <martinwj2005@gmail.com>
+ * Copyright 2009, 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
+ * Copyright 2009, 2010 James Nobis <frt@quelrod.net>
+ *
+ * This file is part of freerainbowtables.
+ *
+ * freerainbowtables is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * freerainbowtables is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with freerainbowtables.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #ifndef _CHAINWALKSET_H
 #define _CHAINWALKSET_H
@@ -30,9 +49,16 @@ private:
 	int    m_nRainbowTableIndex;	// Discard all if not match
 	int    m_nRainbowChainLen;		// Discard all if not match
 	list<ChainWalk> m_lChainWalk;
+	bool   debug;
+	string sPrecalcPathName;
+	int    preCalcPart;
+	vector<string> vPrecalcFiles;
 
 private:
 	void DiscardAll();
+	bool FindInFile(uint64* pIndexE, unsigned char* pHash, int nHashLen);
+	string CheckOrRotatePreCalcFile();
+	void updateUsedPrecalcFiles();
 
 public:
 	uint64* RequestWalk(unsigned char* pHash, int nHashLen,
@@ -40,8 +66,12 @@ public:
 						string sPlainCharsetName, int nPlainLenMin, int nPlainLenMax, 
 						int nRainbowTableIndex, 
 						int nRainbowChainLen,
-						bool& fNewlyGenerated);
+						bool& fNewlyGenerated,
+						bool setDebug,
+						string sPrecalc);
 	void DiscardWalk(uint64* pIndexE);
+	void StoreToFile(uint64* pIndexE, unsigned char* pHash, int nHashLen);
+	void removePrecalcFiles();
 };
 
 #endif

@@ -328,7 +328,7 @@ void CCrackEngine::SearchTableChunkOld(RainbowChainO* pChain, int nRainbowChainL
 
 	bool pausing = false;
 
-	UINT4 nHashIndex;
+	uint32 nHashIndex;
 	for (nHashIndex = 0; nHashIndex < vHash.size(); nHashIndex++)
 	{
 		#ifdef _WIN32
@@ -442,7 +442,7 @@ void CCrackEngine::SearchTableChunkOld(RainbowChainO* pChain, int nRainbowChainL
 			threadPool.clear();
 			pThreads.clear();
 			
-			UINT4 thread_ID;
+			uint32 thread_ID;
 			for (thread_ID = 0; thread_ID < (unsigned long)maxThreads; thread_ID++)
 			{
 				rcrackiThread* r_Thread = new rcrackiThread(TargetHash, thread_ID, nRainbowChainLen, maxThreads, pStartPosIndexE);
@@ -511,7 +511,7 @@ void CCrackEngine::SearchTableChunkOld(RainbowChainO* pChain, int nRainbowChainL
 			threadPool.push_back(r_Thread);
 		}
 
-		UINT4 thread_ID = 0;
+		uint32 thread_ID = 0;
 		int nPos;
 		for (nPos = nRainbowChainLen - 2; nPos >= 0; nPos--)
 		{
@@ -655,7 +655,7 @@ void CCrackEngine::SearchTableChunk(RainbowChain* pChain, int nRainbowChainLen, 
 
 	bool pausing = false;
 
-	UINT4 nHashIndex;
+	uint32 nHashIndex;
 	for (nHashIndex = 0; nHashIndex < vHash.size(); nHashIndex++)
 	{
 		#ifdef _WIN32
@@ -772,7 +772,7 @@ void CCrackEngine::SearchTableChunk(RainbowChain* pChain, int nRainbowChainLen, 
 			threadPool.clear();
 			pThreads.clear();
 			
-			UINT4 thread_ID;
+			uint32 thread_ID;
 			for (thread_ID = 0; thread_ID < (unsigned long)maxThreads; thread_ID++)
 			{
 				rcrackiThread* r_Thread = new rcrackiThread(TargetHash, thread_ID, nRainbowChainLen, maxThreads, pStartPosIndexE);
@@ -846,7 +846,7 @@ void CCrackEngine::SearchTableChunk(RainbowChain* pChain, int nRainbowChainLen, 
 			threadPool.push_back(r_Thread);
 		}
 
-		UINT4 thread_ID = 0;
+		uint32 thread_ID = 0;
 		int nPos;
 		for (nPos = nRainbowChainLen - 2; nPos >= 0; nPos--)
 		{
@@ -956,7 +956,7 @@ void CCrackEngine::SearchRainbowTable(string sPathName, CHashSet& hs)
 		vector<string> sessionFinishedPathNames;
 		if (ReadLinesFromFile(sProgressPathName.c_str(), sessionFinishedPathNames))
 		{
-			UINT4 i;
+			uint32 i;
 			for (i = 0; i < sessionFinishedPathNames.size(); i++)
 			{
 				if (sessionFinishedPathNames[i] == sPathName)
@@ -1002,9 +1002,9 @@ void CCrackEngine::SearchRainbowTable(string sPathName, CHashSet& hs)
 		// File length check
 		bool doOldFormat = CChainWalkContext::isOldFormat();
 		bool doRti2Format = CChainWalkContext::isRti2Format();
-		UINT4 sizeOfChain;
+		uint32 sizeOfChain;
 		bool fVerified = false;
-		UINT4 nFileLen = GetFileLen(file);
+		long nFileLen = GetFileLen(file);
 
 		if (doOldFormat)
 			sizeOfChain = 16;
@@ -1012,7 +1012,7 @@ void CCrackEngine::SearchRainbowTable(string sPathName, CHashSet& hs)
 			sizeOfChain = 8;
 
 		//if (nFileLen % 8 != 0 || nRainbowChainCount * 8 != nFileLen)
-		if ( (nFileLen % sizeOfChain != 0 || nRainbowChainCount * sizeOfChain != nFileLen) && doRti2Format == false )
+		if ( ( (unsigned long)nFileLen % sizeOfChain != 0 || nRainbowChainCount * sizeOfChain != (unsigned long)nFileLen) && doRti2Format == false )
 			printf("file length mismatch\n");
 		else
 		{
@@ -1059,7 +1059,7 @@ void CCrackEngine::SearchRainbowTable(string sPathName, CHashSet& hs)
 					//bool fVerified = false;
 					while (true)	// Chunk read loop
 					{
-						if ((unsigned long)ftell(file) == nFileLen)
+						if (ftell(file) == nFileLen)
 							break;
 
 						// Load table chunk
@@ -1229,8 +1229,8 @@ void CCrackEngine::SearchRainbowTable(string sPathName, CHashSet& hs)
 
 									//fseek(file, 0, SEEK_SET);
 									//bool fVerified = false;
-									UINT4 nProcessedChains = 0;
-									while ( (unsigned long)ftell(file) != nFileLen 
+									uint32 nProcessedChains = 0;
+									while (ftell(file) != nFileLen 
 										&& nProcessedChains < nCoveredRainbowTableChains )	// Chunk read loop
 									{
 										// Load table chunk
@@ -1360,7 +1360,7 @@ void CCrackEngine::Run(vector<string> vPathName, CHashSet& hs, int i_maxThreads,
 	ResetStatistics();
 
 	// Sort vPathName (CChainWalkSet need it)
-	UINT4 i, j;
+	uint32 i, j;
 	for (i = 0; i < vPathName.size() - 1; i++)
 		for (j = 0; j < vPathName.size() - i - 1; j++)
 		{

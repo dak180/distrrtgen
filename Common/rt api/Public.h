@@ -10,8 +10,7 @@
  *
  * freerainbowtables is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
+ * the Free Software Foundation, either version 2 of the License.
  *
  * freerainbowtables is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -52,8 +51,8 @@ struct RainbowChainCP
 struct IndexChain
 {
 	uint64 nPrefix;
-	UINT4 nFirstChain;
-	UINT4 nChainCount;
+	uint32 nFirstChain;
+	uint32 nChainCount;
 };
 struct FoundRainbowChain
 {
@@ -85,7 +84,32 @@ typedef struct
 #define MAX_HASH_LEN  256
 #define MAX_SALT_LEN  256
 
-unsigned int GetFileLen(FILE* file);
+// XXX nmap is GPL2, will check newer releases regarding license
+// Code comes from nmap, used for the linux implementation of kbhit()
+#ifndef _WIN32
+#include <unistd.h>
+#include <termios.h>
+#include <fcntl.h>
+
+int tty_getchar();
+void tty_done();
+void tty_init();
+void tty_flush(void);
+// end nmap code
+
+#endif
+
+#if defined(_WIN32) && !defined(__GNUC__)
+	int gettimeofday( struct timeval *tv, struct timezone *tz );
+#endif
+
+#if !defined(_WIN32) || defined(__GNUC__)
+	#include <sys/time.h>
+#endif
+
+timeval sub_timeofday( timeval tv2, timeval tv );
+
+long GetFileLen(FILE* file);
 string TrimString(string s);
 bool boinc_ReadLinesFromFile(string sPathName, vector<string>& vLine);
 bool ReadLinesFromFile(string sPathName, vector<string>& vLine);
@@ -93,10 +117,11 @@ bool SeperateString(string s, string sSeperator, vector<string>& vPart);
 string uint64tostr(uint64 n);
 string uint64tohexstr(uint64 n);
 string HexToStr(const unsigned char* pData, int nLen);
-unsigned int GetAvailPhysMemorySize();
+unsigned long GetAvailPhysMemorySize();
 string GetApplicationPath();
 void ParseHash(string sHash, unsigned char* pHash, int& nHashLen);
 bool GetHybridCharsets(string sCharset, vector<tCharset>& vCharset);
 void Logo();
+bool writeResultLineToFile(string sOutputFile, string sHash, string sPlain, string sBinary);
 
 #endif

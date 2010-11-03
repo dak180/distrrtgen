@@ -19,6 +19,9 @@ clean:
 debug: DEBUG += -DDEBUG -g
 debug: all
 
+m32: DEBUG += -m32
+m32: rti2rto
+
 rebuild: clean all
 
 MemoryPool.o: $(COMMON_API_PATH)/MemoryPool.h $(COMMON_API_PATH)/MemoryPool.cpp $(COMMON_API_PATH)/Public.h

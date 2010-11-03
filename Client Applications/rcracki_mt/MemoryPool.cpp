@@ -91,8 +91,8 @@ unsigned char* CMemoryPool::Allocate(unsigned int nFileLen, uint64& nAllocatedSi
 	m_pMem = new (nothrow) unsigned char[nTargetSize];
 	while (m_pMem == NULL && nTargetSize >= 32 * 1024 * 1024 )
 	{
-	   nTargetSize -= 16 * 1024 * 1024;
-	   m_pMem = new (nothrow) unsigned char[nTargetSize];
+		nTargetSize -= 16 * 1024 * 1024;
+		m_pMem = new (nothrow) unsigned char[nTargetSize];
 	}
 
 	if (m_pMem != NULL)

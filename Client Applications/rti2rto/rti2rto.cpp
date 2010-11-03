@@ -117,7 +117,7 @@ void ConvertRainbowTable(string sPathName, string sResultFileName, string sType)
 		while(reader->GetChainsLeft() > 0)
 		{
 			reader->ReadChains(nChains, pChain);
-			for(UINT4 i = 0; i < nChains; i++)
+			for(uint32 i = 0; i < nChains; i++)
 			{
 				fwrite(&pChain[i], 1, 16, fResult);
 			}
@@ -158,7 +158,7 @@ int main(int argc, char* argv[])
 		printf("no rainbow table found\n");
 		return 0;
 	}
-	for (UINT4 i = 0; i < vPathName.size(); i++)
+	for (uint32 i = 0; i < vPathName.size(); i++)
 	{
 		string sResultFile, sType;
 			

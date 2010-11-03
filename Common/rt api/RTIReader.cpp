@@ -17,22 +17,21 @@ RTIReader::RTIReader(string Filename)
 	m_chainPosition = 0;
 
 	// Load the index file
-	unsigned int nIndexFileLen = GetFileLen(pFileIndex);
-	unsigned int nFileLen = GetFileLen(m_pFile);
+	long nIndexFileLen = GetFileLen(pFileIndex);
+	long nFileLen = GetFileLen(m_pFile);
 	unsigned int nTotalChainCount = nFileLen / 8;
 	if (nFileLen % 8 != 0)
-		printf("file length mismatch (%u bytes)\n", nFileLen);
+		printf("file length mismatch (%ld bytes)\n", nFileLen);
 	else
 	{
 		// File length check
 		if (nIndexFileLen % 11 != 0)
-			printf("index file length mismatch (%u bytes)\n", nIndexFileLen);
+			printf("index file length mismatch (%ld bytes)\n", nIndexFileLen);
 		else
 		{
 			m_pIndex = new IndexChain[nIndexFileLen / 11];
 			memset(m_pIndex, 0x00, sizeof(IndexChain) * (nIndexFileLen / 11));
 			fseek(pFileIndex, 0, SEEK_SET);
-			int nRead = 0;
 			int nRows;
 			for(nRows = 0; (nRows * 11) < nIndexFileLen; nRows++)
 			{
@@ -82,7 +81,7 @@ int RTIReader::ReadChains(unsigned int &numChains, RainbowChainCP *pData)
 	memset(pData, 0x00, sizeof(RainbowChainCP) * numChains);
 	unsigned int readChains = 0;
 	unsigned int chainsleft = GetChainsLeft();
-	for(int i = 0; i < m_nIndexSize; i++)
+	for(unsigned int i = 0; i < m_nIndexSize; i++)
 	{
 		if(m_chainPosition + readChains > m_pIndex[i].nFirstChain + m_pIndex[i].nChainCount) // We found the matching index
 			continue;

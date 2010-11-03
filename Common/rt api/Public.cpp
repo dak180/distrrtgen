@@ -11,8 +11,7 @@
  *
  * freerainbowtables is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
+ * the Free Software Foundation, either version 2 of the License.
  *
  * freerainbowtables is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -23,7 +22,7 @@
  * along with freerainbowtables.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(__GNUC__)
 	#pragma warning(disable : 4786)
 #endif
 
@@ -32,7 +31,7 @@
 		#include "boinc_win.h"
 	#endif
 #else
-#include "config.h"
+//#include "config.h"
 #include <cstdio>
 #include <cctype>
 #include <ctime>
@@ -50,6 +49,73 @@
 
 #ifdef _WIN32
 	#include <windows.h>
+#endif
+
+#if defined(_WIN32) && !defined(__GNUC__)
+	#include <windows.h>
+	#include <time.h>
+
+	#if defined(_MSC_VER) || defined(_MSC_EXTENSIONS)
+		#define DELTA_EPOCH_IN_MICROSECS  11644473600000000Ui64
+	#else
+		#define DELTA_EPOCH_IN_MICROSECS  11644473600000000ULL
+	#endif
+ 
+	struct timezone
+	{
+		int  tz_minuteswest; /* minutes W of Greenwich */
+		int  tz_dsttime;     /* type of dst correction */
+	};
+ 
+	int gettimeofday(struct timeval *tv, struct timezone *tz)
+	{
+		// Define a structure to receive the current Windows filetime
+		FILETIME ft;
+ 
+		// Initialize the present time to 0 and the timezone to UTC
+  		unsigned __int64 tmpres = 0;
+		static int tzflag = 0;
+ 
+		if (NULL != tv)
+		{
+			GetSystemTimeAsFileTime(&ft);
+ 
+			// The GetSystemTimeAsFileTime returns the number of 100 nanosecond 
+			// intervals since Jan 1, 1601 in a structure. Copy the high bits to 
+			// the 64 bit tmpres, shift it left by 32 then or in the low 32 bits.
+			tmpres |= ft.dwHighDateTime;
+			tmpres <<= 32;
+			tmpres |= ft.dwLowDateTime;
+ 
+			// Convert to microseconds by dividing by 10
+			tmpres /= 10;
+ 
+			// The Unix epoch starts on Jan 1 1970.  Need to subtract the difference 
+			// in seconds from Jan 1 1601.
+			tmpres -= DELTA_EPOCH_IN_MICROSECS;
+	 
+			// Finally change microseconds to seconds and place in the seconds value. 
+			// The modulus picks up the microseconds.
+			tv->tv_sec = (long)(tmpres / 1000000UL);
+			tv->tv_usec = (long)(tmpres % 1000000UL);
+		}
+	 
+		if (NULL != tz)
+		{
+			if (!tzflag)
+			{
+				_tzset();
+				tzflag++;
+			}
+	  
+			// Adjust for the timezone west of Greenwich
+			tz->tz_minuteswest = _timezone / 60;
+			tz->tz_dsttime = _daylight;
+		}
+	 
+		return 0;
+	}
+
 #elif defined(__APPLE__) || \
 	((defined(__unix__) || defined(unix)) && !defined(USG))
 
@@ -60,17 +126,35 @@
 	#elif defined(__linux__)
 		#include <sys/sysinfo.h>
 	#else
-		#error Unsupported Operating system
+		#error Unsupported Operating System
 	#endif
 #endif
 
 //////////////////////////////////////////////////////////////////////
 
-unsigned int GetFileLen(FILE* file)
+timeval sub_timeofday( timeval tv2, timeval tv )
 {
-	unsigned int pos = ftell(file);
+	timeval final;
+
+	final.tv_usec = tv2.tv_usec - tv.tv_usec;
+	final.tv_sec = tv2.tv_sec - tv.tv_sec;
+
+	if ( final.tv_usec < 0 )
+	{
+		final.tv_usec += 1000000;
+		--final.tv_sec;
+	}
+
+	return final;
+}
+
+long GetFileLen(FILE* file)
+{
+	// XXX on x86/x86_64 linux returns long
+	// 32-bit this is a problem if the file is > (2^31-1) bytes
+	long pos = ftell(file);
 	fseek(file, 0, SEEK_END);
-	unsigned int len = ftell(file);
+	long len = ftell(file);
 	fseek(file, pos, SEEK_SET);
 
 	return len;
@@ -102,12 +186,12 @@ bool GetHybridCharsets(string sCharset, vector<tCharset>& vCharset)
 	if(sCharset.substr(0, 6) != "hybrid") // Not hybrid charset
 		return false;
 
-	UINT4 nEnd = (int) sCharset.rfind(')');
-	UINT4 nStart = (int) sCharset.rfind('(');
+	string::size_type nEnd = sCharset.rfind(')');
+	string::size_type nStart = (int) sCharset.rfind('(');
 	string sChar = sCharset.substr(nStart + 1, nEnd - nStart - 1);
 	vector<string> vParts;
 	SeperateString(sChar, ",", vParts);
-	for(UINT4 i = 0; i < vParts.size(); i++)
+	for(uint32 i = 0; i < vParts.size(); i++)
 	{
 		tCharset stCharset;
 		vector<string> vParts2;
@@ -152,8 +236,8 @@ bool boinc_ReadLinesFromFile(string sPathName, vector<string>& vLine)
 				content[i] = '\n';
 		}
 
-		int n;
-		while ((n = content.find("\n", 0)) != -1)
+		string::size_type n;
+		while ((n = content.find("\n", 0)) != string::npos)
 		{
 			string line = content.substr(0, n);
 			line = TrimString(line);
@@ -169,11 +253,12 @@ bool boinc_ReadLinesFromFile(string sPathName, vector<string>& vLine)
 
 	return true;
 }
-#endif 
+#endif
 bool ReadLinesFromFile(string sPathName, vector<string>& vLine)
 {
 	vLine.clear();
-    FILE *file = fopen(sPathName.c_str(), "rb");
+
+	FILE* file = fopen(sPathName.c_str(), "rb");
 	if (file != NULL)
 	{
 		unsigned int len = GetFileLen(file);
@@ -182,7 +267,7 @@ bool ReadLinesFromFile(string sPathName, vector<string>& vLine)
 		data[len] = '\0';
 		string content = data;
 		content += "\n";
-		delete data;
+		delete [] data;
 
 		unsigned int i;
 		for (i = 0; i < content.size(); i++)
@@ -191,8 +276,8 @@ bool ReadLinesFromFile(string sPathName, vector<string>& vLine)
 				content[i] = '\n';
 		}
 
-		int n;
-		while ((n = content.find("\n", 0)) != -1)
+		string::size_type n;
+		while ((n = content.find("\n", 0)) != string::npos)
 		{
 			string line = content.substr(0, n);
 			line = TrimString(line);
@@ -209,6 +294,19 @@ bool ReadLinesFromFile(string sPathName, vector<string>& vLine)
 	return true;
 }
 
+bool writeResultLineToFile(string sOutputFile, string sHash, string sPlain, string sBinary)
+{
+	FILE* file = fopen(sOutputFile.c_str(), "a");
+	if (file!=NULL)
+	{
+		string buffer = sHash + ":" + sPlain + ":" + sBinary + "\n";
+		fputs (buffer.c_str(), file);
+		fclose (file);
+		return true;
+	}
+	else
+		return false;
+}
 
 bool SeperateString(string s, string sSeperator, vector<string>& vPart)
 {
@@ -217,14 +315,18 @@ bool SeperateString(string s, string sSeperator, vector<string>& vPart)
 	unsigned int i;
 	for (i = 0; i < sSeperator.size(); i++)
 	{
-		int n = s.find(sSeperator[i]);
-		if (n != -1)
+		string::size_type n;
+		if ( (n = s.find(sSeperator[i])) != string::npos)
 		{
 			vPart.push_back(s.substr(0, n));
 			s = s.substr(n + 1);
 		}
 		else
+		{
+			printf("not found: %c\n", sSeperator[i]);
+			printf("s: %s\n", s.c_str());
 			return false;
+		}
 	}
 	vPart.push_back(s);
 
@@ -271,16 +373,27 @@ string HexToStr(const unsigned char* pData, int nLen)
 	return sRet;
 }
 
-unsigned int GetAvailPhysMemorySize()
+unsigned long GetAvailPhysMemorySize()
 {
 #ifdef _WIN32
-		MEMORYSTATUS ms;
-		GlobalMemoryStatus(&ms);
-		return ms.dwAvailPhys;
-#else
+	MEMORYSTATUS ms;
+	GlobalMemoryStatus(&ms);
+	return ms.dwAvailPhys;
+#elif defined(BSD)
+	int mib[2] = { CTL_HW, HW_PHYSMEM };
+	uint64 physMem;
+	//XXX warning size_t isn't portable
+	size_t len;
+	len = sizeof(physMem);
+	sysctl(mib, 2, &physMem, &len, NULL, 0);
+	return physMem;
+#elif defined(__linux__)
 	struct sysinfo info;
-	sysinfo(&info);			// This function is Linux-specific
-	return info.freeram;
+	sysinfo(&info);
+	return ( info.freeram + info.bufferram ) * (unsigned long) info.mem_unit;
+#else
+	return 0;
+	#error Unsupported Operating System
 #endif
 }
 
@@ -302,12 +415,12 @@ string GetApplicationPath()
 
 	string sApplicationPath = fullPath;
 #ifdef _WIN32
-	int nIndex = sApplicationPath.find_last_of('\\');
+	string::size_type nIndex = sApplicationPath.find_last_of('\\');
 #else
-	int nIndex = sApplicationPath.find_last_of('/');
+	string::size_type nIndex = sApplicationPath.find_last_of('/');
 #endif
 
-	if ( nIndex != -1 )
+	if ( nIndex != string::npos )
 		sApplicationPath = sApplicationPath.substr(0, nIndex+1);
 
 	return sApplicationPath;
@@ -324,7 +437,7 @@ void ParseHash(string sHash, unsigned char* pHash, int& nHashLen)
 		pHash[i] = (unsigned char)nValue;
 	}
 
-	nHashLen = sHash.size() / 2;
+	nHashLen = (int) sHash.size() / 2;
 }
 
 void Logo()
@@ -335,3 +448,59 @@ void Logo()
 	printf("original code by Zhu Shuanglei <shuanglei@hotmail.com>\n");
 	printf("http://www.antsight.com/zsl/rainbowcrack/\n\n");
 }
+
+// XXX nmap is GPL2, will check newer releases regarding license
+// Code comes from nmap, used for the linux implementation of kbhit()
+#ifndef _WIN32
+
+static int tty_fd = 0;
+struct termios saved_ti;
+
+int tty_getchar()
+{
+	int c, numChars;
+
+	if (tty_fd && tcgetpgrp(tty_fd) == getpid()) {
+		c = 0;
+		numChars = read(tty_fd, &c, 1);
+		if (numChars > 0) return c;
+	}
+
+	return -1;
+}
+
+void tty_done()
+{
+	if (!tty_fd) return;
+
+	tcsetattr(tty_fd, TCSANOW, &saved_ti);
+
+	close(tty_fd);
+	tty_fd = 0;
+}
+
+void tty_init()
+{
+	struct termios ti;
+
+	if (tty_fd)
+		return;
+
+	if ((tty_fd = open("/dev/tty", O_RDONLY | O_NONBLOCK)) < 0) return;
+
+	tcgetattr(tty_fd, &ti);
+	saved_ti = ti;
+	ti.c_lflag &= ~(ICANON | ECHO);
+	ti.c_cc[VMIN] = 1;
+	ti.c_cc[VTIME] = 0;
+	tcsetattr(tty_fd, TCSANOW, &ti);
+
+	atexit(tty_done);
+}
+
+void tty_flush(void)
+{
+	tcflush(tty_fd, TCIFLUSH);
+}
+// end nmap code
+#endif
