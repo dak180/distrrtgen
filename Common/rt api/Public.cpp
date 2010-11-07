@@ -209,7 +209,7 @@ bool GetHybridCharsets(string sCharset, vector<tCharset>& vCharset)
 bool boinc_ReadLinesFromFile(string sPathName, vector<string>& vLine)
 {
 	vLine.clear();
-#ifdef 0
+#ifdef USE_INTEGRATED_CHARSET
 	vLine.push_back("byte                        = []");
 	vLine.push_back("alpha                       = [ABCDEFGHIJKLMNOPQRSTUVWXYZ]");
 	vLine.push_back("alpha-space                 = [ABCDEFGHIJKLMNOPQRSTUVWXYZ ]");

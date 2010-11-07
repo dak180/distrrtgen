@@ -27,6 +27,7 @@ SHELL = /bin/sh
 BOINC_DIR = /usr/share/boinc-dev
 BOINC_API_DIR = $(BOINC_DIR)/api
 BOINC_LIB_DIR = $(BOINC_DIR)/lib
+CC = g++
 COMMON_LIB_DIR = /usr/lib
 INCLUDES = -I../../../Common/rt\ api -I$(BOINC_DIR) -I$(BOINC_LIB_DIR) -I$(BOINC_API_DIR) 
 COMMON_API_PATH = ../../../Common/rt\ api
@@ -39,10 +40,11 @@ CXXFLAGS = -g \
 	 -c \
 	 -DBOINC \
 	 $(INCLUDES) \
-	 $(OPTIMIZATION)
+	 $(OPTIMIZATION) \
+	 $(DEBUG)
 
 LFLAGS = -static -static-libgcc -Wall $(INCLUDES) $(OPTIMIZATION) -L$(BOINC_API_DIR) \
-	-L$(BOINC_LIB_DIR) -L /usr/X11R6/lib -L.
+	-L$(BOINC_LIB_DIR) -L /usr/X11R6/lib -L. $(DEBUG)
 
 LIBS = -lboinc_api -lboinc -lpthread -lssl libstdc++.a $(COMMON_LIB_DIR)/libssl.a $(COMMON_LIB_DIR)/libpthread.a
 OBJS = ChainWalkContext.o des_enc.o des_setkey.o distrrtgen.o ecb_enc.o HashAlgorithm.o HashRoutine.o md4.o md5.o Public.o
@@ -55,7 +57,7 @@ distrrtgen: libstdc++.a $(BOINC_API_DIR)/libboinc_api.a $(BOINC_LIB_DIR)/libboin
 	$(CXX) $(LFLAGS) $(OBJS) $(LIBS) -o distrrtgen
 
 libstdc++.a:
-	ln -s `g++ -print-file-name=libstdc++.a`
+	ln -s `$(CC) $(DEBUG) -print-file-name=libstdc++.a`
 
 clean:
 	/bin/rm -f distrrtgen *.o

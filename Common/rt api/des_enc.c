@@ -60,7 +60,7 @@
  */
 
 #include "des_locl.h"
-//#include "spr.h"
+#include "spr.h"
 
 extern	const DES_LONG des_SPtrans[8][64];
 
