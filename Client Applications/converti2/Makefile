@@ -21,9 +21,16 @@ debug: DEBUG += -DDEBUG -g
 debug: all
 
 #m32: DEBUG += -m32
-#m32: converti2
+#m32: all
 
 rebuild: clean all
+
+static: DEBUG += -static -static-libgcc
+static: all
+
+win32: CC=i586-mingw32msvc-g++
+win32: LIBS += -L/usr/lib/gcc/i586-mingw32msvc/4.2.1-sjlj/lib
+win32: all
 
 MemoryPool.o: $(COMMON_API_PATH)/MemoryPool.h $(COMMON_API_PATH)/MemoryPool.cpp $(COMMON_API_PATH)/Public.h
 	$(CC) $(CFLAGS) $(COMMON_API_PATH)/MemoryPool.cpp

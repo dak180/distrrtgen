@@ -100,7 +100,7 @@ int GetMaxBits(uint64 highvalue)
 		return 30;
 	if(highvalue < 0x80000000)
 		return 31;
-#ifdef WIN32
+#if defined(_WIN32) && !defined(__GNUC__)
 	if(highvalue < 0x0000000100000000I64)
 		return 32;
 	if(highvalue < 0x0000000200000000I64)
@@ -297,7 +297,7 @@ void ConvertRainbowTable(string sPathName, string sResultFileName, unsigned int 
 	}
 	unsigned int distribution[64] = {0};
 	unsigned int numProcessedChains = 0;
-	FILE* fileR;
+	FILE* fileR = NULL;
 	BaseRTReader *reader = NULL;
 	if(sPathName.substr(sPathName.length() - 2, sPathName.length()) == "rt")
 		reader = (BaseRTReader*)new RTReader(sPathName);
@@ -579,7 +579,7 @@ int main(int argc, char* argv[])
 		}		
 	}
 	vector<string> vPathName;
-#ifdef WIN32
+#ifdef _WIN32
 	string sWildCharPathName = argv[1];
 	GetTableList(sWildCharPathName, vPathName);
 #else
