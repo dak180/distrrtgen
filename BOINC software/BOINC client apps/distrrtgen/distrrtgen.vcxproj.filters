@@ -83,5 +83,8 @@
     <ClInclude Include="..\..\..\Common\rt api\spr.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\Common\rt api\global.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

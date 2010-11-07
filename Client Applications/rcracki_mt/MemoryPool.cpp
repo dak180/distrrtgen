@@ -33,14 +33,14 @@ CMemoryPool::CMemoryPool(unsigned int bytesSaved, bool bDebug, uint64 maxMem)
 	m_nMemSize = 0;
 	debug = bDebug;
 
-	uint64 nAvailPhys = GetAvailPhysMemorySize();
+	unsigned long nAvailPhys = GetAvailPhysMemorySize();
 
 	if ( debug )
 	{
-		#ifdef _WIN32
+		#if defined(_WIN32) && !defined(__GNUC__)
 			printf( "Debug: nAvailPhys: %I64u\n", nAvailPhys );
 		#else
-			printf( "Debug: nAvailPhys: %llu\n", nAvailPhys );
+			printf( "Debug: nAvailPhys: %lu\n", nAvailPhys );
 		#endif
 		printf( "Debug: bytesSaved: %d\n", bytesSaved );
 	}

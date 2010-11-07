@@ -87,6 +87,7 @@ void ConvertRainbowTable(string sPathName, string sResultFileName, string sType)
 		sFileName = sPathName.substr(nIndex + 1);
 	else
 		sFileName = sPathName;
+
 	// Info
 	printf("%s:\n", sFileName.c_str());
 	FILE *fResult = fopen(sResultFileName.c_str(), "wb");
@@ -98,7 +99,6 @@ void ConvertRainbowTable(string sPathName, string sResultFileName, string sType)
 	static CMemoryPool mp;
 	unsigned int nAllocatedSize;
 	BaseRTReader *reader = NULL;
-
 	if(sType == "RTI2")
 		reader = (BaseRTReader*)new RTI2Reader(sFileName);
 	else if(sType == "RTI")
@@ -108,15 +108,27 @@ void ConvertRainbowTable(string sPathName, string sResultFileName, string sType)
 		printf("Invalid table type '%s'", sType.c_str());
 		return ;
 	}
-
-	RainbowChainCP* pChain = (RainbowChainCP*)mp.Allocate(reader->GetChainsLeft() * sizeof(RainbowChainCP), nAllocatedSize);
+	int size = reader->GetChainsLeft() * sizeof(RainbowChain);
+#ifdef _MEMORYDEBUG
+	printf("Starting allocation of %i bytes\n", size);
+#endif
+	RainbowChain* pChain = (RainbowChain*)mp.Allocate(size, nAllocatedSize);
+#ifdef _MEMORYDEBUG
+	printf("Finished. Got %i bytes\n", nAllocatedSize);
+#endif
 	if (pChain != NULL)
 	{
-		nAllocatedSize = nAllocatedSize / sizeof(RainbowChainCP) * sizeof(RainbowChainCP);		// Round to boundary
-		unsigned int nChains = nAllocatedSize / sizeof(RainbowChainCP);
+		nAllocatedSize = nAllocatedSize / sizeof(RainbowChain) * sizeof(RainbowChain);		// Round to boundary
+		unsigned int nChains = nAllocatedSize / sizeof(RainbowChain);
 		while(reader->GetChainsLeft() > 0)
 		{
+#ifdef _MEMORYDEBUG
+			printf("Grabbing %i chains from file\n", nChains);
+#endif
 			reader->ReadChains(nChains, pChain);
+#ifdef _MEMORYDEBUG
+			printf("Recieved %i chains from file\n", nChains);
+#endif
 			for(uint32 i = 0; i < nChains; i++)
 			{
 				fwrite(&pChain[i], 1, 16, fResult);

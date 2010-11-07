@@ -47,7 +47,6 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.]
  */
-
 static const DES_LONG des_skb[8][64]={
 {
 /* for C bits (numbered as per FIPS 46) 1 2 3 4 5 6 */

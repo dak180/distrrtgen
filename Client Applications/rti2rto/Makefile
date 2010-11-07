@@ -1,7 +1,7 @@
 SHELL = /bin/sh
 CC = g++
 OPTIMIZATION = -O3
-INCLUDES = -I../../Common/rt\ api -I../../Server\ Applications/rsearchi
+INCLUDES = -I../../Common/rt\ api
 CFLAGS = -Wall -ansi $(INCLUDES) $(OPTIMIZATION) -c $(DEBUG)
 LFLAGS = -Wall -ansi $(INCLUDES) $(OPTIMIZATION) $(DEBUG)
 LIBS = 

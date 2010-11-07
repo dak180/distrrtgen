@@ -48,7 +48,11 @@ RTI2Reader::RTI2Reader(string Filename)
 	long len = GetFileLen(pFileIndex);
 	fseek(pFileIndex, 0, SEEK_SET);
 
-	m_pIndex = new unsigned char[len];
+	m_pIndex = new (nothrow) unsigned char[len];
+	if(m_pIndex == NULL) {
+		printf("Error allocating %ld MB memory for index in RTI2Reader::RTI2Reader()", len / (1024 * 1024));
+		exit(-2);
+	}
 	if(fread(m_pIndex, 1, len, pFileIndex) != (unsigned long)len)
 	{
 		printf("Error while reading index file");

@@ -47,7 +47,11 @@ RTI2Reader::RTI2Reader(string Filename)
 	long len = GetFileLen(pFileIndex);
 	fseek(pFileIndex, 0, SEEK_SET);
 
-	m_pIndex = new unsigned char[len];
+	m_pIndex = new (nothrow) unsigned char[len];
+	if(m_pIndex == NULL) {
+		printf("Error allocating %ld MB memory for index in RTI2Reader::RTI2Reader()", len / (1024 * 1024));
+		exit(-2);
+	}
 	if(fread(m_pIndex, 1, len, pFileIndex) != (unsigned long)len)
 	{
 		printf("Error while reading index file");
@@ -66,7 +70,7 @@ RTI2Reader::RTI2Reader(string Filename)
 	fseek(m_pFile, 0, SEEK_SET);
 	if(len % m_chainsizebytes > 0)
 	{
-		printf("Invalid filesize %ld\n", len);
+		printf("Invalid filesize %lu\n", len);
 		return;
 	}
 	
@@ -86,7 +90,7 @@ unsigned int RTI2Reader::GetChainsLeft()
 	return len / m_chainsizebytes - m_chainPosition;
 }
 
-int RTI2Reader::ReadChains(unsigned int &numChains, RainbowChainCP *pData)
+int RTI2Reader::ReadChains(unsigned int &numChains, RainbowChain *pData)
 {
 	if(strncmp(m_pHeader->header, "RTI2", 4) != 0)
 	{

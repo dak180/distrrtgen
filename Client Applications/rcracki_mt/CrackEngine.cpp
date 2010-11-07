@@ -3,7 +3,7 @@
  * RainbowCrack
  *
  * Copyright (C) Zhu Shuanglei <shuanglei@hotmail.com>
- * Copyright Martin Westergaard Jørgensen <martinwj2005@gmail.com>
+ * Copyright 2009, 2010 Martin Westergaard Jørgensen <martinwj2005@gmail.com>
  * Copyright 2009, 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
  * Copyright 2009, 2010 James Nobis <frt@quelrod.net>
  * Copyright 2010 uroskn
@@ -1044,11 +1044,16 @@ void CCrackEngine::SearchRainbowTable(string sPathName, CHashSet& hs)
 				}
 
 				static CMemoryPool mp(bytesForChainWalkSet, debug, maxMem);
-				RainbowChainO* pChain = (RainbowChainO*)mp.Allocate(nFileLen, nAllocatedSize);
-				#ifdef _WIN32
-					if (debug) printf("Allocated %I64u bytes, filelen %lu\n", nAllocatedSize, (unsigned long)nFileLen);
+				RainbowChainO* pChain = NULL;
+				if(doRti2Format) {
+					pChain = (RainbowChainO*)mp.Allocate(pReader->GetChainsLeft() * 16, nAllocatedSize);
+				} else {
+					pChain = (RainbowChainO*)mp.Allocate(nFileLen, nAllocatedSize);
+				}
+				#if defined(_WIN32) && !defined(__GNUC__)
+					if (debug) printf("Allocated %I64 bytes, filelen %ld\n", nAllocatedSize, nFileLen);
 				#else
-					if (debug) printf("Allocated %llu bytes, filelen %lu\n", nAllocatedSize, (unsigned long)nFileLen);
+					if (debug) printf("Allocated %llu bytes, filelen %ld\n", nAllocatedSize, nFileLen);
 				#endif
 
 				if (pChain != NULL)
@@ -1064,13 +1069,15 @@ void CCrackEngine::SearchRainbowTable(string sPathName, CHashSet& hs)
 
 						// Load table chunk
 						if (debug) printf("reading...\n");
-						unsigned int nDataRead = 0, nDataToRead = 0;
+						unsigned int nDataRead = 0;
 						gettimeofday( &tv, NULL );
 						if ( doRti2Format )
 						{
-							nDataToRead = nAllocatedSize / 16;
-							nDataRead = nDataToRead;
+							nDataRead = nAllocatedSize / 16;
+							if(pReader->GetChainsLeft() <= 0) // No more data
+								break; 
 							pReader->ReadChains(nDataRead, pChain);
+
 							nDataRead *= 8; // Convert from chains read to bytes
 						}
 						else
@@ -1085,6 +1092,10 @@ void CCrackEngine::SearchRainbowTable(string sPathName, CHashSet& hs)
 						m_fTotalDiskAccessTime += fTime;
 
 						int nRainbowChainCountRead = nDataRead / 16;
+
+						if(doRti2Format) {
+							nRainbowChainCountRead = nDataRead / 8;
+						}
 
 						// Verify table chunk
 						if (!fVerified)
@@ -1137,12 +1148,15 @@ void CCrackEngine::SearchRainbowTable(string sPathName, CHashSet& hs)
 						if (!hs.AnyHashLeftWithLen(CChainWalkContext::GetHashLen()))
 							break;
 
+/*
+	// XXX eliminated by PB - check correctness
 						// finished the current table
 						if( doRti2Format && nDataToRead > (nDataRead / 8) )
 						{
 							delete pReader;
 							break;
 						}
+*/
 					}
 				}
 				else
@@ -1162,21 +1176,21 @@ void CCrackEngine::SearchRainbowTable(string sPathName, CHashSet& hs)
 				if(fIndex != NULL)
 				{
 					// File length check
-					unsigned int nFileLenIndex = GetFileLen(fIndex);
+					long nFileLenIndex = GetFileLen(fIndex);
 					//unsigned int nRows = nFileLenIndex / 11;
 					//unsigned int nSize = nRows * sizeof(IndexChain);
 					//printf("Debug: 8\n");
 					if (nFileLenIndex % 11 != 0)
-						printf("index file length mismatch (%u bytes)\n", nFileLenIndex);
+						printf("index file length mismatch (%ld bytes)\n", nFileLenIndex);
 					else
 					{
 						//printf("index nSize: %d\n", nSize);
 						//pIndex = (IndexChain*)new unsigned char[nSize];
 						IndexChain *pIndex = (IndexChain*)mpIndex.Allocate(nFileLenIndex, nAllocatedSizeIndex);
 						#ifdef _WIN32
-							if (debug) printf("Debug: Allocated %I64u bytes for index with filelen %u\n", nAllocatedSizeIndex, nFileLenIndex);
+							if (debug) printf("Debug: Allocated %I64u bytes for index with filelen %ld\n", nAllocatedSizeIndex, nFileLenIndex);
 						#else
-							if (debug) printf("Debug: Allocated %llu bytes for index with filelen %u\n", nAllocatedSizeIndex, nFileLenIndex);
+							if (debug) printf("Debug: Allocated %llu bytes for index with filelen %ld\n", nAllocatedSizeIndex, nFileLenIndex);
 						#endif
 				
 						static CMemoryPool mp(bytesForChainWalkSet + nAllocatedSizeIndex, debug, maxMem);
@@ -1187,7 +1201,7 @@ void CCrackEngine::SearchRainbowTable(string sPathName, CHashSet& hs)
 						
 							fseek(fIndex, 0, SEEK_SET);
 
-							while ( (unsigned long)ftell(fIndex) != nFileLenIndex )	// Index chunk read loop
+							while ( ftell(fIndex) != nFileLenIndex )	// Index chunk read loop
 							{
 								// Load index chunk
 #ifdef _WIN32
@@ -1230,7 +1244,7 @@ void CCrackEngine::SearchRainbowTable(string sPathName, CHashSet& hs)
 									//fseek(file, 0, SEEK_SET);
 									//bool fVerified = false;
 									uint32 nProcessedChains = 0;
-									while (ftell(file) != nFileLen 
+									while ( ftell(file) != nFileLen 
 										&& nProcessedChains < nCoveredRainbowTableChains )	// Chunk read loop
 									{
 										// Load table chunk
