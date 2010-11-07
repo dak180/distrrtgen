@@ -24,6 +24,16 @@ m32: rti2rto
 
 rebuild: clean all
 
+static: DEBUG += -static -static-libgcc
+static: all
+
+static32: DEBUG += -m32 -static -static-libgcc
+static32: all
+
+win32: CC=i586-mingw32msvc-g++
+win32: LIBS += -L/usr/lib/gcc/i586-mingw32msvc/4.2.1-sjlj/lib
+win32: all
+
 MemoryPool.o: $(COMMON_API_PATH)/MemoryPool.h $(COMMON_API_PATH)/MemoryPool.cpp $(COMMON_API_PATH)/Public.h
 	$(CC) $(CFLAGS) $(COMMON_API_PATH)/MemoryPool.cpp
 
