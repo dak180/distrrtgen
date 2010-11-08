@@ -127,7 +127,7 @@ int main(int argc, char **argv) {
 		return -1;
 	}
 	string sHashRoutineName, sCharsetName, sSalt, sCheckPoints;
-	int nRainbowChainCount, nPlainLenMin, nPlainLenMax, nRainbowTableIndex, nRainbowChainLen;
+	uint32 nRainbowChainCount, nPlainLenMin, nPlainLenMax, nRainbowTableIndex, nRainbowChainLen;
 	uint64 nChainStart;
 	sHashRoutineName = argv[1];
 	sCharsetName = argv[2];
@@ -144,7 +144,7 @@ int main(int argc, char **argv) {
 	nChainStart = atoll(argv[8]);
 #endif
 	sCheckPoints = argv[9];
-	vector<int> vCPPositions;
+	vector<uint32> vCPPositions;
 	char *cp = strtok((char *)sCheckPoints.c_str(), ",");
 	while(cp != NULL)
 	{
@@ -224,7 +224,7 @@ int main(int argc, char **argv) {
 	
 	// Round to boundary
 	nDataLen = nDataLen / 18 * 18;
-	if ((int)nDataLen == nRainbowChainCount * 18)
+	if (nDataLen == nRainbowChainCount * 18)
 	{		
 		std::cerr << "precomputation of this rainbow table already finished" << std::endl;
 		fclose(outfile);
@@ -237,7 +237,7 @@ int main(int argc, char **argv) {
 	uint64 nIndex[2];
 	time_t tStart = time(NULL);
 //	std::cout << "Starting to generate chains" << std::endl;
-	for(int nCurrentCalculatedChains = nDataLen / 18; nCurrentCalculatedChains < nRainbowChainCount; nCurrentCalculatedChains++)
+	for(uint32 nCurrentCalculatedChains = nDataLen / 18; nCurrentCalculatedChains < nRainbowChainCount; nCurrentCalculatedChains++)
 	{		
 		uint32 cpcheck = 0;
 		unsigned short checkpoint = 0;
@@ -246,7 +246,7 @@ int main(int argc, char **argv) {
 		cwc.SetIndex(nChainStart++); // use a given index now!
 		nIndex[0] = cwc.GetIndex();
 		
-		for (int nPos = 0; nPos < nRainbowChainLen - 1; nPos++)
+		for (uint32 nPos = 0; nPos < nRainbowChainLen - 1; nPos++)
 		{
 		//	std::cout << "IndexToPlain()" << std::endl;
 			cwc.IndexToPlain();
@@ -290,7 +290,7 @@ int main(int argc, char **argv) {
 	{
 		// Load file
 		fseek(outfile, 0, SEEK_SET);
-		for(int i = 0; i < nRainbowChainCount; i++)
+		for(uint32 i = 0; i < nRainbowChainCount; i++)
 		{
 			if(fread(&pChain[i], 1, 16, outfile) != 16)
 			{
@@ -309,7 +309,7 @@ int main(int argc, char **argv) {
 
 		// Write file
 		fseek(outfile, 0, SEEK_SET);
-		for(int i = 0; i < nRainbowChainCount; i++)
+		for(uint32 i = 0; i < nRainbowChainCount; i++)
 		{
 			fwrite(&pChain[i], 1, 16, outfile);
 			fwrite(&pChain[i].nCheckPoint, 2, 1, outfile);

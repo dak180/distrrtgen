@@ -26,7 +26,7 @@ void CudaCWCExtender::Init(void) {
 	plainCharSet.clear();
 
 	hashName = CChainWalkContext::m_sHashRoutineName;
-	std::transform(hashName.begin(), hashName.end(), hashName.begin(), tolower);
+	std::transform(hashName.begin(), hashName.end(), hashName.begin(), ::tolower);
 	if(hashName.compare("lm") == 0)
 		hash = rcuda::RHASH_LM;
 	else if(hashName.compare("md4") == 0)

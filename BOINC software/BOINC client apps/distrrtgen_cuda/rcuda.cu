@@ -123,22 +123,22 @@ __device__ void MD5(unsigned int* dataHash) {
 
 #define   PLAIN_MAX_SIZE     20
 
-__device__ unsigned __int64 *dataHeap;
+__device__ uint64 *dataHeap;
 __device__ unsigned char *plStart;
 __device__ uint3 *plDimVec;
 __device__ unsigned char *plChrSet;
 __device__ int *plCpPos;
 __device__ int plCpPosSize;
-__device__ unsigned __int64 reduceOffset;
-__device__ unsigned __int64 plainSpaceTotal;
-__device__ unsigned __int64 rPlainSpaceTotal;
+__device__ uint64 reduceOffset;
+__device__ uint64 plainSpaceTotal;
+__device__ uint64 rPlainSpaceTotal;
 
 
 __global__ void RTGenMD5Kernel(unsigned int chainStart, unsigned int chainStop) {
 	unsigned int *hData;
 	uint3 dimItem;
 	unsigned int uiVal, uiMul, uiDiv, idx;
-	unsigned __int64 uiVal64, uiMul64, uiDiv64, idx64;
+	uint64 uiVal64, uiMul64, uiDiv64, idx64;
 	unsigned int nPos, size, ii, jj, kk;
 	unsigned int cpcheck, checkpoint;
 	unsigned int plain;
@@ -172,9 +172,9 @@ __global__ void RTGenMD5Kernel(unsigned int chainStart, unsigned int chainStop) 
 			uiVal64 = idx64 + plStart[ii];
 			uiVal64--;
 			dimItem = plDimVec[ii];
-			uiMul64 = (unsigned __int64)dimItem.y<<32;
+			uiMul64 = (uint64)dimItem.y<<32;
 			idx64 = __umul64hi(uiVal64, uiMul64);
-			uiDiv64 = uiVal64 - idx64*(unsigned __int64)dimItem.x;
+			uiDiv64 = uiVal64 - idx64*(uint64)dimItem.x;
 			uiVal = __umulhi((unsigned int)uiDiv64, dimItem.y);
 			uiDiv = (unsigned int)uiDiv64 - uiVal * dimItem.x;
 			idx64 += uiVal;
@@ -243,7 +243,7 @@ __global__ void RTGenMD5Kernel(unsigned int chainStart, unsigned int chainStop) 
 		nPos = ((((blockIdx.y<<GRID_X_L2) + blockIdx.x)<<BLOCK_X_L2) + threadIdx.x) << 1;
 		for(ii = 0; ii < BLOCK_X_SIZE; ii++, nPos+=2) {
 			hData = shData + ((ii>>4)<<8)+(ii&15);
-			dataHeap[nPos] = ((unsigned __int64)hData[SHIDX(1)]<<32)|(unsigned __int64)hData[SHIDX(0)];
+			dataHeap[nPos] = ((uint64)hData[SHIDX(1)]<<32)|(uint64)hData[SHIDX(0)];
 			dataHeap[nPos+1] = hData[SHIDX(2)];
 		}
 	}
@@ -251,27 +251,27 @@ __global__ void RTGenMD5Kernel(unsigned int chainStart, unsigned int chainStop) 
 }
 
 
-extern "C" int CalcChainsOnCUDA(const rcuda::RCudaTask* task, unsigned __int64 *resultBuff) {
+extern "C" int CalcChainsOnCUDA(const rcuda::RCudaTask* task, uint64 *resultBuff) {
 	cudaError_t cuErr;
 	char buff[PLAIN_MAX_SIZE];
-	unsigned __int64 *data;
+	uint64 *data;
 	unsigned char *stPlain;
 	uint3 *dimVec;
 	unsigned char *charSet;
 	int *cpPos;
-	unsigned __int64 uiVal64;
+	uint64 uiVal64;
 	time_t tStart, tEnd;
 	if(task->hash != rcuda::RHASH_MD5)
 		return 0;
 
 	memset(buff, 0, PLAIN_MAX_SIZE);
-	cudaMalloc((void**)&data, task->idxCount*2*sizeof(unsigned __int64));
+	cudaMalloc((void**)&data, task->idxCount*2*sizeof(uint64));
 	cudaMalloc((void**)&stPlain, PLAIN_MAX_SIZE);
 	cudaMalloc((void**)&dimVec, task->dimVecSize*sizeof(uint3));
 	cudaMalloc((void**)&charSet, task->charSetSize);
 	cudaMalloc((void**)&cpPos, task->cpPosSize*sizeof(int));
 
-	cudaMemcpy(data, resultBuff, task->idxCount*2*sizeof(unsigned __int64), cudaMemcpyHostToDevice);
+	cudaMemcpy(data, resultBuff, task->idxCount*2*sizeof(uint64), cudaMemcpyHostToDevice);
 	cudaMemcpy(stPlain, buff, PLAIN_MAX_SIZE, cudaMemcpyHostToDevice);
 	cudaMemcpy(stPlain, task->stPlain, min(task->stPlainSize, PLAIN_MAX_SIZE), cudaMemcpyHostToDevice);
 	cudaMemcpy(dimVec, task->dimVec, task->dimVecSize*sizeof(uint3), cudaMemcpyHostToDevice);
@@ -286,7 +286,7 @@ extern "C" int CalcChainsOnCUDA(const rcuda::RCudaTask* task, unsigned __int64 *
 	cudaMemcpyToSymbol(plCpPosSize, &task->cpPosSize, sizeof(task->cpPosSize));
 	cudaMemcpyToSymbol(reduceOffset, &task->reduceOffset, sizeof(task->reduceOffset));
 	cudaMemcpyToSymbol(plainSpaceTotal, &task->plainSpaceTotal, sizeof(task->plainSpaceTotal));
-	uiVal64 = (unsigned __int64)-1/task->plainSpaceTotal;
+	uiVal64 = (uint64)-1/task->plainSpaceTotal;
 	cudaMemcpyToSymbol(rPlainSpaceTotal, &uiVal64, sizeof(uiVal64));
 
 	int grSizeX = (task->idxCount-1)/BLOCK_X_SIZE + 1;
@@ -306,7 +306,7 @@ extern "C" int CalcChainsOnCUDA(const rcuda::RCudaTask* task, unsigned __int64 *
 	fprintf(stderr, "Kernel run time: %i\n", (tEnd - tStart));
 
 	if(cuErr == cudaSuccess)
-		cudaMemcpy(resultBuff, data, task->idxCount*2*sizeof(unsigned __int64), cudaMemcpyDeviceToHost);
+		cudaMemcpy(resultBuff, data, task->idxCount*2*sizeof(uint64), cudaMemcpyDeviceToHost);
 	else
 		fprintf(stderr, "Error happened: %d (%s)\n", cuErr, cudaGetErrorString(cuErr));	
 

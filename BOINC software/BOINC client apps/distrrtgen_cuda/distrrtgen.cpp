@@ -74,7 +74,7 @@ double cpu_time = 20, comp_result;
 */
 int QuickSortPartition(RainbowChainCP* pChain, int nLow, int nHigh)
 {
-	int nRandomIndex = nLow + ((unsigned int)rand() * (RAND_MAX + 1) + (unsigned int)rand()) % (nHigh - nLow + 1);
+	int nRandomIndex = nLow + ((uint32)rand() * ((uint32)RAND_MAX + 1) + (uint32)rand()) % (nHigh - nLow + 1);
 	RainbowChainCP TempChain;
 	TempChain = pChain[nLow];
 	pChain[nLow] = pChain[nRandomIndex];
@@ -229,7 +229,7 @@ int main(int argc, char **argv) {
 	
 	// Round to boundary
 	nDataLen = nDataLen / 18 * 18;
-	if ((int)nDataLen == nRainbowChainCount * 18)
+	if (nDataLen == nRainbowChainCount * 18)
 	{		
 		std::cerr << "precomputation of this rainbow table already finished" << std::endl;
 		fclose(outfile);
@@ -253,7 +253,7 @@ int main(int argc, char **argv) {
 time_t tStart, tStartFinal, tEndFinal;
 time_t tEnd;
 	tStartFinal = time(NULL);
-	for(int nCurrentCalculatedChains = nDataLen / 18, calcSize; nCurrentCalculatedChains < nRainbowChainCount; )
+	for(uint32 nCurrentCalculatedChains = nDataLen / 18, calcSize; nCurrentCalculatedChains < nRainbowChainCount; )
 	{		
 		fd = (double)nCurrentCalculatedChains / (double)nRainbowChainCount;
 		boinc_fraction_done(fd);
@@ -272,7 +272,7 @@ time_t tEnd;
 		cuTask.reduceOffset = ex.GetReduceOffset();
 		cuTask.plainSpaceTotal = ex.GetPlainSpaceTotal();
 		cuTask.rainbowChainLen = nRainbowChainLen;
-		for(int ii = 0; ii < cuTask.idxCount; ii++) {
+		for(ii = 0; ii < cuTask.idxCount; ii++) {
 			calcBuff[2*ii] = cuTask.startIdx + ii;
 			calcBuff[2*ii+1] = 0;
 		}
@@ -321,7 +321,7 @@ time_t tEnd;
 	std::cout << "Sorting file" << std::endl;
 #endif
 		fseek(outfile, 0, SEEK_SET);
-		for(int i = 0; i < nRainbowChainCount; i++)
+		for(uint32 i = 0; i < nRainbowChainCount; i++)
 		{
 			if(fread(&pChain[i], 1, 16, outfile) != 16)
 			{
@@ -340,7 +340,7 @@ time_t tEnd;
 
 		// Write file
 		fseek(outfile, 0, SEEK_SET);
-		for(int i = 0; i < nRainbowChainCount; i++)
+		for(uint32 i = 0; i < nRainbowChainCount; i++)
 		{
 			fwrite(&pChain[i], 1, 16, outfile);
 			fwrite(&pChain[i].nCheckPoint, 2, 1, outfile);
