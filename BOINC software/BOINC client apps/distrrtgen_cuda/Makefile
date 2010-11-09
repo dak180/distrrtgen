@@ -36,10 +36,10 @@ OPTIMIZATION = -O3
 WARNALL = -Wextra -Wunused-macros -Wunsafe-loop-optimizations -Wundef -Woverlength-strings -Wdisabled-optimization -Wformat-extra-args -Wformat-security -Winline
 
 #    -static -static-libgcc
-CXXFLAGS = -Wall -ansi -c -DBOINC $(INCLUDES) $(OPTIMIZATION) $(DEBUG)
+CXXFLAGS = -Wall -static-libgcc -ansi -c -DBOINC $(INCLUDES) $(OPTIMIZATION) $(DEBUG)
 
 # -static-libgcc
-LFLAGS = -Wall -ansi $(INCLUDES) $(OPTIMIZATION) -L$(BOINC_API_DIR) \
+LFLAGS = -Wall -static-libgcc -ansi $(INCLUDES) $(OPTIMIZATION) -L$(BOINC_API_DIR) \
 	-L$(BOINC_LIB_DIR) -L/usr/X11R6/lib -L/usr/lib -L/usr/local/cuda/lib64 -L/usr/local/cuda/lib -L. $(DEBUG)
 
 LIBS = -lboinc_api -lboinc -lpthread -lssl -lcudart libstdc++.a $(COMMON_LIB_DIR)/libssl.a $(COMMON_LIB_DIR)/libpthread.a
@@ -66,9 +66,6 @@ debugall: all
 
 distclean:
 	/bin/rm -f distrrtgen *.o libstdc++.a
-
-m32: DEBUG += -m32
-m32: all
 
 rebuild: clean all
 
@@ -106,5 +103,5 @@ rcuda_ext.o: rcuda_ext.h rcuda_ext.cpp $(COMMON_API_PATH)/ChainWalkContext.h
 	$(CXX) $(CXXFLAGS) rcuda_ext.cpp
 
 rcuda.o: rcuda.h rcuda.cu $(COMMON_API_PATH)/Public.h $(COMMON_API_PATH)/global.h
-	/usr/local/cuda/bin/nvcc -I../../../Common/rt\ api --compile rcuda.cu
-#	/usr/local/cuda/bin/nvcc --machine 32 -I../../../Common/rt\ api --compile rcuda.cu
+	/usr/local/cuda/bin/nvcc $(DEBUG) -I../../../Common/rt\ api --compile rcuda.cu
+#	/usr/local/cuda/bin/nvcc -G $(DEBUG) --machine 32 -I../../../Common/rt\ api --compile rcuda.cu
