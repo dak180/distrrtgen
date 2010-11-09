@@ -223,21 +223,21 @@ int main(int argc, char **argv) {
 	unsigned int nFileLen;
 	
 	// Round to boundary
-	nDataLen = nDataLen / 18 * 18;
-	if (nDataLen == nRainbowChainCount * 18)
+	nDataLen = nDataLen / 10 * 10;
+	if ((int)nDataLen == nRainbowChainCount * 10)
 	{		
 		std::cerr << "precomputation of this rainbow table already finished" << std::endl;
 		fclose(outfile);
 		return 0;
 	}
-	nChainStart += (nDataLen / 18);
+	nChainStart += (nDataLen / 10);
 	fseek(outfile, nDataLen, SEEK_SET);
 	size_t nReturn;
 	CChainWalkContext cwc;
 	uint64 nIndex[2];
 	time_t tStart = time(NULL);
 //	std::cout << "Starting to generate chains" << std::endl;
-	for(uint32 nCurrentCalculatedChains = nDataLen / 18; nCurrentCalculatedChains < nRainbowChainCount; nCurrentCalculatedChains++)
+	for(uint32 nCurrentCalculatedChains = nDataLen / 10; nCurrentCalculatedChains < nRainbowChainCount; nCurrentCalculatedChains++)
 	{		
 		uint32 cpcheck = 0;
 		unsigned short checkpoint = 0;
@@ -265,7 +265,7 @@ int main(int argc, char **argv) {
 
 		nIndex[1] = cwc.GetIndex();
 		// Write chain to disk
-		if ((nReturn = fwrite(nIndex, 1, 16, outfile)) != 16)
+		if ((nReturn = fwrite(&nIndex[1], 1, 8, outfile)) != 8)
 		{
 			std::cerr << "disk write fail" << std::endl;
 			fclose(outfile);
@@ -280,7 +280,7 @@ int main(int argc, char **argv) {
 //		fflush(file);
 	}
 	//std::cout << "Generation completed" << std::endl;
-    fseek(outfile, 0, SEEK_SET);
+/*    fseek(outfile, 0, SEEK_SET);
 	nFileLen = GetFileLen(outfile);
 	nRainbowChainCount = nFileLen / 18;
 
@@ -305,18 +305,18 @@ int main(int argc, char **argv) {
 		}
 
 		// Sort file
-		QuickSort(pChain, 0, nRainbowChainCount - 1);
+		//QuickSort(pChain, 0, nRainbowChainCount - 1);
 
 		// Write file
 		fseek(outfile, 0, SEEK_SET);
 		for(uint32 i = 0; i < nRainbowChainCount; i++)
 		{
-			fwrite(&pChain[i], 1, 16, outfile);
+			fwrite(&pChain[i].nIndexE, 1, 8, outfile);
 			fwrite(&pChain[i].nCheckPoint, 2, 1, outfile);
 		}
 		delete[] pChain;
 	}
-
+*/
 	fclose(outfile);
     
 	// main loop - read characters, convert to UC, write
