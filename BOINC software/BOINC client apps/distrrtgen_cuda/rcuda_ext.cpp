@@ -1,7 +1,7 @@
 //============================================================================
 // Name        : rcuda_ext.cpp
 // Author      : Jan Kyska
-// Version     : 0.9
+// Version     : 1.00
 // Description : A code to access internals of the CChainWalkContext 
 //               for the CUDA generator of FreeRainbowTables
 //============================================================================ 
@@ -76,7 +76,8 @@ int CudaCWCExtender::IndexToStartPlain(const uint64 nIndex, std::vector<unsigned
 			stCharset &chs = CChainWalkContext::m_vCharset[jj];
 			nCharsetLen += chs.m_nPlainLenMax;
 			if(ii < nCharsetLen) { // We found the correct charset
-				stPlain.push_back(nIndexOfX % chs.m_nPlainCharsetLen + 1);
+				//XXX from md5 only cuda stPlain.push_back(nIndexOfX % chs.m_nPlainCharsetLen + 1);
+				stPlain.push_back((unsigned char)(nIndexOfX % (uint64)chs.m_nPlainCharsetLen + 1));
 				nIndexOfX /= chs.m_nPlainCharsetLen;
 			}
 		}

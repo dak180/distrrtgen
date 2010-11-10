@@ -72,6 +72,7 @@ bool early_crash = false;
 bool early_sleep = false;
 double cpu_time = 20, comp_result;
 */
+/*
 int QuickSortPartition(RainbowChainCP* pChain, int nLow, int nHigh)
 {
 	int nRandomIndex = nLow + ((uint32)rand() * ((uint32)RAND_MAX + 1) + (uint32)rand()) % (nHigh - nLow + 1);
@@ -104,7 +105,7 @@ void QuickSort(RainbowChainCP* pChain, int nLow, int nHigh)
 		QuickSort(pChain, nPivotLoc + 1, nHigh);
 	}
 }
-
+*/
 int main(int argc, char **argv) {    
     int retval;
     double fd;
@@ -115,16 +116,29 @@ int main(int argc, char **argv) {
         fprintf(stderr, "boinc_init returned %d\n", retval);
         exit(retval);
     }
-	
 
-    // get size of input file (used to compute fraction done)
-    //
-    //file_size(input_path, fsize);
-
-    // See if there's a valid checkpoint file.
-    // If so seek input file and truncate output file
-    //
-
+	// extract a --device option
+	std::vector<char*> argVec;
+	int cudaDevice = -1;
+	for(int ii = 0; ii < argc; ii++) {
+		if(cudaDevice < 0 && strcmp(argv[ii], "--device") == 0 && ii + 1 < argc)
+			cudaDevice = atoi(argv[++ii]);
+		else
+			argVec.push_back(argv[ii]);
+	}
+	argc = (int)argVec.size();
+	argv = &argVec[0];
+	if(!(cudaDevice < 0))
+		// set the cuda device
+		if(rcuda::SetCudaDevice(cudaDevice) != 0)
+		{
+			//XXX this call doesn't work on linux
+			// fixed in upstream source 2010-09-16
+			// http://bolt.berkeley.edu/trac/changeset/22382
+			#ifdef _WIN32
+				boinc_temporary_exit(60);
+			#endif
+		}
 
 	if(argc < 10)
 	{
@@ -210,9 +224,7 @@ int main(int argc, char **argv) {
 
 	
 	// Open file
-//	fclose(fopen(sFilename.c_str(), "a"));
-//	FILE* file = fopen(sFilename.c_str(), "r+b");
-    boinc_resolve_filename("result", output_path, sizeof(output_path));
+	boinc_resolve_filename("result", output_path, sizeof(output_path));
 	fclose(boinc_fopen(output_path, "a"));
 	FILE *outfile = boinc_fopen(output_path, "r+b");
 	
@@ -228,8 +240,8 @@ int main(int argc, char **argv) {
 	unsigned int nFileLen;
 	
 	// Round to boundary
-	nDataLen = nDataLen / 18 * 18;
-	if (nDataLen == nRainbowChainCount * 18)
+	nDataLen = nDataLen / 10 * 10;
+	if (nDataLen == nRainbowChainCount * 10)
 	{		
 		std::cerr << "precomputation of this rainbow table already finished" << std::endl;
 		fclose(outfile);
@@ -237,12 +249,14 @@ int main(int argc, char **argv) {
 	}
 
 	fseek(outfile, nDataLen, SEEK_SET);
+	//XXX size_t isn't 32/64 clean
 	size_t nReturn;
 	CChainWalkContext cwc;
 	uint64 nIndex[2];
+	time_t tStart = time(NULL);
 
 //	std::cout << "Starting to generate chains" << std::endl;
-	int maxCalcBuffSize = rcuda::GetChainsBufferSize(5000);
+	int maxCalcBuffSize = rcuda::GetChainsBufferSize(0x2000);
 	uint64 *calcBuff = new uint64[2*maxCalcBuffSize];
 	int ii;
 
@@ -250,10 +264,8 @@ int main(int argc, char **argv) {
 	rcuda::RCudaTask cuTask;
 	std::vector<unsigned char> stPlain;
 	ex.Init();
-time_t tStart, tStartFinal, tEndFinal;
-time_t tEnd;
-	tStartFinal = time(NULL);
-	for(uint32 nCurrentCalculatedChains = nDataLen / 18, calcSize; nCurrentCalculatedChains < nRainbowChainCount; )
+
+	for(int nCurrentCalculatedChains = nDataLen / 10, calcSize; nCurrentCalculatedChains < nRainbowChainCount; )
 	{		
 		fd = (double)nCurrentCalculatedChains / (double)nRainbowChainCount;
 		boinc_fraction_done(fd);
@@ -276,21 +288,16 @@ time_t tEnd;
 			calcBuff[2*ii] = cuTask.startIdx + ii;
 			calcBuff[2*ii+1] = 0;
 		}
-
-		tStart = time(NULL);
-
 		calcSize = rcuda::CalcChainsOnCUDA(&cuTask, calcBuff);
-		tEnd = time(NULL);
-		std::cerr << "CUDA time taken: " << tEnd - tStart << std::endl;
-		tStart = time(NULL);
+
 		if(calcSize > 0) {
 			nCurrentCalculatedChains += calcSize;
 			for(ii = 0; ii < cuTask.idxCount; ii++) {
 				nIndex[0] = cuTask.startIdx + ii;
-				nReturn = fwrite(nIndex, 1, 8, outfile);
-				nReturn += fwrite(calcBuff+(2*ii), 1, 8, outfile);
+//				nReturn = fwrite(nIndex, 1, 8, outfile);
+				nReturn = fwrite(calcBuff+(2*ii), 1, 8, outfile);
 				nReturn += fwrite(calcBuff+(2*ii+1), 1, 2, outfile);
-				if(nReturn != 18) {
+				if(nReturn != 10) {
 					std::cerr << "disk write fail" << std::endl;
 					fclose(outfile);
 					return 9;
@@ -302,12 +309,11 @@ time_t tEnd;
 			return 0;
 		}
 	}
-	tEndFinal = time(NULL);
-	std::cerr << "Time taken: " << tEndFinal - tStartFinal << " secs" << std::endl;
 	delete [] calcBuff;
 #ifdef _DEBUG
 	std::cout << "Generation completed" << std::endl;
 #endif
+/*
     fseek(outfile, 0, SEEK_SET);
 	nFileLen = GetFileLen(outfile);
 	nRainbowChainCount = nFileLen / 18;
@@ -347,7 +353,7 @@ time_t tEnd;
 		}
 		delete[] pChain;
 	}
-
+*/
 	fclose(outfile);
     
 	// main loop - read characters, convert to UC, write
@@ -368,6 +374,3 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR Args, int WinMode
     return main(argc, argv);
 }
 #endif
-
-const char *BOINC_RCSID_33ac47a071 = "$Id: upper_case.C 12135 2007-02-21 20:04:14Z davea $";
-

@@ -103,5 +103,5 @@ rcuda_ext.o: rcuda_ext.h rcuda_ext.cpp $(COMMON_API_PATH)/ChainWalkContext.h
 	$(CXX) $(CXXFLAGS) rcuda_ext.cpp
 
 rcuda.o: rcuda.h rcuda.cu $(COMMON_API_PATH)/Public.h $(COMMON_API_PATH)/global.h
-	/usr/local/cuda/bin/nvcc $(DEBUG) -I../../../Common/rt\ api --compile rcuda.cu
+	/usr/local/cuda/bin/nvcc $(OPTIMIZATION) $(DEBUG) -I../../../Common/rt\ api --compile rcuda.cu
 #	/usr/local/cuda/bin/nvcc -G $(DEBUG) --machine 32 -I../../../Common/rt\ api --compile rcuda.cu

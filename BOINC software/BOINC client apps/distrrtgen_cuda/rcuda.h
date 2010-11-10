@@ -24,8 +24,9 @@ struct RCudaTask {
 	unsigned int rainbowChainLen;
 };
 
-extern "C" int CalcChainsOnCUDA(const RCudaTask* task, uint64 *resultBuff);
+extern "C" int SetCudaDevice(int device);
 extern "C" int GetChainsBufferSize(int minSize);
+extern "C" int CalcChainsOnCUDA(const RCudaTask* task, uint64 *resultBuff);
 
 }
 
