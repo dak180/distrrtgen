@@ -224,7 +224,7 @@ int main(int argc, char **argv) {
 	
 	// Round to boundary
 	nDataLen = nDataLen / 10 * 10;
-	if ((int)nDataLen == nRainbowChainCount * 10)
+	if (nDataLen == nRainbowChainCount * 10)
 	{		
 		std::cerr << "precomputation of this rainbow table already finished" << std::endl;
 		fclose(outfile);
