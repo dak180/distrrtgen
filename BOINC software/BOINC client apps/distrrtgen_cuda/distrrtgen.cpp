@@ -56,12 +56,12 @@
 #include "filesys.h"
 #include "boinc_api.h"
 #include "Public.h"
-// Rainbowcrack code
-#include "ChainWalkContext.h"
 //typedef unsigned int uint32;
 //typedef unsigned __int64 uint64;
 #include "rcuda.h"
 #include "rcuda_ext.h"
+
+#define EXIT_CODE_TEMP_SLEEP -20
 
 
 using std::string;
@@ -137,6 +137,9 @@ int main(int argc, char **argv) {
 			// http://bolt.berkeley.edu/trac/changeset/22382
 			#ifdef _WIN32
 				boinc_temporary_exit(60);
+			#else
+				sleep(60);
+				exit(EXIT_CODE_TEMP_SLEEP);
 			#endif
 		}
 

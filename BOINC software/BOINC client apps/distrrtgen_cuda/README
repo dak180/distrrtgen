@@ -1,0 +1,10 @@
+Makefile is for a standalone build
+Makefile.linux_x86_64 is for a boinc build which needs these files:
+	charset.txt
+	distrrtgen_3.07_x86_64-pc-linux-gnu__cuda30
+	libcudart.so.3=libcudart_x86_64-pc-linux-gnu_3.07.so.3
+	libcudart.so.3=libcudart_x86_64-pc-linux-gnu_3.07.so.3.file_ref_info
+	libgcc_s.so.1=libgcc_s_x86_64-pc-linux-gnu_3.07.so.1
+	libgcc_s.so.1=libgcc_s_x86_64-pc-linux-gnu_3.07.so.1.file_ref_info
+	libstdc++.so.6=libstdc++_x86_64-pc-linux-gnu_3.07.so.6
+	libstdc++.so.6=libstdc++_x86_64-pc-linux-gnu_3.07.so.6.file_ref_info
