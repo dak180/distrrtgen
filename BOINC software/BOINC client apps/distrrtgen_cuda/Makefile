@@ -30,6 +30,8 @@ BOINC_LIB_DIR = $(BOINC_DIR)/lib
 CC = g++
 COMMON_LIB_DIR = /usr/lib
 CUDA_PATH = /usr/local/cuda
+CUDA_LIB = libcudart.so.2
+#CUDA_LIB = libcudart.so.3
 INCLUDES = -I../../../Common/rt\ api -I$(BOINC_DIR) -I$(BOINC_LIB_DIR) \
 	-I$(BOINC_API_DIR) -I$(CUDA_PATH)/include
 COMMON_API_PATH = ../../../Common/rt\ api
@@ -48,7 +50,7 @@ LFLAGS = -Wall -static-libgcc -ansi $(INCLUDES) $(OPTIMIZATION) \
 	-L$(CUDA_PATH)/lib64 -L$(CUDA_PATH)/lib -L. -Xlinker -rpath . \
 	$(DEBUG)
 
-LIBS = -lboinc_api -lboinc -lpthread -lcudart libcudart.so.3 libgcc_s.so.1 \
+LIBS = -lboinc_api -lboinc -lpthread -lcudart $(CUDA_LIB) libgcc_s.so.1 \
 	libstdc++.so.6 $(COMMON_LIB_DIR)/libpthread.a
 OBJS = ChainWalkContext.o des_enc.o des_setkey.o distrrtgen.o ecb_enc.o \
 	HashAlgorithm.o HashRoutine.o md4.o md5.o Public.o rcuda_ext.o rcuda.o
@@ -57,11 +59,11 @@ OSNAME = $(shell uname -s)
 
 all: distrrtgen
 
-distrrtgen: libcudart.so.3 libgcc_s.so.1 libstdc++.so.6 $(BOINC_API_DIR)/libboinc_api.a $(BOINC_LIB_DIR)/libboinc.a $(OBJS)
+distrrtgen: $(CUDA_LIB) libgcc_s.so.1 libstdc++.so.6 $(BOINC_API_DIR)/libboinc_api.a $(BOINC_LIB_DIR)/libboinc.a $(OBJS)
 	$(CXX) $(LFLAGS) $(OBJS) $(LIBS) -o distrrtgen
 
-libcudart.so.3:
-	ln -s $(CUDA_PATH)/lib64/libcudart.so.3 libcudart.so.3
+$(CUDA_LIB):
+	ln -s $(CUDA_PATH)/lib64/$(CUDA_LIB) $(CUDA_LIB)
 
 libstdc++.so.6:
 	ln -s `$(CC) $(CXXFLAGS) -print-file-name=libstdc++.so.6`
@@ -79,7 +81,7 @@ debugall: DEBUG += -DDEBUG -g $(WARNALL)
 debugall: all
 
 distclean:
-	/bin/rm -f distrrtgen *.o libcudart.so.3 libgcc_s.so.1 libstdc++.so.6
+	/bin/rm -f distrrtgen *.o $(CUDA_LIB) libgcc_s.so.1 libstdc++.so.6
 
 rebuild: clean all
 

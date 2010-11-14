@@ -29,11 +29,18 @@ BOINC_API_DIR = $(BOINC_DIR)/api
 BOINC_LIB_DIR = $(BOINC_DIR)/lib
 CC = g++
 COMMON_LIB_DIR = /usr/lib
+# ending for libcudart
+CUDA_LIB = so.2
+#CUDA_LIB = so.3
 CUDA_PATH = /usr/local/cuda
+CUDA_VERSION = cuda__23
+#CUDA_VERSION = cuda__30
+#CUDA_VERSION = cuda__32
+PLATFORM = x86_64-pc-linux-gnu
+VERSION = 3.10
 INCLUDES = -I../../../Common/rt\ api -I$(BOINC_DIR) -I$(BOINC_LIB_DIR) \
 	-I$(BOINC_API_DIR) -I$(CUDA_PATH)/include
 COMMON_API_PATH = ../../../Common/rt\ api
-VERSION = 3.07
 
 OPTIMIZATION = -O3
 WARNALL = -Wextra -Wunused-macros -Wunsafe-loop-optimizations -Wundef \
@@ -49,9 +56,9 @@ LFLAGS = -Wall -static-libgcc -ansi $(INCLUDES) $(OPTIMIZATION) \
 	-L$(CUDA_PATH)/lib64 -L$(CUDA_PATH)/lib -L. -Xlinker -rpath . $(DEBUG)
 
 LIBS = -lboinc_api -lboinc -lpthread -lcudart \
-	libcudart.so.3=libcudart_x86_64-pc-linux-gnu_$(VERSION).so.3 \
-	libgcc_s.so.1=libgcc_s_x86_64-pc-linux-gnu_$(VERSION).so.1 \
-	libstdc++.so.6=libstdc++_x86_64-pc-linux-gnu_$(VERSION).so.6 \
+	libcudart.$(CUDA_LIB)=libcudart_$(VERSION)_$(PLATFORM)_$(CUDA_VERSION).$(CUDA_LIB) \
+	libgcc_s.so.1=libgcc_s_$(VERSION)_$(PLATFORM)_$(CUDA_VERSION).so.1 \
+	libstdc++.so.6=libstdc++_$(VERSION)_$(PLATFORM)_$(CUDA_VERSION).so.6 \
 	$(COMMON_LIB_DIR)/libpthread.a
 OBJS = ChainWalkContext.o des_enc.o des_setkey.o distrrtgen.o ecb_enc.o \
 	HashAlgorithm.o HashRoutine.o md4.o md5.o Public.o rcuda_ext.o rcuda.o
@@ -60,25 +67,25 @@ OSNAME = $(shell uname -s)
 
 all: distrrtgen
 
-distrrtgen: libcudart_x86_64-pc-linux-gnu.so.3 \
-	libgcc_s_x86_64-pc-linux-gnu.so.1 libstdc++_x86_64-pc-linux-gnu.so.6 \
+distrrtgen: libcudart_$(PLATFORM).$(CUDA_LIB) \
+	libgcc_s_$(PLATFORM).so.1 libstdc++_$(PLATFORM).so.6 \
 	$(BOINC_API_DIR)/libboinc_api.a $(BOINC_LIB_DIR)/libboinc.a $(OBJS)
 	$(CXX) $(LFLAGS) $(OBJS) $(LIBS) -o distrrtgen
 
-libcudart_x86_64-pc-linux-gnu.so.3:
-	ln -s $(CUDA_PATH)/lib64/libcudart.so.3 \
-		libcudart.so.3=libcudart_x86_64-pc-linux-gnu_$(VERSION).so.3
-	echo -n "<copy_file/>" > libcudart.so.3=libcudart_x86_64-pc-linux-gnu_$(VERSION).so.3.file_ref_info
+libcudart_$(PLATFORM).$(CUDA_LIB):
+	ln -s $(CUDA_PATH)/lib64/libcudart.$(CUDA_LIB) \
+		libcudart.$(CUDA_LIB)=libcudart_$(VERSION)_$(PLATFORM)_$(CUDA_VERSION).$(CUDA_LIB)
+	echo -n "<copy_file/>" > libcudart.$(CUDA_LIB)=libcudart_$(VERSION)_$(PLATFORM)_$(CUDA_VERSION).$(CUDA_LIB).file_ref_info
 
-libstdc++_x86_64-pc-linux-gnu.so.6:
+libstdc++_$(PLATFORM).so.6:
 	ln -s `$(CC) $(CXXFLAGS) -print-file-name=libstdc++.so.6` \
-		libstdc++.so.6=libstdc++_x86_64-pc-linux-gnu_$(VERSION).so.6
-	echo -n "<copy_file/>" > libstdc++.so.6=libstdc++_x86_64-pc-linux-gnu_$(VERSION).so.6.file_ref_info
+		libstdc++.so.6=libstdc++_$(VERSION)_$(PLATFORM)_$(CUDA_VERSION).so.6
+	echo -n "<copy_file/>" > libstdc++.so.6=libstdc++_$(VERSION)_$(PLATFORM)_$(CUDA_VERSION).so.6.file_ref_info
 
-libgcc_s_x86_64-pc-linux-gnu.so.1:
+libgcc_s_$(PLATFORM).so.1:
 	ln -s `$(CC) $(CXXFLAGS) -print-file-name=libgcc_s.so.1` \
-		libgcc_s.so.1=libgcc_s_x86_64-pc-linux-gnu_$(VERSION).so.1
-	echo -n "<copy_file/>" > libgcc_s.so.1=libgcc_s_x86_64-pc-linux-gnu_$(VERSION).so.1.file_ref_info
+		libgcc_s.so.1=libgcc_s_$(VERSION)_$(PLATFORM)_$(CUDA_VERSION).so.1
+	echo -n "<copy_file/>" > libgcc_s.so.1=libgcc_s_$(VERSION)_$(PLATFORM)_$(CUDA_VERSION).so.1.file_ref_info
 
 clean:
 	/bin/rm -f distrrtgen *.o
@@ -91,12 +98,12 @@ debugall: all
 
 distclean:
 	/bin/rm -f distrrtgen *.o \
-		libgcc_s.so.1=libgcc_s_x86_64-pc-linux-gnu_$(VERSION).so.1 \
-		libstdc++.so.6=libstdc++_x86_64-pc-linux-gnu_$(VERSION).so.6 \
-		libcudart.so.3=libcudart_x86_64-pc-linux-gnu_$(VERSION).so.3 \
-		libgcc_s.so.1=libgcc_s_x86_64-pc-linux-gnu_$(VERSION).so.1.file_ref_info \
-		libstdc++.so.6=libstdc++_x86_64-pc-linux-gnu_$(VERSION).so.6.file_ref_info \
-		libcudart.so.3=libcudart_x86_64-pc-linux-gnu_$(VERSION).so.3.file_ref_info
+		libgcc_s.so.1=libgcc_s_$(VERSION)_$(PLATFORM)_$(CUDA_VERSION).so.1 \
+		libstdc++.so.6=libstdc++_$(VERSION)_$(PLATFORM)_$(CUDA_VERSION).so.6 \
+		libcudart.$(CUDA_LIB)=libcudart_$(VERSION)_$(PLATFORM)_$(CUDA_VERSION).$(CUDA_LIB) \
+		libgcc_s.so.1=libgcc_s_$(VERSION)_$(PLATFORM)_$(CUDA_VERSION).so.1.file_ref_info \
+		libstdc++.so.6=libstdc++_$(VERSION)_$(PLATFORM)_$(CUDA_VERSION).so.6.file_ref_info \
+		libcudart.$(CUDA_LIB)=libcudart_$(VERSION)_$(PLATFORM)_$(CUDA_VERSION).$(CUDA_LIB).file_ref_info
 
 rebuild: clean all
 

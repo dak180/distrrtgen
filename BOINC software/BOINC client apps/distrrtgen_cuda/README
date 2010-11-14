@@ -1,10 +1,31 @@
 Makefile is for a standalone build
-Makefile.linux_x86_64 is for a boinc build which needs these files:
-	charset.txt
-	distrrtgen_3.07_x86_64-pc-linux-gnu__cuda30
-	libcudart.so.3=libcudart_x86_64-pc-linux-gnu_3.07.so.3
-	libcudart.so.3=libcudart_x86_64-pc-linux-gnu_3.07.so.3.file_ref_info
-	libgcc_s.so.1=libgcc_s_x86_64-pc-linux-gnu_3.07.so.1
-	libgcc_s.so.1=libgcc_s_x86_64-pc-linux-gnu_3.07.so.1.file_ref_info
-	libstdc++.so.6=libstdc++_x86_64-pc-linux-gnu_3.07.so.6
-	libstdc++.so.6=libstdc++_x86_64-pc-linux-gnu_3.07.so.6.file_ref_info
+	edit the following as necessary:
+		BOINC_DIR
+		CUDA_LIB
+		CUDA_PATH
+Makefile.linux_x86_64 is for a boinc build
+	edit the following as necessary:
+		BOINC_DIR
+		CUDA_LIB
+		CUDA_PATH
+		CUDA_VERSION
+		VERSION (arbitrary boinc version number)
+
+	include these files for the bonic client:
+		charset.txt
+		distrrtgen_$(VERSION)_x86_64-pc-linux-gnu__$(CUDA_VERSION)
+		libcudart.so.3=libcudart_$(VERSION)_x86_64-pc-linux-gnu__$(CUDA_VERSION).so.3
+		libcudart.so.3=libcudart_$(VERSION)_x86_64-pc-linux-gnu__$(CUDA_VERSION).so.3.file_ref_info
+		libgcc_s.so.1=libgcc_s_$(VERSION)_x86_64-pc-linux-gnu__$(CUDA_VERSION).so.1
+		libgcc_s.so.1=libgcc_s_$(VERSION)_x86_64-pc-linux-gnu__$(CUDA_VERSION).so.1.file_ref_info
+		libstdc++.so.6=libstdc++_$(VERSION)_x86_64-pc-linux-gnu__$(CUDA_VERSION).so.6
+		libstdc++.so.6=libstdc++_$(VERSION)_x86_64-pc-linux-gnu__$(CUDA_VERSION).so.6.file_ref_info
+
+Makefile.linux_i686
+	follow the above instructions and modify them as necessary
+	you *must* build on a 32-bit host short of a lot of trickery of the boinc
+		libs
+
+Cuda 2.3 tookit requires a driver version of at least 190.38
+Cuda 3.0 toolkit requires a driver version of at least 195.00
+Cuda 3.2 toolkit requires a driver version of at least 260.61
