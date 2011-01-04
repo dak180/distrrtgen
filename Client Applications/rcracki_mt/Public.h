@@ -109,6 +109,7 @@ void tty_done();
 void tty_init();
 void tty_flush(void);
 // end nmap code
+
 #endif
 
 #if defined(_WIN32) && !defined(__GNUC__)
