@@ -24,12 +24,22 @@
 SHELL = /bin/sh
 
 #BOINC_DIR = /home/ubuntu/boinc
+# Debian
 BOINC_DIR = /usr/share/boinc-dev
+# FreeBSD
+#BOINC_DIR = /usr/local/lib
+# Linux
 BOINC_API_DIR = $(BOINC_DIR)/api
+# FreeBSD
+#BOINC_API_DIR = /usr/local/lib
+# Linux
 BOINC_LIB_DIR = $(BOINC_DIR)/lib
+# FreeBSD
+#BOINC_LIB_DIR = $(BOINC_DIR)
+#BOINC_INC_DIR = /usr/local/include/boinc
 CC = g++
 COMMON_LIB_DIR = /usr/lib
-INCLUDES = -I../../../Common/rt\ api -I$(BOINC_DIR) -I$(BOINC_LIB_DIR) -I$(BOINC_API_DIR) 
+INCLUDES = -I../../../Common/rt\ api -I$(BOINC_DIR) -I$(BOINC_LIB_DIR) -I$(BOINC_API_DIR) -I$(BOINC_INC_DIR)
 COMMON_API_PATH = ../../../Common/rt\ api
 
 OPTIMIZATION = -O3
@@ -61,6 +71,9 @@ libstdc++.a:
 
 clean:
 	/bin/rm -f distrrtgen *.o
+
+debug: DEBUG += -DDEBUG -g
+debug: all
 
 distclean:
 	/bin/rm -f distrrtgen *.o libstdc++.a

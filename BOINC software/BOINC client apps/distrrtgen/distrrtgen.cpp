@@ -103,8 +103,8 @@ void QuickSort(RainbowChainCP* pChain, int nLow, int nHigh)
 int main(int argc, char **argv) {    
     int retval;
     double fd;
-    char output_path[512], chkpt_path[512];
-    FILE* state;	
+    char output_path[512]; //, chkpt_path[512];
+    //FILE* state;	
     retval = boinc_init();
     if (retval) {
         fprintf(stderr, "boinc_init returned %d\n", retval);
@@ -220,7 +220,7 @@ int main(int argc, char **argv) {
 	
 	// Check existing chains
 	unsigned int nDataLen = (unsigned int)GetFileLen(outfile);
-	unsigned int nFileLen;
+	//unsigned int nFileLen;
 	
 	// Round to boundary
 	nDataLen = nDataLen / 10 * 10;
@@ -235,7 +235,7 @@ int main(int argc, char **argv) {
 	size_t nReturn;
 	CChainWalkContext cwc;
 	uint64 nIndex[2];
-	time_t tStart = time(NULL);
+	//time_t tStart = time(NULL);
 //	std::cout << "Starting to generate chains" << std::endl;
 	for(uint32 nCurrentCalculatedChains = nDataLen / 10; nCurrentCalculatedChains < nRainbowChainCount; nCurrentCalculatedChains++)
 	{		
