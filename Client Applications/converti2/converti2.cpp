@@ -317,7 +317,7 @@ void ConvertRainbowTable(string sPathName, string sResultFileName, unsigned int 
 
 		int size = reader->GetChainsLeft() * sizeof(RainbowChain);
 			static CMemoryPool mp;
-			unsigned int nAllocatedSize;
+			uint64 nAllocatedSize;
 			RainbowChain* pChain = (RainbowChain*)mp.Allocate(size, nAllocatedSize);			
 			uint32 chainrowsize = (uint32)ceil((float)(rti_startptlength + rti_endptlength + rti_cplength) / 8) * 8 ; // The size in bits (in whole bytes)
 			unsigned int chainrowsizebytes = chainrowsize / 8;
@@ -403,7 +403,7 @@ void ConvertRainbowTable(string sPathName, string sResultFileName, unsigned int 
 				indexes.push_back(index);
 
 				IndexRow high = {0}; // Used to find the highest numbers. This tells us how much we can pack the index bits
-				for(UINT4 i = 0; i < indexes.size(); i++)
+				for(uint32 i = 0; i < indexes.size(); i++)
 				{
 					if(indexes[i].numchains > high.numchains)
 						high.numchains = indexes[i].numchains;
@@ -427,14 +427,14 @@ void ConvertRainbowTable(string sPathName, string sResultFileName, unsigned int 
 //					fwrite(&m_rti_index_indexlength , 1, 1, pFileIndex);
 
 				fwrite(&m_rti_index_numchainslength, 1, 1, pFileIndex);
-				for(UINT4 i = 0; i < rti_cppos.size(); i++)	{
+				for(uint32 i = 0; i < rti_cppos.size(); i++)	{
 					fwrite(&rti_cppos[i], 1, 4, pFileIndex); // The position of the checkpoints
 				}
 //					fwrite(&m_rti_index_prefixlength, 1, 1, pFileIndex);
 				int zero = 0;
 				fwrite(&indexes[0].prefix, 1, 8, pFileIndex); // Write the first prefix
 				unsigned int lastPrefix = 0;
-				for(UINT4 i = 0; i < indexes.size(); i++)	{
+				for(uint32 i = 0; i < indexes.size(); i++)	{
 					if(i == 0) {
 						lastPrefix = indexes[0].prefix;
 					}
@@ -457,7 +457,7 @@ void ConvertRainbowTable(string sPathName, string sResultFileName, unsigned int 
 								exit(1);
 							}
 						}
-						for(UINT4 j = 1; j < diffSize; j++)
+						for(uint32 j = 1; j < diffSize; j++)
 						{								
 							fwrite(&zero, 1, m_indexrowsizebytes, pFileIndex);
 						}
@@ -589,7 +589,7 @@ int main(int argc, char* argv[])
 		printf("no rainbow table found\n");
 		return 0;
 	}
-	for (UINT4 i = 0; i < vPathName.size(); i++) {
+	for (uint32 i = 0; i < vPathName.size(); i++) {
 		string sResultFile;
 		int n = vPathName[i].find_last_of('\\');
 		if (n != -1) {

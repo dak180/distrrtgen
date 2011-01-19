@@ -32,7 +32,7 @@ CMemoryPool::CMemoryPool()
 	m_pMem = NULL;
 	m_nMemSize = 0;
 
-	unsigned int nAvailPhys = GetAvailPhysMemorySize();
+	unsigned long nAvailPhys = GetAvailPhysMemorySize();
 	if (nAvailPhys < 16 * 1024 * 1024)
 	{
 		nAvailPhys = 512 * 1024 * 1024; // There is atleast 256 mb available (Some Linux distros returns a really low GetAvailPhysMemorySize()
@@ -45,7 +45,8 @@ CMemoryPool::CMemoryPool()
 
 CMemoryPool::~CMemoryPool()
 {
-	if (m_pMem != NULL)	{
+	if (m_pMem != NULL)
+	{
 #ifdef _MEMORYDEBUG
 		printf("Freeing %i bytes of memory\n", m_nMemSize);
 #endif 
@@ -55,22 +56,23 @@ CMemoryPool::~CMemoryPool()
 	}
 }
 
-unsigned char* CMemoryPool::Allocate(unsigned int nFileLen, unsigned int& nAllocatedSize)
+unsigned char* CMemoryPool::Allocate(unsigned int nFileLen, uint64& nAllocatedSize)
 {
-	if (nFileLen <= m_nMemSize)	{
+	if (nFileLen <= m_nMemSize)
+	{
 		nAllocatedSize = nFileLen;
 		return m_pMem;
 	}
 
 	unsigned int nTargetSize;
-	if (nFileLen < m_nMemMax) {
+	if (nFileLen < m_nMemMax)
 		nTargetSize = nFileLen;
-	}
-	else {
+	else
 		nTargetSize = m_nMemMax;
-	}
+
 	// Free existing memory
-	if (m_pMem != NULL)	{
+	if (m_pMem != NULL)
+	{
 #ifdef _MEMORYDEBUG
 		printf("Freeing %i bytes of memory\n", m_nMemSize);
 #endif 
@@ -81,21 +83,23 @@ unsigned char* CMemoryPool::Allocate(unsigned int nFileLen, unsigned int& nAlloc
 
 	// Allocate new memory
 	//printf("allocating %u bytes memory\n", nTargetSize);
-	//	m_pMem = new unsigned char[nTargetSize];
 #ifdef _MEMORYDEBUG
 		printf("Allocating %i bytes of memory - ", nTargetSize);
 #endif 
 
 	m_pMem = new (nothrow) unsigned char[nTargetSize];
-	while (m_pMem == NULL && nTargetSize >= 512 * 1024 * 1024 )	{
+	while (m_pMem == NULL && nTargetSize >= 512 * 1024 * 1024 )
+	{
 #ifdef _MEMORYDEBUG
 		printf("failed!\n");
 		printf("Allocating %i bytes of memory (backup) - ", nTargetSize);
 #endif 
-	   nTargetSize -= 16 * 1024 * 1024;
-	   m_pMem = new (nothrow) unsigned char[nTargetSize];
+		nTargetSize -= 16 * 1024 * 1024;
+		m_pMem = new (nothrow) unsigned char[nTargetSize];
 	}
-	if (m_pMem != NULL)	{
+
+	if (m_pMem != NULL)
+	{
 #ifdef _MEMORYDEBUG
 		printf("success!\n");
 #endif
@@ -103,7 +107,9 @@ unsigned char* CMemoryPool::Allocate(unsigned int nFileLen, unsigned int& nAlloc
 		nAllocatedSize = nTargetSize;
 		return m_pMem;
 	}
-	else {
+	else
+	{
+		m_nMemSize = 0;
 		nAllocatedSize = 0;
 		return NULL;
 	}

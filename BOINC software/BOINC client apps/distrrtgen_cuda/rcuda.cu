@@ -160,6 +160,7 @@ extern "C" int CalcChainsOnCUDA(const rcuda::RCudaTask* task, uint64 *resultBuff
 	cuErr = cudaSuccess;
 	
 	cudaSetDeviceFlags(cudaDeviceBlockingSync);
+
 	for(int idx = 0; idx < task->rainbowChainLen-1 && cuErr == cudaSuccess; idx+=KERN_CHAIN_SIZE) {
 		switch(task->hash) {
 		case rcuda::RHASH_MD5:

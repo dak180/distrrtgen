@@ -25,7 +25,7 @@
  */
 
 #if defined(_WIN32) && !defined(__GNUC__)
-	#pragma warning(disable : 4786 4267 4018)
+	#pragma warning(disable : 4786)
 #endif
 
 #include "ChainWalkContext.h"
