@@ -51,8 +51,8 @@ public:
 	static bool isRti2RtFormat;
 	static vector<stCharset> m_vCharset;
 	static int m_nPlainLenMinTotal, m_nPlainLenMaxTotal;
-	static uint64 m_nPlainSpaceTotal;							// Performance consideration
 	static uint64 m_nPlainSpaceUpToX[MAX_PLAIN_LEN + 1];		// Performance consideration
+	static uint64 m_nPlainSpaceTotal;							// Performance consideration
 	static int m_nHybridCharset;
 	static int m_nRainbowTableIndex;							// Configuration
 	static uint64 m_nReduceOffset;								// Performance consideration
@@ -96,7 +96,6 @@ public:
 	const uint64* GetIndexPtr();
 	string GetPlain();
 	string GetBinary();
-//	string GetPlainBinary();
 	string GetHash();
 	bool CheckHash(unsigned char* pHash);	// The length should be m_nHashLen
 };

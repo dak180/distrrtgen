@@ -410,8 +410,12 @@ void CChainWalkContext::Dump()
 	printf("hash routine: %s\n", m_sHashRoutineName.c_str());
 	printf("hash length: %d\n", m_nHashLen);
 
+	printf( "m_vCharset[0].m_nPlainCharSetLen: %d\n", m_vCharset[0].m_nPlainCharsetLen );
+	printf( "m_vCharset[1].m_nPlainCharSetLen: %d\n", m_vCharset[1].m_nPlainCharsetLen );
+
 	printf("plain charset: ");
 	unsigned int i;
+	
 	for (i = 0; i < m_vCharset[0].m_nPlainCharsetLen; i++)
 	{
 		if (isprint(m_vCharset[0].m_PlainCharset[i]))
@@ -548,15 +552,11 @@ void CChainWalkContext::IndexToPlain()
 		}
 		m_Plain[i] = m_vCharset[j].m_PlainCharset[nTemp];
 #else
-		__asm__ __volatile__ (	"mov %2, %%eax;"
-								"xor %%edx, %%edx;"
+		__asm__ __volatile__ ("xor %%edx, %%edx;"
 								"divl %3;"
-								"mov %%eax, %0;"
-								"mov %%edx, %1;"
-								: "=m"(nIndexOfX32), "=m"(nTemp)
-								: "m"(nIndexOfX32), "m"(m_vCharset[j].m_nPlainCharsetLen)
-								: "%eax", "%edx"
-							 );
+								: "=a"(nIndexOfX32), "=d"(nTemp)
+								: "a"(nIndexOfX32), "rm"(m_vCharset[j].m_nPlainCharsetLen)
+								: );
 		m_Plain[i] = m_vCharset[j].m_PlainCharset[nTemp];
 #endif
 		break;
@@ -605,24 +605,7 @@ string CChainWalkContext::GetBinary()
 {
 	return HexToStr(m_Plain, m_nPlainLen);
 }
-/*
-string CChainWalkContext::GetPlainBinary()
-{
-	string sRet;
-	sRet += GetPlain();
-	int i;
-	for (i = 0; i < m_nPlainLenMax - m_nPlainLen; i++)
-		sRet += ' ';
 
-	sRet += "|";
-
-	sRet += GetBinary();
-	for (i = 0; i < m_nPlainLenMax - m_nPlainLen; i++)
-		sRet += "  ";
-
-	return sRet;
-}
-*/
 string CChainWalkContext::GetHash()
 {
 	return HexToStr(m_Hash, m_nHashLen);

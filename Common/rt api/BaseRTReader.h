@@ -37,8 +37,8 @@ using namespace std;
 class BaseRTReader
 {
 public:
-	virtual int ReadChains(UINT4 &numChains, RainbowChain *pData) = 0;
-	virtual UINT4 GetChainsLeft() = 0;
+	virtual int ReadChains(uint32 &numChains, RainbowChainO *pData) = 0;
+	virtual uint32 GetChainsLeft() = 0;
 	
 	virtual ~BaseRTReader()  { };
 };
