@@ -82,6 +82,11 @@ void RTWrite::writeChain(RTChain *chain)
 		perror("temp.rt");
 		exit(1);
 	}	
+	if (fwrite((void*)&chain->checkpoint, 2, 1, m_pFile) != 1)
+	{
+		perror("temp.rt");
+		exit(1);
+	}
 	m_curFileChains++;
 	if (m_curFileChains >= m_chainsPerFile)
 	{
