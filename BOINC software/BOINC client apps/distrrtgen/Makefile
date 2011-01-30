@@ -76,7 +76,8 @@ debug: DEBUG += -DDEBUG -g
 debug: all
 
 distclean:
-	/bin/rm -f distrrtgen *.o libstdc++.a
+	/bin/rm -f distrrtgen *.o libstdc++.a stderr.txt boinc_lockfile result \
+		init_data.xml boinc_finish_called
 
 rebuild: clean all
 
