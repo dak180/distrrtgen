@@ -41,7 +41,7 @@ private:
 public:
 	RTReader(string Filename);
 	~RTReader(void);
-	int ReadChains(unsigned int &numChains, RainbowChain *pData);
+	int ReadChains(uint32 &numChains, RainbowChain *pData);
 	unsigned int GetChainsLeft();
 
 };

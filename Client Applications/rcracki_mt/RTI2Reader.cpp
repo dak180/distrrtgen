@@ -71,7 +71,7 @@ RTI2Reader::RTI2Reader(string Filename)
 	fseek(m_pFile, 0, SEEK_SET);
 	if(len % m_chainsizebytes > 0)
 	{
-		printf("Invalid filesize %ld\n", len);
+		printf("Invalid filesize %lu\n", len);
 		return;
 	}
 	

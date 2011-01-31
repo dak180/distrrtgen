@@ -97,7 +97,7 @@ void ConvertRainbowTable(string sPathName, string sResultFileName, string sType)
 		return;
 	}
 	static CMemoryPool mp;
-	unsigned int nAllocatedSize;
+	uint64 nAllocatedSize;
 	BaseRTReader *reader = NULL;
 	if(sType == "RTI2")
 		reader = (BaseRTReader*)new RTI2Reader(sFileName);
@@ -108,7 +108,7 @@ void ConvertRainbowTable(string sPathName, string sResultFileName, string sType)
 		printf("Invalid table type '%s'", sType.c_str());
 		return ;
 	}
-	int size = reader->GetChainsLeft() * sizeof(RainbowChain);
+	uint64 size = reader->GetChainsLeft() * sizeof(RainbowChain);
 #ifdef _MEMORYDEBUG
 	printf("Starting allocation of %i bytes\n", size);
 #endif

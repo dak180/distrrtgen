@@ -36,7 +36,6 @@
 
 using namespace std;
 
-
 struct RainbowChainO
 {
 	uint64 nIndexS;
@@ -114,9 +113,7 @@ void tty_flush(void);
 
 #if defined(_WIN32) && !defined(__GNUC__)
 	int gettimeofday( struct timeval *tv, struct timezone *tz );
-#endif
-
-#if !defined(_WIN32) || defined(__GNUC__)
+#else
 	#include <sys/time.h>
 #endif
 

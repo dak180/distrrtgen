@@ -38,12 +38,12 @@ public:
 private:
 	bool debug;
 	unsigned char* m_pMem;
-	unsigned int m_nMemSize;
+	uint64 m_nMemSize;
 
-	unsigned int m_nMemMax;
+	uint64 m_nMemMax;
 
 public:
-	unsigned char* Allocate(unsigned int nFileLen, unsigned int& nAllocatedSize);
+	unsigned char* Allocate(unsigned int nFileLen, uint64& nAllocatedSize);
 };
 
 #endif
