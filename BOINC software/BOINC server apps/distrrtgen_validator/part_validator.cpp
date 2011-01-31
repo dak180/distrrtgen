@@ -47,7 +47,7 @@ int read_file_binary(const char *path, RainbowPartFile *data, int &isize)
     if (!f) return ERR_FOPEN;
     isize = (int) size;
         log_messages.printf(MSG_DEBUG,
-                    "malloc %i bytes. size: %i\n",
+                    "malloc %lu bytes. size: %lu\n",
                     (isize / 18 * sizeof(RainbowPartFile)), sizeof(RainbowPartFile)
                 );	     
     data->pChain = (RainbowChainCP*)malloc(isize / 18 * sizeof(RainbowChainCP));
@@ -108,10 +108,6 @@ int cleanup_result(RESULT const& /*result*/, void *data) {
 	delete ((RainbowPartFile*)data);
     }
     return 0;
-}
-
-double compute_granted_credit(WORKUNIT& wu, vector<RESULT>& results) {
-    return median_mean_credit(wu, results);
 }
 
 const char *BOINC_RCSID_7ab2b7189c = "$Id: sample_bitwise_validator.cpp 16069 2008-09-26 18:20:24Z davea $";

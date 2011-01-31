@@ -7,6 +7,7 @@
  * Copyright 2009, 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
  * Copyright 2009, 2010, 2011 James Nobis <frt@quelrod.net>
  * Copyright 2010 Yngve AAdlandsvik
+ * Copyright 2008, 2009, 2010, 2011 Steve Thomas (Sc00bz)
  *
  * This file is part of freerainbowtables.
  *
@@ -233,14 +234,14 @@ bool CChainWalkContext::SetPlainCharset(string sCharsetName, int nPlainLenMin, i
 	m_nPlainLenMinTotal = 0;
 	uint64 nTemp = 1;
 	uint32 j, k = 1;
-	int i;
+	int i = 1;
 	for(j = 0; j < m_vCharset.size(); j++)
 	{
 		m_nPlainLenMaxTotal += m_vCharset[j].m_nPlainLenMax;
 		m_nPlainLenMinTotal += m_vCharset[j].m_nPlainLenMin;
 		m_vCharset[j].m_nPlainSpaceUpToX[0] = 0;
 		uint64 nTemp2 = 1;
-
+			
 		// XXX assumes each sub keyspace starts at length 1
 		for (i = 1; i <= m_vCharset[j].m_nPlainLenMax; i++)
 		{			
@@ -260,10 +261,11 @@ bool CChainWalkContext::SetPlainCharset(string sCharsetName, int nPlainLenMin, i
 
 			k++;
 		}
+
+		m_vCharset[j].m_nPlainSpaceTotal = m_vCharset[j].m_nPlainSpaceUpToX[i-1];
 	}
 	// m_nPlainSpaceTotal
 	m_nPlainSpaceTotal = m_nPlainSpaceUpToX[m_nPlainLenMaxTotal];
-	m_vCharset[j].m_nPlainSpaceTotal = m_vCharset[j].m_nPlainSpaceUpToX[i];
 
 	return true;
 }
@@ -432,28 +434,44 @@ void CChainWalkContext::Dump()
 	printf("hash routine: %s\n", m_sHashRoutineName.c_str());
 	printf("hash length: %d\n", m_nHashLen);
 
-	printf( "m_vCharset[0].m_nPlainCharSetLen: %d\n", m_vCharset[0].m_nPlainCharsetLen );
-	printf( "m_vCharset[1].m_nPlainCharSetLen: %d\n", m_vCharset[1].m_nPlainCharsetLen );
-
-	printf("plain charset: ");
-	unsigned int i;
-	
-	for (i = 0; i < m_vCharset[0].m_nPlainCharsetLen; i++)
+	for ( uint32 i = 0; i < m_vCharset.size(); i++ )
 	{
-		if (isprint(m_vCharset[0].m_PlainCharset[i]))
-			printf("%c", m_vCharset[0].m_PlainCharset[i]);
-		else
-			printf("?");
+		printf( "m_vCharset[%d].m_nPlainCharSetLen: %d\n", i, m_vCharset[i].m_nPlainCharsetLen );
+
+		printf("plain charset: ");
+		
+		for ( uint32 j = 0; j < m_vCharset[i].m_nPlainCharsetLen; j++ )
+		{
+			if (isprint(m_vCharset[i].m_PlainCharset[j]))
+				printf("%c", m_vCharset[i].m_PlainCharset[j]);
+			else
+				printf("?");
+		}
+		printf("\n");
+
+		for ( int j = 0; j <= m_vCharset[i].m_nPlainLenMax; j++ )
+		{
+			printf( "m_vCharset[%d].m_nPlainSpaceUpToX[%d]: %llu\n"
+				, i, j, m_vCharset[i].m_nPlainSpaceUpToX[j] );
+		}
+		
+		printf("plain charset in hex: ");
+
+		for ( uint32 j = 0; j < m_vCharset[i].m_nPlainCharsetLen; j++ )
+			printf("%02x ", m_vCharset[i].m_PlainCharset[j]);
+		printf("\n");
+
+		printf("plain length range: %d - %d\n", m_vCharset[i].m_nPlainLenMin, m_vCharset[i].m_nPlainLenMax);
+		printf("plain charset name: %s\n", m_vCharset[i].m_sPlainCharsetName.c_str());
+		printf("plain subkey space total: %s\n", uint64tostr(m_vCharset[i].m_nPlainSpaceTotal).c_str());
 	}
-	printf("\n");
+		
+	for ( int i = 0; i <= m_nPlainLenMaxTotal; i++ )
+	{
+		printf( "m_nPlainSpaceUpToX[%d]: %llu\n"
+			, i, m_nPlainSpaceUpToX[i] );
+	}
 
-	printf("plain charset in hex: ");
-	for (i = 0; i < m_vCharset[0].m_nPlainCharsetLen; i++)
-		printf("%02x ", m_vCharset[0].m_PlainCharset[i]);
-	printf("\n");
-
-	printf("plain length range: %d - %d\n", m_vCharset[0].m_nPlainLenMin, m_vCharset[0].m_nPlainLenMax);
-	printf("plain charset name: %s\n", m_vCharset[0].m_sPlainCharsetName.c_str());
 	//printf("plain charset content: %s\n", m_sPlainCharsetContent.c_str());
 	//for (i = 0; i <= m_nPlainLenMax; i++)
 	//	printf("plain space up to %d: %s\n", i, uint64tostr(m_nPlainSpaceUpToX[i]).c_str());
@@ -484,18 +502,20 @@ int CChainWalkContext::normalIndexToPlain(uint64 index, uint64 *plainSpaceUpToX,
 {
 	int a;
 
-	for ( a = max - 1; a >= min - 1; a-- )
+	for ( a = max - 1; a >= min; a-- )
 	{
 		if ( index >= plainSpaceUpToX[a])
 			break;
 	}
 
 	// XXX is this correct to modify the class variable?
-	m_nPlainLen = a + 1;
+	//m_nPlainLen = a + 1;
+	uint64 plainLen = a + 1;
 
 	index -= plainSpaceUpToX[a]; // plainLen - 1 == a
 	// XXX is this correct to modify the class variable?
-	for ( a = m_nPlainLen - 1; a >= 0; a-- )
+	//for ( a = m_nPlainLen - 1; a >= 0; a-- )
+	for ( a = plainLen - 1; a >= 0; a-- )
 	{
 #ifdef _WIN32
 		if (index < 0x100000000I64)
@@ -520,7 +540,8 @@ int CChainWalkContext::normalIndexToPlain(uint64 index, uint64 *plainSpaceUpToX,
 	}
 
 	// XXX is this correct to modify the class variable?
-	return m_nPlainLen;
+	//return m_nPlainLen;
+	return plainLen;
 }
 
 void CChainWalkContext::IndexToPlain()
@@ -528,9 +549,9 @@ void CChainWalkContext::IndexToPlain()
 	m_nPlainLen = 0;
 	uint64 indexTmp = m_nIndex;
 
-	int numKeySpaces = m_vCharset.size();
+	uint32 numKeySpaces = m_vCharset.size();
 
-	for ( int a = 0; a < numKeySpaces - 1; a-- )
+	for ( uint32 a = 0; a < numKeySpaces - 1; a-- )
 	{
 		m_vCharset[a].m_nIndexX = indexTmp % m_vCharset[a].m_nPlainSpaceTotal;
 		indexTmp /= m_vCharset[a].m_nPlainSpaceTotal;
@@ -598,6 +619,23 @@ void CChainWalkContext::IndexToPlain()
 			nCharsetLen += m_vCharset[j].m_nPlainLenMax;
 			if(i < nCharsetLen) // We found the correct charset
 			{
+				m_Plain[i] = m_vCharset[j].m_PlainCharset[nIndexOfX % m_vCharset[j].m_nPlainCharsetLen];
+				nIndexOfX /= m_vCharset[j].m_nPlainCharsetLen;
+				break;
+			}
+		}
+	}
+
+	uint32 nIndexOfX32 = (uint32)nIndexOfX;
+	for (; i >= 0; i--)
+	{
+		int nCharsetLen = 0;
+		for(uint32 j = 0; j < m_vCharset.size(); j++)
+		{
+			nCharsetLen += m_vCharset[j].m_nPlainLenMax;
+			if(i < nCharsetLen) // We found the correct charset
+			{
+
 				m_Plain[i] = m_vCharset[j].m_PlainCharset[nIndexOfX % m_vCharset[j].m_nPlainCharsetLen];
 				nIndexOfX /= m_vCharset[j].m_nPlainCharsetLen;
 				break;

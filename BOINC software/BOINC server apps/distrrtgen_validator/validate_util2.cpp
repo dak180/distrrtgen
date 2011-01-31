@@ -52,7 +52,7 @@ using std::vector;
 //
 int check_set(
     vector<RESULT>& results, WORKUNIT& wu,
-    int& canonicalid, double& credit, bool& retry
+    int& canonicalid, double&, bool& retry
 ) {
     DB_CONN frt;
     char query[1024];
@@ -140,7 +140,7 @@ int check_set(
 		goto cleanup;
 	}
         int PartSize = atoi(row[0]);
-	log_messages.printf(MSG_DEBUG, "Starting verification...\n");
+	log_messages.printf(MSG_DEBUG, "Starting verification of RESULT#%i...\n", results[i].id);
 	log_messages.printf(MSG_DEBUG, "Num chains: %i PartSize: %i...\n", curData->numchains, PartSize);
 	 
 	 if(curData->numchains != PartSize)
@@ -151,7 +151,7 @@ int check_set(
                 );
             results[i].outcome = RESULT_OUTCOME_VALIDATE_ERROR;
             results[i].validate_state = VALIDATE_STATE_INVALID;		
-	     break;
+	     continue;
 	 }
 	log_messages.printf(MSG_DEBUG, "Converting %i %s %s %s %s %s %s %s %s...\n", partid, row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8]);
 	
@@ -197,7 +197,7 @@ int check_set(
 	{
 		int nIndexToVerify = nRainbowChainCountRead / 25 * j - 1;
 		CChainWalkContext cwc;
-	log_messages.printf(MSG_DEBUG, "Setting seed to %lld for verification step %i...\n", pChain[nIndexToVerify].nIndexS, j);
+		log_messages.printf(MSG_DEBUG, "Setting seed to %lld for verification step %i...\n", pChain[nIndexToVerify].nIndexS, j);
 
 		cwc.SetIndex(pChain[nIndexToVerify].nIndexS);
 		int nPos;
@@ -212,12 +212,12 @@ int check_set(
 		{
 			log_messages.printf(MSG_CRITICAL,
 				"[RESULT#%d %s] Rainbow chain length verification failed at step %i index %i (%lld != %lld)\n", results[i].id, results[i].name, j, nIndexToVerify, cwc.GetIndex(), pChain[nIndexToVerify].nIndexE);
-	              results[i].outcome = RESULT_OUTCOME_VALIDATE_ERROR;
-                     results[i].validate_state = VALIDATE_STATE_INVALID;		
+	                results[i].outcome = RESULT_OUTCOME_VALIDATE_ERROR;
+                        results[i].validate_state = VALIDATE_STATE_INVALID;		
 			break;
 		}
 	}
-	if(results[i].outcome == RESULT_OUTCOME_VALIDATE_ERROR && results[i].validate_state == VALIDATE_STATE_INVALID) break;
+	if(results[i].outcome == RESULT_OUTCOME_VALIDATE_ERROR && results[i].validate_state == VALIDATE_STATE_INVALID) continue;
 	log_messages.printf(MSG_DEBUG, "Checking if all %i chains is within bounds...\n", PartSize);
 
 	for(j = 0; j < PartSize; j++)
@@ -239,12 +239,12 @@ int check_set(
 			break;
 		}
 	}
-	if(results[i].outcome == RESULT_OUTCOME_VALIDATE_ERROR && results[i].validate_state == VALIDATE_STATE_INVALID) break;
+	if(results[i].outcome == RESULT_OUTCOME_VALIDATE_ERROR && results[i].validate_state == VALIDATE_STATE_INVALID) continue;
 
 	results[i].validate_state = VALIDATE_STATE_VALID;
-       canonicalid = results[i].id;	
-	credit = creditvalue;
+       canonicalid = results[i].id;
        log_messages.printf(MSG_DEBUG, "WU %i is OK\n", wu.id);
+	retry = false;
 	 /*
         for (j=0; j!=n; j++) {
             if (had_error[j]) continue;
@@ -286,6 +286,8 @@ cleanup:
         cleanup_result(results[i], data[i]);
     }
     frt.close();
+    log_messages.printf(MSG_DEBUG, "[RESULT#%d %s] --------------TEST IS OVER! ------------------\n", results[i].id, results[i].name);
+   
 //	exit(0);
     return 0;
 }

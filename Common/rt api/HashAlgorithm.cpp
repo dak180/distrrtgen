@@ -28,7 +28,6 @@
 #include "HashAlgorithm.h"
 
 #include "Public.h"
-
 #include <string.h>
 
 //#include <openssl/md2.h>
@@ -36,12 +35,9 @@
 #include "md5.h"
 #include "des.h"
 //#include "sha1.h"
+#include <openssl/sha.h>
 #if defined(_WIN32) && !defined(__GNUC__)
 	#pragma comment(lib, "libeay32.lib")
-#endif
-
-#ifdef __NetBSD__
-	#include <des.h>
 #endif
 
 #define MSCACHE_HASH_SIZE 16

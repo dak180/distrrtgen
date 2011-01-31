@@ -1,5 +1,6 @@
 SHELL = /bin/sh
-CC = g++
+CXX = g++
+CC = gcc
 OPTIMIZATION = -O3
 INCLUDES = -I../../Common/rt\ api
 # XXX todo currently only 32-bit targets work
@@ -12,7 +13,7 @@ COMMON_API_PATH = ../../Common/rt\ api
 all: converti2
 
 converti2: $(OBJS)
-	$(CC) $(LFLAGS) $(OBJS) $(LIBS) converti2.cpp -o converti2
+	$(CXX) $(LFLAGS) $(OBJS) $(LIBS) converti2.cpp -o converti2
 
 clean:
 	rm -f *.o converti2
@@ -28,21 +29,22 @@ rebuild: clean all
 static: DEBUG += -static -static-libgcc
 static: all
 
-win32: CC=i586-mingw32msvc-g++
+win32: CXX=i586-mingw32msvc-g++
+win32: CC=i586-mingw32msvc-gcc
 win32: LIBS += -L/usr/lib/gcc/i586-mingw32msvc/4.2.1-sjlj/lib
 win32: all
 
 MemoryPool.o: $(COMMON_API_PATH)/MemoryPool.h $(COMMON_API_PATH)/MemoryPool.cpp $(COMMON_API_PATH)/Public.h
-	$(CC) $(CFLAGS) $(COMMON_API_PATH)/MemoryPool.cpp
+	$(CXX) $(CFLAGS) $(COMMON_API_PATH)/MemoryPool.cpp
 
 Public.o: $(COMMON_API_PATH)/Public.h $(COMMON_API_PATH)/Public.cpp
-	$(CC) $(CFLAGS) $(COMMON_API_PATH)/Public.cpp
+	$(CXX) $(CFLAGS) $(COMMON_API_PATH)/Public.cpp
 
 RTI2Reader.o: $(COMMON_API_PATH)/RTI2Reader.h $(COMMON_API_PATH)/RTI2Reader.cpp
-	$(CC) $(CFLAGS) $(COMMON_API_PATH)/RTI2Reader.cpp
+	$(CXX) $(CFLAGS) $(COMMON_API_PATH)/RTI2Reader.cpp
 
 RTIReader.o: $(COMMON_API_PATH)/RTIReader.h $(COMMON_API_PATH)/RTIReader.cpp
-	$(CC) $(CFLAGS) $(COMMON_API_PATH)/RTIReader.cpp
+	$(CXX) $(CFLAGS) $(COMMON_API_PATH)/RTIReader.cpp
 
 RTReader.o: $(COMMON_API_PATH)/RTReader.h $(COMMON_API_PATH)/RTReader.cpp
-	$(CC) $(CFLAGS) $(COMMON_API_PATH)/RTReader.cpp
+	$(CXX) $(CFLAGS) $(COMMON_API_PATH)/RTReader.cpp
