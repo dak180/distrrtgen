@@ -113,13 +113,13 @@ RTIReader::RTIReader(string Filename)
 
 }
 
-int RTIReader::ReadChains(uint32 &numChains, RainbowChain *pData)
+int RTIReader::ReadChains(unsigned int &numChains, RainbowChain *pData)
 {	
 	// We HAVE to reset the data to 0x00's or we will get in trouble
 	memset(pData, 0x00, sizeof(RainbowChain) * numChains);
 	unsigned int readChains = 0;
 	unsigned int chainsleft = GetChainsLeft();
-	for(uint32 i = 0; i < m_nIndexSize; i++)
+	for(UINT4 i = 0; i < m_nIndexSize; i++)
 	{
 		if(m_chainPosition + readChains > m_pIndex[i].nFirstChain + m_pIndex[i].nChainCount) // We found the matching index
 			continue;
@@ -143,7 +143,7 @@ int RTIReader::ReadChains(uint32 &numChains, RainbowChain *pData)
 	return 0;
 }
 
-uint32 RTIReader::GetChainsLeft()
+UINT4 RTIReader::GetChainsLeft()
 {	
 	return (GetFileLen(m_pFile) / 8) - m_chainPosition;
 }

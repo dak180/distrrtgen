@@ -84,7 +84,7 @@ RTI2Reader::~RTI2Reader(void)
 
 }
 
-uint32 RTI2Reader::GetChainsLeft()
+unsigned int RTI2Reader::GetChainsLeft()
 {
 	long len = GetFileLen(m_pFile);
 	return len / m_chainsizebytes - m_chainPosition;
@@ -104,7 +104,6 @@ int RTI2Reader::ReadChains(unsigned int &numChains, RainbowChain *pData)
 	
 	while(true) // Fast forward to current position
 	{
-		/// XXX
 		// ALERT: Possible problem here if m_indexrowsizebytes > 1 as pNumChains is a unsigned char.
 		unsigned int NumChainsInRow = (unsigned int)*(pNumChains + indexRow * m_indexrowsizebytes);
 		if(m_indexrowsizebytes > 1)

@@ -257,7 +257,7 @@ bool boinc_ReadLinesFromFile(string sPathName, vector<string>& vLine)
 
 	if (file != NULL)
 	{
-		long len = GetFileLen(file);
+		unsigned int len = GetFileLen(file);
 		char* data = new char[len + 1];
 		fread(data, 1, len, file);
 		data[len] = '\0';
@@ -297,7 +297,7 @@ bool ReadLinesFromFile(string sPathName, vector<string>& vLine)
 	FILE* file = fopen(sPathName.c_str(), "rb");
 	if (file != NULL)
 	{
-		long len = GetFileLen(file);
+		unsigned int len = GetFileLen(file);
 		char* data = new char[len + 1];
 		fread(data, 1, len, file);
 		data[len] = '\0';

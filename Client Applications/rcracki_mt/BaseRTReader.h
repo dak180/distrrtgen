@@ -2,7 +2,7 @@
  * rcracki_mt is a multithreaded implementation and fork of the original 
  * RainbowCrack
  *
- * Copyright 2010, 2011 Martin Westergaard Jørgensen <martinwj2005@gmail.com>
+ * Copyright 2010 Martin Westergaard Jørgensen <martinwj2005@gmail.com>
  * Copyright 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
  * Copyright 2010, 2011 James Nobis <frt@quelrod.net>
  *

@@ -2,7 +2,7 @@
  * freerainbowtables is a project for generating, distributing, and using
  * perfect rainbow tables
  *
- * Copyright 2010, 2011 Martin Westergaard Jørgensen <martinwj2005@gmail.com>
+ * Copyright 2010 Martin Westergaard Jørgensen <martinwj2005@gmail.com>
  * Copyright 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
  * Copyright 2010, 2011 James Nobis <frt@quelrod.net>
  *
@@ -37,7 +37,7 @@ using namespace std;
 class BaseRTReader
 {
 public:
-	virtual int ReadChains(uint32 &numChains, RainbowChain *pData) = 0;
+	virtual int ReadChains(uint32 &numChains, RainbowChainO *pData) = 0;
 	virtual uint32 GetChainsLeft() = 0;
 	
 	virtual ~BaseRTReader()  { };
