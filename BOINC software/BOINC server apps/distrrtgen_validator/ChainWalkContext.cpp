@@ -1,20 +1,44 @@
 /*
-   RainbowCrack - a general propose implementation of Philippe Oechslin's faster time-memory trade-off technique.
+ * distrrtgen_validator is a tool to validate completed BOINC WUs
+ * from distrrtgen[_cuda] as part of the freerainbowtables project.
+ *
+ * Copyright (C) Zhu Shuanglei <shuanglei@hotmail.com>
+ * Copyright Martin Westergaard Jørgensen <martinwj2005@gmail.com>
+ * Copyright 2008, 2009, 2010, 2011 Steve Thomas (Sc00bz)
+ * Copyright 2009, 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
+ * Copyright 2009, 2010, 2011 James Nobis <frt@quelrod.net>
+ * Copyright 2010 Yngve AAdlandsvik
+ *
+ * This file is part of distrrtgen_validator.
+ *
+ * distrrtgen is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * distrrtgen_validator is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with distrrtgen_validator.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-   Copyright (C) Zhu Shuanglei <shuanglei@hotmail.com>
-*/
-
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(__GNUC__)
 	#pragma warning(disable : 4786)
 #endif
 
 #include "ChainWalkContext.h"
+#include "Public.h"
 
 #include <ctype.h>
 #include <openssl/rand.h>
 #ifdef _WIN32
 	#pragma comment(lib, "libeay32.lib")
 #endif
+
+#define CHARSET_TXT "/home/frt/projects/distrrtgen/download/charset.txt"
 
 //////////////////////////////////////////////////////////////////////
 
@@ -24,8 +48,10 @@ int CChainWalkContext::m_nHashLen;
 int CChainWalkContext::m_nPlainLenMinTotal = 0;
 int CChainWalkContext::m_nPlainLenMaxTotal = 0;
 int CChainWalkContext::m_nHybridCharset = 0;
+bool CChainWalkContext::isOldRtFormat = false;
+bool CChainWalkContext::isRti2RtFormat = false;
 vector<stCharset> CChainWalkContext::m_vCharset;
-uint64 CChainWalkContext::m_nPlainSpaceUpToX[MAX_PLAIN_LEN + 1];
+uint64 CChainWalkContext::m_nPlainSpaceUpToX[MAX_PLAIN_LEN];
 uint64 CChainWalkContext::m_nPlainSpaceTotal;
 unsigned char CChainWalkContext::m_Salt[MAX_SALT_LEN];
 int CChainWalkContext::m_nSaltLen = 0;
@@ -50,8 +76,8 @@ bool CChainWalkContext::LoadCharset(string sName)
 		stCharset tCharset;
 		int i;
 		for (i = 0x00; i <= 0xff; i++)
-			tCharset.m_PlainCharset[i] = i;
-		tCharset.m_nPlainCharsetLen = 256;
+			tCharset.m_PlainCharset[i] = (unsigned char) i;
+		tCharset.m_nPlainCharsetLen = MAX_PLAIN_LEN;
 		tCharset.m_sPlainCharsetName = sName;
 		tCharset.m_sPlainCharsetContent = "0x00, 0x01, ... 0xff";
 		m_vCharset.push_back(tCharset);
@@ -59,12 +85,18 @@ bool CChainWalkContext::LoadCharset(string sName)
 	}
 	if(sName.substr(0, 6) == "hybrid") // Hybrid charset consisting of 2 charsets
 	{
-		m_nHybridCharset = 1;		
+		if (sName.substr(6, 2) == "2(" )
+			m_nHybridCharset = 2;
+		else
+			m_nHybridCharset = 1;		
 	}
+	else
+		m_nHybridCharset = 0;
+	
 	vector<string> vLine;
 	if (ReadLinesFromFile(CHARSET_TXT, vLine))
 	{
-		int i;
+		uint32 i;
 		for (i = 0; i < vLine.size(); i++)
 		{
 			// Filter comment
@@ -81,7 +113,7 @@ bool CChainWalkContext::LoadCharset(string sName)
 								
 				// sCharsetName charset check
 				bool fCharsetNameCheckPass = true;
-				int j;
+				uint32 j;
 				for (j = 0; j < sCharsetName.size(); j++)
 				{
 					if (   !isalpha(sCharsetName[j])
@@ -108,7 +140,7 @@ bool CChainWalkContext::LoadCharset(string sName)
 					continue;
 				}
 				sCharsetContent = sCharsetContent.substr(1, sCharsetContent.size() - 2);
-				if (sCharsetContent.size() > 256)
+				if (sCharsetContent.size() > MAX_PLAIN_LEN)
 				{
 					printf("charset content %s too long\n", sCharsetContent.c_str());
 					continue;
@@ -116,14 +148,14 @@ bool CChainWalkContext::LoadCharset(string sName)
 
 				//printf("%s = [%s]\n", sCharsetName.c_str(), sCharsetContent.c_str());
 
-				// Is it the wanted charset?
-				if(m_nHybridCharset == 1)
+				// Is it a hybrid?
+				if( m_nHybridCharset != 0 )
 				{
 					vector<tCharset> vCharsets;
 					GetHybridCharsets(sName, vCharsets);
 					if(sCharsetName == vCharsets[m_vCharset.size()].sName)
 					{
-						stCharset tCharset = {0};
+						stCharset tCharset;
 						tCharset.m_nPlainCharsetLen = sCharsetContent.size();							
 						memcpy(tCharset.m_PlainCharset, sCharsetContent.c_str(), tCharset.m_nPlainCharsetLen);
 						tCharset.m_sPlainCharsetName = sCharsetName;
@@ -133,7 +165,10 @@ bool CChainWalkContext::LoadCharset(string sName)
 						m_vCharset.push_back(tCharset);
 						if(vCharsets.size() == m_vCharset.size())
 							return true;
-						i = 0; // Start the lookup over again for the next charset
+						//i = 0; // Start the lookup over again for the next charset
+						// Sc00bz indicates this fixes a bug of skipping line 1
+						// of charset.txt
+						i = -1; // Start the lookup over again for the next charset
 					}						
 				}
 				else if (sCharsetName == sName)
@@ -152,6 +187,7 @@ bool CChainWalkContext::LoadCharset(string sName)
 	}
 	else
 		printf("can't open charset configuration file\n");
+
 	return false;
 }
 
@@ -192,21 +228,36 @@ bool CChainWalkContext::SetPlainCharset(string sCharsetName, int nPlainLenMin, i
 	m_nPlainLenMaxTotal = 0;
 	m_nPlainLenMinTotal = 0;
 	uint64 nTemp = 1;
-	int j, k = 1;
+	uint32 j, k = 1;
+	int i = 1;
 	for(j = 0; j < m_vCharset.size(); j++)
 	{
-		int i;
 		m_nPlainLenMaxTotal += m_vCharset[j].m_nPlainLenMax;
 		m_nPlainLenMinTotal += m_vCharset[j].m_nPlainLenMin;
+		m_vCharset[j].m_nPlainSpaceUpToX[0] = 0;
+		uint64 nTemp2 = 1;
+			
+		// XXX assumes each sub keyspace starts at length 1
 		for (i = 1; i <= m_vCharset[j].m_nPlainLenMax; i++)
 		{			
 			nTemp *= m_vCharset[j].m_nPlainCharsetLen;
+			nTemp2 *= m_vCharset[j].m_nPlainCharsetLen;
+
 			if (i < m_vCharset[j].m_nPlainLenMin)
+			{
 				m_nPlainSpaceUpToX[k] = 0;
+				m_vCharset[j].m_nPlainSpaceUpToX[i] = 0;
+			}
 			else
+			{
 				m_nPlainSpaceUpToX[k] = m_nPlainSpaceUpToX[k - 1] + nTemp;
+				m_vCharset[j].m_nPlainSpaceUpToX[i] = m_vCharset[j].m_nPlainSpaceUpToX[i - 1] + nTemp2;
+			}
+
 			k++;
-		}		
+		}
+
+		m_vCharset[j].m_nPlainSpaceTotal = m_vCharset[j].m_nPlainSpaceUpToX[i-1];
 	}
 	// m_nPlainSpaceTotal
 	m_nPlainSpaceTotal = m_nPlainSpaceUpToX[m_nPlainLenMaxTotal];
@@ -238,11 +289,11 @@ bool CChainWalkContext::SetupWithPathName(string sPathName, int& nRainbowChainLe
 	// something like lm_alpha#1-7_0_100x16_test.rt
 
 #ifdef _WIN32
-	int nIndex = sPathName.find_last_of('\\');
+	string::size_type nIndex = sPathName.find_last_of('\\');
 #else
-	int nIndex = sPathName.find_last_of('/');
+	string::size_type nIndex = sPathName.find_last_of('/');
 #endif
-	if (nIndex != -1)
+	if (nIndex != string::npos)
 		sPathName = sPathName.substr(nIndex + 1);
 
 	if (sPathName.size() < 3)
@@ -250,13 +301,24 @@ bool CChainWalkContext::SetupWithPathName(string sPathName, int& nRainbowChainLe
 		printf("%s is not a rainbow table\n", sPathName.c_str());
 		return false;
 	}
-	/*
-	if (sPathName.substr(sPathName.size() - 4) != ".rti")
+	if (sPathName.substr(sPathName.size() - 5) == ".rti2")
+	{
+		isRti2RtFormat = true;
+	}
+	else if (sPathName.substr(sPathName.size() - 4) == ".rti")
+	{
+		isOldRtFormat = false;
+	}
+	else if (sPathName.substr(sPathName.size() - 3) == ".rt")
+	{
+		isOldRtFormat = true;
+	}
+	else
 	{
 		printf("%s is not a rainbow table\n", sPathName.c_str());
 		return false;
 	}
-*/
+
 	// Parse
 	vector<string> vPart;
 	if (!SeperateString(sPathName, "___x_", vPart))
@@ -283,7 +345,7 @@ bool CChainWalkContext::SetupWithPathName(string sPathName, int& nRainbowChainLe
 	}
 	else
 	{
-		if (sCharsetDefinition.find('#') == -1)		// For backward compatibility, "#1-7" is implied
+		if ( sCharsetDefinition.find('#') == string::npos )		// For backward compatibility, "#1-7" is implied
 		{			
 			sCharsetName = sCharsetDefinition;
 			nPlainLenMin = 1;
@@ -367,24 +429,44 @@ void CChainWalkContext::Dump()
 	printf("hash routine: %s\n", m_sHashRoutineName.c_str());
 	printf("hash length: %d\n", m_nHashLen);
 
-	printf("plain charset: ");
-	int i;
-	for (i = 0; i < m_vCharset[0].m_nPlainCharsetLen; i++)
+	for ( uint32 i = 0; i < m_vCharset.size(); i++ )
 	{
-		if (isprint(m_vCharset[0].m_PlainCharset[i]))
-			printf("%c", m_vCharset[0].m_PlainCharset[i]);
-		else
-			printf("?");
+		printf( "m_vCharset[%d].m_nPlainCharSetLen: %d\n", i, m_vCharset[i].m_nPlainCharsetLen );
+
+		printf("plain charset: ");
+		
+		for ( uint32 j = 0; j < m_vCharset[i].m_nPlainCharsetLen; j++ )
+		{
+			if (isprint(m_vCharset[i].m_PlainCharset[j]))
+				printf("%c", m_vCharset[i].m_PlainCharset[j]);
+			else
+				printf("?");
+		}
+		printf("\n");
+
+		for ( int j = 0; j <= m_vCharset[i].m_nPlainLenMax; j++ )
+		{
+			printf( "m_vCharset[%d].m_nPlainSpaceUpToX[%d]: %llu\n"
+				, i, j, m_vCharset[i].m_nPlainSpaceUpToX[j] );
+		}
+		
+		printf("plain charset in hex: ");
+
+		for ( uint32 j = 0; j < m_vCharset[i].m_nPlainCharsetLen; j++ )
+			printf("%02x ", m_vCharset[i].m_PlainCharset[j]);
+		printf("\n");
+
+		printf("plain length range: %d - %d\n", m_vCharset[i].m_nPlainLenMin, m_vCharset[i].m_nPlainLenMax);
+		printf("plain charset name: %s\n", m_vCharset[i].m_sPlainCharsetName.c_str());
+		printf("plain subkey space total: %s\n", uint64tostr(m_vCharset[i].m_nPlainSpaceTotal).c_str());
 	}
-	printf("\n");
+		
+	for ( int i = 0; i <= m_nPlainLenMaxTotal; i++ )
+	{
+		printf( "m_nPlainSpaceUpToX[%d]: %llu\n"
+			, i, m_nPlainSpaceUpToX[i] );
+	}
 
-	printf("plain charset in hex: ");
-	for (i = 0; i < m_vCharset[0].m_nPlainCharsetLen; i++)
-		printf("%02x ", m_vCharset[0].m_PlainCharset[i]);
-	printf("\n");
-
-	printf("plain length range: %d - %d\n", m_vCharset[0].m_nPlainLenMin, m_vCharset[0].m_nPlainLenMax);
-	printf("plain charset name: %s\n", m_vCharset[0].m_sPlainCharsetName.c_str());
 	//printf("plain charset content: %s\n", m_sPlainCharsetContent.c_str());
 	//for (i = 0; i <= m_nPlainLenMax; i++)
 	//	printf("plain space up to %d: %s\n", i, uint64tostr(m_nPlainSpaceUpToX[i]).c_str());
@@ -411,6 +493,72 @@ void CChainWalkContext::SetHash(unsigned char* pHash)
 	memcpy(m_Hash, pHash, m_nHashLen);
 }
 
+int CChainWalkContext::normalIndexToPlain(uint64 index, uint64 *plainSpaceUpToX, unsigned char *charSet, int charSetLen, int min, int max, unsigned char *plain)
+{
+	int a;
+
+	for ( a = max - 1; a >= min; a-- )
+	{
+		if ( index >= plainSpaceUpToX[a])
+			break;
+	}
+
+	// XXX is this correct to modify the class variable?
+	//m_nPlainLen = a + 1;
+	uint64 plainLen = a + 1;
+
+	index -= plainSpaceUpToX[a]; // plainLen - 1 == a
+	// XXX is this correct to modify the class variable?
+	//for ( a = m_nPlainLen - 1; a >= 0; a-- )
+	for ( a = plainLen - 1; a >= 0; a-- )
+	{
+#ifdef _WIN32
+		if (index < 0x100000000I64)
+			break;
+#else
+		if (index < 0x100000000llu)
+			break;
+#endif
+		plain[a] = charSet[index % charSetLen];
+		index /= charSetLen;
+	}
+
+	unsigned int index32 = (unsigned int) index;
+	for ( ; a >= 0; a-- )
+	{
+		// Note the lack of assembly code.
+		// Assembly code is not needed since all the variables are in the stack.
+		// If you add in assembly code it will be slower than the compiler's code.
+
+		plain[a] = charSet[index32 % charSetLen];
+		index32 /= charSetLen;
+	}
+
+	// XXX is this correct to modify the class variable?
+	//return m_nPlainLen;
+	return plainLen;
+}
+
+void CChainWalkContext::IndexToPlain()
+{
+	m_nPlainLen = 0;
+	uint64 indexTmp = m_nIndex;
+
+	uint32 numKeySpaces = m_vCharset.size();
+
+	for ( uint32 a = 0; a < numKeySpaces - 1; a-- )
+	{
+		m_vCharset[a].m_nIndexX = indexTmp % m_vCharset[a].m_nPlainSpaceTotal;
+		indexTmp /= m_vCharset[a].m_nPlainSpaceTotal;
+		m_nPlainLen += normalIndexToPlain(m_vCharset[a].m_nIndexX, m_vCharset[a].m_nPlainSpaceUpToX, m_vCharset[a].m_PlainCharset, m_vCharset[a].m_nPlainCharsetLen, m_vCharset[a].m_nPlainLenMin, m_vCharset[a].m_nPlainLenMax, m_Plain + m_nPlainLen);
+	}
+
+	m_vCharset[numKeySpaces-1].m_nIndexX = indexTmp;
+	m_nPlainLen += normalIndexToPlain(m_vCharset[numKeySpaces-1].m_nIndexX, m_vCharset[numKeySpaces-1].m_nPlainSpaceUpToX, m_vCharset[numKeySpaces-1].m_PlainCharset, m_vCharset[numKeySpaces-1].m_nPlainCharsetLen, m_vCharset[numKeySpaces-1].m_nPlainLenMin, m_vCharset[numKeySpaces-1].m_nPlainLenMax, m_Plain + m_nPlainLen);
+}
+
+
+/*
 void CChainWalkContext::IndexToPlain()
 {
 	int i;
@@ -427,37 +575,14 @@ void CChainWalkContext::IndexToPlain()
 		m_nPlainLen = m_nPlainLenMinTotal;
 	uint64 nIndexOfX = m_nIndex - m_nPlainSpaceUpToX[m_nPlainLen - 1];
 
-#ifdef _WIN64
+// this is the generic code for non x86/x86_64 platforms
+#if !defined(_M_X64) && !defined(_M_IX86) && !defined(__i386__) && !defined(__x86_64__)
 	
-	// Slow version
+	// generic version (slow for non 64-bit platforms and gcc < 4.5.x)
 	for (i = m_nPlainLen - 1; i >= 0; i--)
 	{
 		int nCharsetLen = 0;
-		for(int j = 0; j < m_vCharset.size(); i++)
-		{
-			nCharsetLen += m_vCharset[j].m_nPlainLenMax;
-			if(i < nCharsetLen) // We found the correct charset
-			{
-				m_Plain[i] = m_vCharset[j].m_PlainCharset[nIndexOfX % m_nPlainCharsetLen];
-				nIndexOfX /= m_vCharset[j].m_nPlainCharsetLen;
-			}
-		}
-	}
-#else
-
-
-	// Fast version
-	for (i = m_nPlainLen - 1; i >= 0; i--)
-	{
-#ifdef _WIN32
-		if (nIndexOfX < 0x100000000I64)
-			break;
-#else
-		if (nIndexOfX < 0x100000000llu)
-			break;
-#endif
-		int nCharsetLen = 0;
-		for(int j = 0; j < m_vCharset.size(); j++)
+		for(uint32 j = 0; j < m_vCharset.size(); j++)
 		{
 			nCharsetLen += m_vCharset[j].m_nPlainLenMax;
 			if(i < nCharsetLen) // We found the correct charset
@@ -469,22 +594,72 @@ void CChainWalkContext::IndexToPlain()
 		}
 	}
 
-	unsigned int nIndexOfX32 = (unsigned int)nIndexOfX;
+#elif defined(_M_X64) || defined(_M_IX86) || defined(__i386__) || defined(__x86_64__)
+
+	// Fast ia32 version
+	for (i = m_nPlainLen - 1; i >= 0; i--)
+	{
+		// 0x100000000 = 2^32
+#ifdef _M_IX86
+		if (nIndexOfX < 0x100000000I64)
+			break;
+#else
+		if (nIndexOfX < 0x100000000llu)
+			break;
+#endif
+
+		int nCharsetLen = 0;
+		for(uint32 j = 0; j < m_vCharset.size(); j++)
+		{
+			nCharsetLen += m_vCharset[j].m_nPlainLenMax;
+			if(i < nCharsetLen) // We found the correct charset
+			{
+				m_Plain[i] = m_vCharset[j].m_PlainCharset[nIndexOfX % m_vCharset[j].m_nPlainCharsetLen];
+				nIndexOfX /= m_vCharset[j].m_nPlainCharsetLen;
+				break;
+			}
+		}
+	}
+
+	uint32 nIndexOfX32 = (uint32)nIndexOfX;
 	for (; i >= 0; i--)
 	{
 		int nCharsetLen = 0;
-		for(int j = 0; j < m_vCharset.size(); j++)
+		for(uint32 j = 0; j < m_vCharset.size(); j++)
 		{
 			nCharsetLen += m_vCharset[j].m_nPlainLenMax;
 			if(i < nCharsetLen) // We found the correct charset
 			{
 
-//		m_Plain[i] = m_PlainCharset[nIndexOfX32 % m_vCharset[j].m_nPlainCharsetLen];
+				m_Plain[i] = m_vCharset[j].m_PlainCharset[nIndexOfX % m_vCharset[j].m_nPlainCharsetLen];
+				nIndexOfX /= m_vCharset[j].m_nPlainCharsetLen;
+				break;
+			}
+		}
+	}
+
+	uint32 nIndexOfX32 = (uint32)nIndexOfX;
+	for (; i >= 0; i--)
+	{
+		int nCharsetLen = 0;
+		for(uint32 j = 0; j < m_vCharset.size(); j++)
+		{
+			nCharsetLen += m_vCharset[j].m_nPlainLenMax;
+			if(i < nCharsetLen) // We found the correct charset
+			{
+
+//		m_Plain[i] = m_vCharset[j].m_PlainCharset[nIndexOfX32 % m_vCharset[j].m_nPlainCharsetLen];
 //		nIndexOfX32 /= m_vCharset[j].m_nPlainCharsetLen;
 
+//	moving nPlainCharsetLen into the asm body and avoiding the extra temp
+//	variable results in a performance gain
+//				unsigned int nPlainCharsetLen = m_vCharset[j].m_nPlainCharsetLen;
+				unsigned int nTemp;
+
+#if defined(_WIN32) && !defined(__GNUC__)
+		// VC++ still needs this
 		unsigned int nPlainCharsetLen = m_vCharset[j].m_nPlainCharsetLen;
-		unsigned int nTemp;
-#ifdef _WIN32
+
 		__asm
 		{
 			mov eax, nIndexOfX32
@@ -495,15 +670,11 @@ void CChainWalkContext::IndexToPlain()
 		}
 		m_Plain[i] = m_vCharset[j].m_PlainCharset[nTemp];
 #else
-		__asm__ __volatile__ (	"mov %2, %%eax;"
-								"xor %%edx, %%edx;"
+		__asm__ __volatile__ ("xor %%edx, %%edx;"
 								"divl %3;"
-								"mov %%eax, %0;"
-								"mov %%edx, %1;"
-								: "=m"(nIndexOfX32), "=m"(nTemp)
-								: "m"(nIndexOfX32), "m"(nPlainCharsetLen)
-								: "%eax", "%edx"
-							 );
+								: "=a"(nIndexOfX32), "=d"(nTemp)
+								: "a"(nIndexOfX32), "rm"(m_vCharset[j].m_nPlainCharsetLen)
+								: );
 		m_Plain[i] = m_vCharset[j].m_PlainCharset[nTemp];
 #endif
 		break;
@@ -512,6 +683,7 @@ void CChainWalkContext::IndexToPlain()
 	}
 #endif
 }
+*/
 
 void CChainWalkContext::PlainToHash()
 {	
@@ -552,24 +724,7 @@ string CChainWalkContext::GetBinary()
 {
 	return HexToStr(m_Plain, m_nPlainLen);
 }
-/*
-string CChainWalkContext::GetPlainBinary()
-{
-	string sRet;
-	sRet += GetPlain();
-	int i;
-	for (i = 0; i < m_nPlainLenMax - m_nPlainLen; i++)
-		sRet += ' ';
 
-	sRet += "|";
-
-	sRet += GetBinary();
-	for (i = 0; i < m_nPlainLenMax - m_nPlainLen; i++)
-		sRet += "  ";
-
-	return sRet;
-}
-*/
 string CChainWalkContext::GetHash()
 {
 	return HexToStr(m_Hash, m_nHashLen);
@@ -581,4 +736,14 @@ bool CChainWalkContext::CheckHash(unsigned char* pHash)
 		return true;
 
 	return false;
+}
+
+bool CChainWalkContext::isOldFormat()
+{
+	return isOldRtFormat;
+}
+
+bool CChainWalkContext::isRti2Format()
+{
+	return isRti2RtFormat;
 }

@@ -28,7 +28,6 @@
 #include "HashAlgorithm.h"
 
 #include "Public.h"
-
 #include <string.h>
 
 //#include <openssl/md2.h>
@@ -36,12 +35,9 @@
 #include "md5.h"
 #include "des.h"
 //#include "sha1.h"
+#include <openssl/sha.h>
 #if defined(_WIN32) && !defined(__GNUC__)
 	#pragma comment(lib, "libeay32.lib")
-#endif
-
-#ifdef __NetBSD__
-	#include <des.h>
 #endif
 
 #define MSCACHE_HASH_SIZE 16
@@ -130,7 +126,7 @@ void HashHALFLMCHALL(unsigned char* pPlain, int nPlainLen, unsigned char* pHash)
 
 void HashNTLMCHALL(unsigned char* pPlain, int nPlainLen, unsigned char* pHash)
 {
-	unsigned char UnicodePlain[MAX_PLAIN_LEN];
+	unsigned char UnicodePlain[MAX_PLAIN_LEN * 2];
 	static unsigned char spoofed_challange[] = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88}; 
 	
 	int len = (nPlainLen < 127) ? nPlainLen : 127;

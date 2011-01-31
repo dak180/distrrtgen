@@ -3,6 +3,7 @@
  * perfect rainbow tables
  *
  * Copyright (C) Zhu Shuanglei <shuanglei@hotmail.com>
+ * Copyright Martin Westergaard Jørgensen <martinwj2005@gmail.com>
  * Copyright 2009, 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
  * Copyright 2009, 2010, 2011 James Nobis <frt@quelrod.net>
  *
@@ -10,7 +11,7 @@
  *
  * freerainbowtables is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License.
+ * the Free Software Foundation, version 2 of the License.
  *
  * freerainbowtables is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of

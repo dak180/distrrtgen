@@ -11,7 +11,7 @@
  *
  * freerainbowtables is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License.
+ * the Free Software Foundation, version 2 of the License.
  *
  * freerainbowtables is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -182,15 +182,17 @@ string TrimString(string s)
 }
 bool GetHybridCharsets(string sCharset, vector<tCharset>& vCharset)
 {
-	// Example: hybrid(mixalpha-numeric-all-space#1-6,numeric#1-4)
+	// Example: hybrid(mixalpha-numeric-all-space#6-6,numeric#1-4)
 	if(sCharset.substr(0, 6) != "hybrid") // Not hybrid charset
 		return false;
 
 	string::size_type nEnd = sCharset.rfind(')');
-	string::size_type nStart = (int) sCharset.rfind('(');
+	string::size_type nStart = sCharset.rfind('(');
 	string sChar = sCharset.substr(nStart + 1, nEnd - nStart - 1);
+
 	vector<string> vParts;
 	SeperateString(sChar, ",", vParts);
+
 	for(uint32 i = 0; i < vParts.size(); i++)
 	{
 		tCharset stCharset;
@@ -201,6 +203,7 @@ bool GetHybridCharsets(string sCharset, vector<tCharset>& vCharset)
 		SeperateString(vParts2[1], "-", vParts3);
 		stCharset.nPlainLenMin = atoi(vParts3[0].c_str());
 		stCharset.nPlainLenMax = atoi(vParts3[1].c_str());
+
 		vCharset.push_back(stCharset);
 	}
 	return true;

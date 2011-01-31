@@ -5,6 +5,7 @@
  * Copyright (C) Zhu Shuanglei <shuanglei@hotmail.com>
  * Copyright 2009, 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
  * Copyright 2009, 2010, 2011 James Nobis <frt@quelrod.net>
+ * Copyright 2008, 2009, 2010, 2011 Steve Thomas (Sc00bz)
  *
  * This file is part of freerainbowtables.
  *
@@ -30,7 +31,11 @@
 
 typedef struct 
 {
-	unsigned char m_PlainCharset[255];
+	uint64 m_nPlainSpaceUpToX[MAX_PLAIN_LEN];		// Performance consideration
+	//unsigned char m_PlainCharset[255];
+	unsigned char m_PlainCharset[MAX_PLAIN_LEN];
+	uint64 m_nPlainSpaceTotal;
+	uint64 m_nIndexX;
 	unsigned int m_nPlainCharsetLen;
 	int m_nPlainLenMin;
 	int m_nPlainLenMax;
@@ -51,7 +56,7 @@ public:
 	static bool isRti2RtFormat;
 	static vector<stCharset> m_vCharset;
 	static int m_nPlainLenMinTotal, m_nPlainLenMaxTotal;
-	static uint64 m_nPlainSpaceUpToX[MAX_PLAIN_LEN + 1];		// Performance consideration
+	static uint64 m_nPlainSpaceUpToX[MAX_PLAIN_LEN];		// Performance consideration
 	static uint64 m_nPlainSpaceTotal;							// Performance consideration
 	static int m_nHybridCharset;
 	static int m_nRainbowTableIndex;							// Configuration
@@ -89,6 +94,7 @@ public:
 	void SetHash(unsigned char* pHash);		// The length should be m_nHashLen
 
 	void IndexToPlain();
+	int normalIndexToPlain(uint64 index, uint64 *plainSpaceUpToX, unsigned char *charSet, int charSetLen, int min, int max, unsigned char *plain);
 	void PlainToHash();
 	void HashToIndex(int nPos);
 
