@@ -25,26 +25,28 @@ CXX = g++
 CC = gcc
 
 # NetBSD server
-#BOINC_DIR = /home/frt/src/boinc_core_release_6_12
+BOINC_DIR = /home/frt/src/boinc_core_release_6_12
 #Debian GNU/Linux
-BOINC_DIR = /home/quel/download/boinc_core_release_6_12.PB
+#BOINC_DIR = /home/quel/download/boinc_core_release_6_12.PB
 BOINC_API_DIR = $(BOINC_DIR)/api
 BOINC_LIB_DIR = $(BOINC_DIR)/lib
 BOINC_SCHED_DIR = $(BOINC_DIR)/sched
 BOINC_DB_DIR = $(BOINC_DIR)/db
 # NetBSD
-#MYSQL_DIR = /usr/local/include/mysql
-#MYSQL_LIB_DIR = /usr/local/lib/mysql
+MYSQL_DIR = /usr/local/include/mysql
+MYSQL_LIB_DIR = /usr/local/lib/mysql
 # Debian GNU/Linux
-MYSQL_DIR = /usr/include/mysql
-MYSQL_LIB_DIR = /usr/lib/mysql
+#MYSQL_DIR = /usr/include/mysql
+#MYSQL_LIB_DIR = /usr/lib/mysql
 # NetBSD
-#COMMON_LIB_DIR = /usr/local/lib
+COMMON_LIB_DIR = /usr/local/lib
 # Debian GNU/Linux
-COMMON_LIB_DIR = /usr/lib
+#COMMON_LIB_DIR = /usr/lib
 COMMON_API_PATH = ../../../Common/rt\ api
 
-OPTIMIZATION = -O3 -mtune=native
+# NetBSD doesn't like native
+#-mtune=native
+OPTIMIZATION = -O3
 
 INCLUDES = -I$(BOINC_DIR) \
 	-I$(BOINC_LIB_DIR) \
@@ -54,7 +56,7 @@ INCLUDES = -I$(BOINC_DIR) \
 	-I$(MYSQL_DIR) \
 	-I$(COMMON_API_PATH)
 
-LFLAGS =	-L$(MYSQL_LIB_DIR) \
+LFLAGS = -L$(MYSQL_LIB_DIR) \
 	-L$(BOINC_API_DIR) \
 	-L$(BOINC_LIB_DIR) \
 	-L$(BOINC_SCHED_DIR) \
@@ -84,7 +86,7 @@ all: $(PROG)
 
 distrrtgen_validator: libstdc++.a $(BOINC_API_DIR)/libboinc_api.a \
 	$(BOINC_LIB_DIR)/libboinc.a $(BOINC_SCHED_DIR)/libsched.a $(OBJS)
-	$(CXX) $(CXXFLAGS) $(LFLAGS) $(OBJS) $(LIBS) -o $(PROG)
+	$(CXX) $(CXXFLAGS) -Wl,--export-dynamic $(LFLAGS) $(OBJS) $(LIBS) -o $(PROG)
 
 libstdc++.a:
 	ln -s `g++ -print-file-name=libstdc++.a`

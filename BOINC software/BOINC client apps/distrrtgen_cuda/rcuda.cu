@@ -1,9 +1,24 @@
-//============================================================================
-// Name        : rcuda.cu
-// Author      : Jan Kyska
-// Version     : 1.00
-// Description : Generator of FreeRainbowTables / MD5, MD4, NTLM, SHA1, LM
-//============================================================================ 
+// freerainbowtables is a project for generating, distributing, and using
+// perfect rainbow tables
+//
+// Copyright 2010 Jan Kyska
+// Copyright 2010 Martin Westergaard Jørgensen <martinwj2005@gmail.com>
+// Copyright 2010, 2011 James Nobis <frt@quelrod.net>
+//
+// This file is part of freerainbowtables.
+//
+// freerainbowtables is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 2 of the License, or
+// (at your option) any later version.
+//
+// freerainbowtables is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with freerainbowtables.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <stdio.h>  
 #include <cuda.h>  
@@ -105,6 +120,8 @@ __device__ uint64 rPlainSpaceTotal;
 #include "rcuda_lm.inc"
 
 extern "C" int CalcChainsOnCUDA(const rcuda::RCudaTask* task, uint64 *resultBuff) {
+	cudaSetDeviceFlags(cudaDeviceBlockingSync);
+
 	cudaError_t cuErr;
 	char buff[PLAIN_MAX_SIZE];
 	uint64 *data;
@@ -158,8 +175,6 @@ extern "C" int CalcChainsOnCUDA(const rcuda::RCudaTask* task, uint64 *resultBuff
 	grSizeX = GRID_X_SIZE;
 	dim3 numBlocks(grSizeX, grSizeY);
 	cuErr = cudaSuccess;
-
-	cudaSetDeviceFlags(cudaDeviceBlockingSync);
 
 	for(int idx = 0; idx < task->rainbowChainLen-1 && cuErr == cudaSuccess; idx+=KERN_CHAIN_SIZE) {
 		switch(task->hash) {

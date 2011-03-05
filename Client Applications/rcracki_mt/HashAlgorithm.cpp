@@ -131,7 +131,7 @@ void HashHALFLMCHALL(unsigned char* pPlain, int nPlainLen, unsigned char* pHash)
 
 void HashNTLMCHALL(unsigned char* pPlain, int nPlainLen, unsigned char* pHash)
 {
-	unsigned char UnicodePlain[MAX_PLAIN_LEN];
+	unsigned char UnicodePlain[MAX_PLAIN_LEN * 2];
 	static unsigned char spoofed_challange[] = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88}; 
 	
 	int len = (nPlainLen < 127) ? nPlainLen : 127;

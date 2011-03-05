@@ -17,6 +17,8 @@
 
 #include "boinc_api.h"
 
+#define CALC_BUFFER_SIZE_ADJ 0x2000
+
 struct UC_SHMEM {
     double update_time;
     double fraction_done;

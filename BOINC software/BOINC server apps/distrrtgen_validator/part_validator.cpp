@@ -48,13 +48,13 @@ int read_file_binary(const char *path, RainbowPartFile *data, int &isize)
     isize = (int) size;
         log_messages.printf(MSG_DEBUG,
                     "malloc %lu bytes. size: %lu\n",
-                    (isize / 18 * sizeof(RainbowPartFile)), sizeof(RainbowPartFile)
+                    (isize / 10 * sizeof(RainbowPartFile)), sizeof(RainbowPartFile)
                 );	     
-    data->pChain = (RainbowChainCP*)malloc(isize / 18 * sizeof(RainbowChainCP));
-    data->numchains = isize / 18;
+    data->pChain = (RainbowChainCP*)malloc(isize / 10 * sizeof(RainbowChainCP));
+    data->numchains = isize / 10;
     for(int i = 0; i < data->numchains; i++)
     {	
-        size_t n = fread(&data->pChain[i].nIndexS, 1, 8, f);
+        size_t n;// = fread(&data->pChain[i].nIndexS, 1, 8, f);
         n = fread(&data->pChain[i].nIndexE, 1, 8, f);
         n = fread(&data->pChain[i].nCheckPoint, 1, 2, f);
     }
