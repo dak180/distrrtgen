@@ -39,17 +39,17 @@
 #define H(x, y, z) ((x) ^ (y) ^ (z))
 #define ROTATE_LEFT(x, n) (((x) << (n)) | ((x) >> (32-(n))))
 #define FF(a, b, c, d, x, s) { \
-    (a) += F ((b), (c), (d)) + (x); \
-    (a) = ROTATE_LEFT ((a), (s)); \
-  }
+		(a) += F ((b), (c), (d)) + (x); \
+		(a) = ROTATE_LEFT ((a), (s)); \
+	}
 #define GG(a, b, c, d, x, s) { \
-    (a) += G ((b), (c), (d)) + (x) + (uint32)0x5a827999; \
-    (a) = ROTATE_LEFT ((a), (s)); \
-  }
+		(a) += G ((b), (c), (d)) + (x) + (uint32)0x5a827999; \
+		(a) = ROTATE_LEFT ((a), (s)); \
+	}
 #define HH(a, b, c, d, x, s) { \
-    (a) += H ((b), (c), (d)) + (x) + (uint32)0x6ed9eba1; \
-    (a) = ROTATE_LEFT ((a), (s)); \
-  }
+		(a) += H ((b), (c), (d)) + (x) + (uint32)0x6ed9eba1; \
+		(a) = ROTATE_LEFT ((a), (s)); \
+	}
 #define S11 3
 #define S12 7
 #define S13 11
@@ -63,7 +63,6 @@
 #define S33 11
 #define S34 15
 /* End MD4 Defines */
-
 
 void MD4_NEW( unsigned char * pData, int length, unsigned char * pDigest)
 {

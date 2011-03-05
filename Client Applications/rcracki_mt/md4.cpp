@@ -27,7 +27,6 @@
  * little bit optimized (or at least attempted) for NTLM (unicode) by neinbrucke
  */
 
-
 //#include <cstdlib>
 //#include <cstring>
 #include "md4.h"

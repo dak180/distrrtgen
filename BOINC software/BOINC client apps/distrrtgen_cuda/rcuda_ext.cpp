@@ -59,6 +59,7 @@ int CudaCWCExtender::IndexToStartPlain(const uint64 nIndex, std::vector<unsigned
 	stPlain.clear();
 	stPlain.reserve(0x20);
 	nPlainLen = 0;
+
 	for(ii = CChainWalkContext::m_nPlainLenMaxTotal - 1; ii >= CChainWalkContext::m_nPlainLenMinTotal - 1; ii--) {
 		if(nIndex >= CChainWalkContext::m_nPlainSpaceUpToX[ii]) {
 			nPlainLen = ii + 1;
@@ -82,5 +83,6 @@ int CudaCWCExtender::IndexToStartPlain(const uint64 nIndex, std::vector<unsigned
 			}
 		}
 	}
+
 	return stPlain.size();
 }

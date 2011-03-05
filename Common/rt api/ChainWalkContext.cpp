@@ -531,6 +531,7 @@ int CChainWalkContext::normalIndexToPlain(uint64 index, uint64 *plainSpaceUpToX,
 	unsigned int index32 = (unsigned int) index;
 	for ( ; a >= 0; a-- )
 	{
+		// remarks from Sc00bz
 		// Note the lack of assembly code.
 		// Assembly code is not needed since all the variables are in the stack.
 		// If you add in assembly code it will be slower than the compiler's code.

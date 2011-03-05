@@ -158,7 +158,7 @@ extern "C" int CalcChainsOnCUDA(const rcuda::RCudaTask* task, uint64 *resultBuff
 	grSizeX = GRID_X_SIZE;
 	dim3 numBlocks(grSizeX, grSizeY);
 	cuErr = cudaSuccess;
-	
+
 	cudaSetDeviceFlags(cudaDeviceBlockingSync);
 
 	for(int idx = 0; idx < task->rainbowChainLen-1 && cuErr == cudaSuccess; idx+=KERN_CHAIN_SIZE) {
