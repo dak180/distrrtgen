@@ -129,6 +129,26 @@ timeval sub_timeofday( timeval tv2, timeval tv )
 	return final;
 }
 
+long GetFileLen( char* file )
+{
+	struct stat sb;
+
+	if ( stat(file, &sb ) == -1 )
+		return -1;
+
+	return sb.st_size;
+}
+
+long GetFileLen( string file )
+{
+	struct stat sb;
+
+	if ( stat(file.c_str(), &sb ) == -1 )
+		return -1;
+
+	return sb.st_size;
+}
+
 long GetFileLen(FILE* file)
 {
 	// XXX on x86/x86_64 linux returns long

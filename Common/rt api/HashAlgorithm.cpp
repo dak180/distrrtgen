@@ -35,7 +35,7 @@
 #include "md5.h"
 #include "des.h"
 //#include "sha1.h"
-#include <openssl/sha.h>
+//#include <openssl/sha.h>
 #if defined(_WIN32) && !defined(__GNUC__)
 	#pragma comment(lib, "libeay32.lib")
 #endif

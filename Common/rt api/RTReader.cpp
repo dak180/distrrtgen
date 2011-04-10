@@ -23,7 +23,7 @@
 
 #include "RTReader.h"
 
-RTReader::RTReader(string Filename)
+RTReader::RTReader( std::string Filename )
 {
 	m_pFile = fopen(Filename.c_str(), "rb");
 }
@@ -39,7 +39,13 @@ int RTReader::ReadChains(uint32 &numChains, RainbowChain *pData)
 	m_chainPosition += numChains;
 	return 0;
 }
+
 uint32 RTReader::GetChainsLeft()
 {
 	return (GetFileLen(m_pFile) / 16) - m_chainPosition;
+}
+
+uint32 RTReader::getChainLength()
+{
+	return chainLength;
 }
