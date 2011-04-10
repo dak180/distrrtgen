@@ -39,8 +39,8 @@ typedef struct
 	unsigned int m_nPlainCharsetLen;
 	int m_nPlainLenMin;
 	int m_nPlainLenMax;
-	string m_sPlainCharsetName;
-	string m_sPlainCharsetContent;
+	std::string m_sPlainCharsetName;
+	std::string m_sPlainCharsetContent;
 } stCharset;
 class CChainWalkContext 
 {
@@ -49,12 +49,12 @@ public:
 	virtual ~CChainWalkContext();
 
 //private:
-	static string m_sHashRoutineName;	
+	static std::string m_sHashRoutineName;	
 	static HASHROUTINE m_pHashRoutine;							// Configuration
 	static int m_nHashLen;										// Configuration
 	static bool isOldRtFormat;
 	static bool isRti2RtFormat;
-	static vector<stCharset> m_vCharset;
+	static std::vector<stCharset> m_vCharset;
 	static int m_nPlainLenMinTotal, m_nPlainLenMaxTotal;
 	static uint64 m_nPlainSpaceUpToX[MAX_PLAIN_LEN];		// Performance consideration
 	static uint64 m_nPlainSpaceTotal;							// Performance consideration
@@ -70,18 +70,18 @@ public:
 	static unsigned char m_Salt[MAX_SALT_LEN];
 	static int m_nSaltLen;
 private:
-	static bool LoadCharset(string sCharset);
+	static bool LoadCharset( std::string sCharset );
 
 public:
-	static bool SetHashRoutine(string sHashRoutineName);												// Configuration
-	static bool SetPlainCharset(string sCharsetName, int nPlainLenMin, int nPlainLenMax);				// Configuration
+	static bool SetHashRoutine( std::string sHashRoutineName );
+	static bool SetPlainCharset( std::string sCharsetName, int nPlainLenMin, int nPlainLenMax );
 	static bool SetRainbowTableIndex(int nRainbowTableIndex);	
-	static bool SetSalt(unsigned char *Salt, int nSaltLength);// Configuration
-	static bool SetupWithPathName(string sPathName, int& nRainbowChainLen, int& nRainbowChainCount);	// Wrapper
-	static string GetHashRoutineName();
+	static bool SetSalt(unsigned char *Salt, int nSaltLength);
+	static bool SetupWithPathName( std::string sPathName, int& nRainbowChainLen, int& nRainbowChainCount );	// Wrapper
+	static std::string GetHashRoutineName();
 	static int GetHashLen();
-	static string GetPlainCharsetName();
-	static string GetPlainCharsetContent();
+	static std::string GetPlainCharsetName();
+	static std::string GetPlainCharsetContent();
 	static int GetPlainLenMin();
 	static int GetPlainLenMax();
 	static uint64 GetPlainSpaceTotal();
@@ -100,9 +100,9 @@ public:
 
 	uint64 GetIndex();
 	const uint64* GetIndexPtr();
-	string GetPlain();
-	string GetBinary();
-	string GetHash();
+	std::string GetPlain();
+	std::string GetBinary();
+	std::string GetHash();
 	bool CheckHash(unsigned char* pHash);	// The length should be m_nHashLen
 };
 

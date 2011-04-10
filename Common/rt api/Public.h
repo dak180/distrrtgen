@@ -35,7 +35,7 @@
 
 #include "global.h"
 
-using namespace std;
+//using namespace std;
 
 struct RainbowChain
 {
@@ -49,12 +49,14 @@ struct RainbowChainCP
 	uint64 nIndexE;
 	unsigned short nCheckPoint;
 };
+
 struct IndexChain
 {
 	uint64 nPrefix;
 	uint32 nFirstChain;
 	uint32 nChainCount;
 };
+
 struct FoundRainbowChain
 {
 	uint64 nIndexS;
@@ -62,11 +64,13 @@ struct FoundRainbowChain
 	int nCheckPoint;
 	int nGuessedPos;
 };
+
 struct ChainCheckChain
 {
 	uint64 nIndexS;
 	int nGuessedPos;
 };
+
 struct IndexRow
 {
 	uint64 prefix;
@@ -75,7 +79,7 @@ struct IndexRow
 
 typedef struct
 {
-	string sName;
+	std::string sName;
 	int nPlainLenMin;
 	int nPlainLenMax;
 } tCharset;
@@ -109,18 +113,20 @@ void tty_flush(void);
 timeval sub_timeofday( timeval tv2, timeval tv );
 
 long GetFileLen(FILE* file);
-string TrimString(string s);
-bool boinc_ReadLinesFromFile(string sPathName, vector<string>& vLine);
-bool ReadLinesFromFile(string sPathName, vector<string>& vLine);
-bool SeperateString(string s, string sSeperator, vector<string>& vPart);
-string uint64tostr(uint64 n);
-string uint64tohexstr(uint64 n);
-string HexToStr(const unsigned char* pData, int nLen);
+long GetFileLen(char* file);
+long GetFileLen( std::string file );
+std::string TrimString( std::string s );
+bool boinc_ReadLinesFromFile( std::string sPathName, std::vector<std::string>& vLine );
+bool ReadLinesFromFile( std::string sPathName, std::vector<std::string>& vLine);
+bool SeperateString( std::string s, std::string sSeperator, std::vector<std::string>& vPart);
+std::string uint64tostr(uint64 n);
+std::string uint64tohexstr(uint64 n);
+std::string HexToStr(const unsigned char* pData, int nLen);
 unsigned long GetAvailPhysMemorySize();
-string GetApplicationPath();
-void ParseHash(string sHash, unsigned char* pHash, int& nHashLen);
-bool GetHybridCharsets(string sCharset, vector<tCharset>& vCharset);
+std::string GetApplicationPath();
+void ParseHash( std::string sHash, unsigned char* pHash, int& nHashLen );
+bool GetHybridCharsets( std::string sCharset, std::vector<tCharset>& vCharset );
 void Logo();
-bool writeResultLineToFile(string sOutputFile, string sHash, string sPlain, string sBinary);
+bool writeResultLineToFile( std::string sOutputFile, std::string sHash, std::string sPlain, std::string sBinary );
 
 #endif

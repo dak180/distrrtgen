@@ -32,13 +32,22 @@
 	#include <io.h>
 #endif
 
-using namespace std;
+//using namespace std;
 
 class BaseRTReader
 {
+protected:
+	FILE *m_pFile;
+	uint32 chainLength;
+	std::string salt;
+
 public:
 	virtual int ReadChains(uint32 &numChains, RainbowChain *pData) = 0;
 	virtual uint32 GetChainsLeft() = 0;
+	virtual uint32 getChainLength();
+
+	virtual std::string getSalt();
+	virtual void setSalt( std::string salt );
 	
 	virtual ~BaseRTReader()  { };
 };

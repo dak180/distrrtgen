@@ -31,7 +31,7 @@
 
 #include "global.h"
 
-using namespace std;
+//using namespace std;
 
 typedef void (*HASHROUTINE)(unsigned char* pPlain, int nPlainLen, unsigned char* pHash);
 
@@ -42,14 +42,15 @@ public:
 	virtual ~CHashRoutine();
 
 private:
-	vector<string>		vHashRoutineName;
-	vector<HASHROUTINE>	vHashRoutine;
-	vector<int>			vHashLen;
-	void AddHashRoutine(string sHashRoutineName, HASHROUTINE pHashRoutine, int nHashLen);
+	std::vector<std::string> vHashRoutineName;
+	std::vector<HASHROUTINE> vHashRoutine;
+	std::vector<int> vHashLen;
+
+	void AddHashRoutine( std::string sHashRoutineName, HASHROUTINE pHashRoutine, int nHashLen);
 
 public:
-	string GetAllHashRoutineName();
-	void GetHashRoutine(string sHashRoutineName, HASHROUTINE& pHashRoutine, int& nHashLen);
+	std::string GetAllHashRoutineName();
+	void GetHashRoutine( std::string sHashRoutineName, HASHROUTINE& pHashRoutine, int& nHashLen );
 };
 
 #endif

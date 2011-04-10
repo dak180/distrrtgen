@@ -39,6 +39,7 @@
 #include <cstdlib>
 #include <csignal>
 #include <unistd.h>
+#include <sys/stat.h>
 
 #endif
 #ifdef BOINC
@@ -148,6 +149,26 @@ timeval sub_timeofday( timeval tv2, timeval tv )
 	return final;
 }
 
+long GetFileLen( char* file )
+{
+	struct stat sb;
+
+	if ( stat(file, &sb ) == -1 )
+		return -1;
+
+	return sb.st_size;
+}
+
+long GetFileLen( std::string file )
+{
+	struct stat sb;
+
+	if ( stat(file.c_str(), &sb ) == -1 )
+		return -1;
+
+	return sb.st_size;
+}
+
 long GetFileLen(FILE* file)
 {
 	// XXX on x86/x86_64 linux returns long
@@ -160,7 +181,7 @@ long GetFileLen(FILE* file)
 	return len;
 }
 
-string TrimString(string s)
+std::string TrimString( std::string s )
 {
 	while (s.size() > 0)
 	{
@@ -180,26 +201,26 @@ string TrimString(string s)
 
 	return s;
 }
-bool GetHybridCharsets(string sCharset, vector<tCharset>& vCharset)
+bool GetHybridCharsets( std::string sCharset, std::vector<tCharset>& vCharset )
 {
 	// Example: hybrid(mixalpha-numeric-all-space#6-6,numeric#1-4)
 	if(sCharset.substr(0, 6) != "hybrid") // Not hybrid charset
 		return false;
 
-	string::size_type nEnd = sCharset.rfind(')');
-	string::size_type nStart = sCharset.rfind('(');
-	string sChar = sCharset.substr(nStart + 1, nEnd - nStart - 1);
+	std::string::size_type nEnd = sCharset.rfind(')');
+	std::string::size_type nStart = sCharset.rfind('(');
+	std::string sChar = sCharset.substr(nStart + 1, nEnd - nStart - 1);
 
-	vector<string> vParts;
+	std::vector<std::string> vParts;
 	SeperateString(sChar, ",", vParts);
 
 	for(uint32 i = 0; i < vParts.size(); i++)
 	{
 		tCharset stCharset;
-		vector<string> vParts2;
+		std::vector<std::string> vParts2;
 		SeperateString(vParts[i], "#", vParts2);
 		stCharset.sName = vParts2[0];
-		vector<string> vParts3;
+		std::vector<std::string> vParts3;
 		SeperateString(vParts2[1], "-", vParts3);
 		stCharset.nPlainLenMin = atoi(vParts3[0].c_str());
 		stCharset.nPlainLenMax = atoi(vParts3[1].c_str());
@@ -209,7 +230,7 @@ bool GetHybridCharsets(string sCharset, vector<tCharset>& vCharset)
 	return true;
 }
 #ifdef BOINC
-bool boinc_ReadLinesFromFile(string sPathName, vector<string>& vLine)
+bool boinc_ReadLinesFromFile( std::string sPathName, std::vector<std::string>& vLine )
 {
 	vLine.clear();
 #ifdef USE_INTEGRATED_CHARSET
@@ -261,7 +282,7 @@ bool boinc_ReadLinesFromFile(string sPathName, vector<string>& vLine)
 		char* data = new char[len + 1];
 		fread(data, 1, len, file);
 		data[len] = '\0';
-		string content = data;
+		std::string content = data;
 		content += "\n";
 		delete [] data;
 
@@ -272,10 +293,10 @@ bool boinc_ReadLinesFromFile(string sPathName, vector<string>& vLine)
 				content[i] = '\n';
 		}
 
-		string::size_type n;
-		while ((n = content.find("\n", 0)) != string::npos)
+		std::string::size_type n;
+		while ((n = content.find("\n", 0)) != std::string::npos)
 		{
-			string line = content.substr(0, n);
+			std::string line = content.substr(0, n);
 			line = TrimString(line);
 			if (line != "")
 				vLine.push_back(line);
@@ -290,7 +311,7 @@ bool boinc_ReadLinesFromFile(string sPathName, vector<string>& vLine)
 	return true;
 }
 #endif
-bool ReadLinesFromFile(string sPathName, vector<string>& vLine)
+bool ReadLinesFromFile( std::string sPathName, std::vector<std::string>& vLine )
 {
 	vLine.clear();
 
@@ -301,7 +322,7 @@ bool ReadLinesFromFile(string sPathName, vector<string>& vLine)
 		char* data = new char[len + 1];
 		fread(data, 1, len, file);
 		data[len] = '\0';
-		string content = data;
+		std::string content = data;
 		content += "\n";
 		delete [] data;
 
@@ -312,10 +333,10 @@ bool ReadLinesFromFile(string sPathName, vector<string>& vLine)
 				content[i] = '\n';
 		}
 
-		string::size_type n;
-		while ((n = content.find("\n", 0)) != string::npos)
+		std::string::size_type n;
+		while ((n = content.find("\n", 0)) != std::string::npos)
 		{
-			string line = content.substr(0, n);
+			std::string line = content.substr(0, n);
 			line = TrimString(line);
 			if (line != "")
 				vLine.push_back(line);
@@ -330,12 +351,12 @@ bool ReadLinesFromFile(string sPathName, vector<string>& vLine)
 	return true;
 }
 
-bool writeResultLineToFile(string sOutputFile, string sHash, string sPlain, string sBinary)
+bool writeResultLineToFile( std::string sOutputFile, std::string sHash, std::string sPlain, std::string sBinary )
 {
 	FILE* file = fopen(sOutputFile.c_str(), "a");
 	if (file!=NULL)
 	{
-		string buffer = sHash + ":" + sPlain + ":" + sBinary + "\n";
+		std::string buffer = sHash + ":" + sPlain + ":" + sBinary + "\n";
 		fputs (buffer.c_str(), file);
 		fclose (file);
 		return true;
@@ -344,15 +365,15 @@ bool writeResultLineToFile(string sOutputFile, string sHash, string sPlain, stri
 		return false;
 }
 
-bool SeperateString(string s, string sSeperator, vector<string>& vPart)
+bool SeperateString( std::string s, std::string sSeperator, std::vector<std::string>& vPart )
 {
 	vPart.clear();
 
 	unsigned int i;
 	for (i = 0; i < sSeperator.size(); i++)
 	{
-		string::size_type n;
-		if ( (n = s.find(sSeperator[i])) != string::npos)
+		std::string::size_type n;
+		if ( (n = s.find(sSeperator[i])) != std::string::npos)
 		{
 			vPart.push_back(s.substr(0, n));
 			s = s.substr(n + 1);
@@ -369,7 +390,7 @@ bool SeperateString(string s, string sSeperator, vector<string>& vPart)
 	return true;
 }
 
-string uint64tostr(uint64 n)
+std::string uint64tostr(uint64 n)
 {
 	char str[32];
 
@@ -382,7 +403,7 @@ string uint64tostr(uint64 n)
 	return str;
 }
 
-string uint64tohexstr(uint64 n)
+std::string uint64tohexstr(uint64 n)
 {
 	char str[32];
 
@@ -395,9 +416,9 @@ string uint64tohexstr(uint64 n)
 	return str;
 }
 
-string HexToStr(const unsigned char* pData, int nLen)
+std::string HexToStr(const unsigned char* pData, int nLen)
 {
-	string sRet;
+	std::string sRet;
 	int i;
 	for (i = 0; i < nLen; i++)
 	{
@@ -433,7 +454,7 @@ unsigned long GetAvailPhysMemorySize()
 #endif
 }
 
-string GetApplicationPath()
+std::string GetApplicationPath()
 {
 	char fullPath[FILENAME_MAX];
 
@@ -449,25 +470,25 @@ string GetApplicationPath()
 		fullPath[bytes] = '\0';
 #endif
 
-	string sApplicationPath = fullPath;
+	std::string sApplicationPath = fullPath;
 #ifdef _WIN32
-	string::size_type nIndex = sApplicationPath.find_last_of('\\');
+	std::string::size_type nIndex = sApplicationPath.find_last_of('\\');
 #else
-	string::size_type nIndex = sApplicationPath.find_last_of('/');
+	std::string::size_type nIndex = sApplicationPath.find_last_of('/');
 #endif
 
-	if ( nIndex != string::npos )
+	if ( nIndex != std::string::npos )
 		sApplicationPath = sApplicationPath.substr(0, nIndex+1);
 
 	return sApplicationPath;
 }
 
-void ParseHash(string sHash, unsigned char* pHash, int& nHashLen)
+void ParseHash( std::string sHash, unsigned char* pHash, int& nHashLen )
 {
 	uint32 i;
 	for (i = 0; i < sHash.size() / 2; i++)
 	{
-		string sSub = sHash.substr(i * 2, 2);
+		std::string sSub = sHash.substr(i * 2, 2);
 		int nValue;
 		sscanf(sSub.c_str(), "%02x", &nValue);
 		pHash[i] = (unsigned char)nValue;

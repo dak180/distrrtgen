@@ -87,7 +87,7 @@ unsigned char* CMemoryPool::Allocate(unsigned int nFileLen, uint64& nAllocatedSi
 		printf("Allocating %i bytes of memory - ", nTargetSize);
 #endif 
 
-	m_pMem = new (nothrow) unsigned char[nTargetSize];
+	m_pMem = new (std::nothrow) unsigned char[nTargetSize];
 	while (m_pMem == NULL && nTargetSize >= 512 * 1024 * 1024 )
 	{
 #ifdef _MEMORYDEBUG
@@ -95,7 +95,7 @@ unsigned char* CMemoryPool::Allocate(unsigned int nFileLen, uint64& nAllocatedSi
 		printf("Allocating %i bytes of memory (backup) - ", nTargetSize);
 #endif 
 		nTargetSize -= 16 * 1024 * 1024;
-		m_pMem = new (nothrow) unsigned char[nTargetSize];
+		m_pMem = new (std::nothrow) unsigned char[nTargetSize];
 	}
 
 	if (m_pMem != NULL)
