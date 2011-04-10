@@ -35,7 +35,7 @@
 #include "md5.h"
 #include "des.h"
 //#include "sha1.h"
-#include <openssl/sha.h>
+//#include <openssl/sha.h>
 #if defined(_WIN32) && !defined(__GNUC__)
 	#pragma comment(lib, "libeay32.lib")
 #endif
@@ -244,9 +244,11 @@ void HashMD5(unsigned char* pPlain, int nPlainLen, unsigned char* pHash)
 void HashDoubleMD5(unsigned char* pPlain, int nPlainLen, unsigned char* pHash)
 {
 	MD5_NEW(pPlain, nPlainLen, pHash);
-	unsigned char hash[16];
-	memcpy(hash, pHash, 16);
-	MD5_NEW(hash, 16, pHash);
+
+	unsigned char hash[MD5_DIGEST_LENGTH];
+	memcpy(hash, pHash, MD5_DIGEST_LENGTH);
+	
+	MD5_NEW(hash, MD5_DIGEST_LENGTH, pHash);
 }
 
 /*

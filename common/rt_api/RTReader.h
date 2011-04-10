@@ -30,7 +30,8 @@
 #endif
 #include "Public.h"
 #include "BaseRTReader.h"
-using namespace std;
+
+//using namespace std;
 
 class RTReader : BaseRTReader
 {
@@ -39,11 +40,11 @@ private:
 	unsigned int m_chainPosition;
 
 public:
-	RTReader(string Filename);
+	RTReader( std::string Filename );
 	~RTReader(void);
 	int ReadChains(uint32 &numChains, RainbowChain *pData);
-	unsigned int GetChainsLeft();
-
+	uint32 GetChainsLeft();
+	uint32 getChainLength();
 };
 
 #endif

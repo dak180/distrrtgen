@@ -62,16 +62,16 @@ CHashRoutine::~CHashRoutine()
 {
 }
 
-void CHashRoutine::AddHashRoutine(string sHashRoutineName, HASHROUTINE pHashRoutine, int nHashLen)
+void CHashRoutine::AddHashRoutine( std::string sHashRoutineName, HASHROUTINE pHashRoutine, int nHashLen )
 {
 	vHashRoutineName.push_back(sHashRoutineName);
 	vHashRoutine.push_back(pHashRoutine);
 	vHashLen.push_back(nHashLen);
 }
 
-string CHashRoutine::GetAllHashRoutineName()
+std::string CHashRoutine::GetAllHashRoutineName()
 {
-	string sRet;
+	std::string sRet;
 	uint32 i;
 	for (i = 0; i < vHashRoutineName.size(); i++)
 		sRet += vHashRoutineName[i] + " ";
@@ -79,7 +79,7 @@ string CHashRoutine::GetAllHashRoutineName()
 	return sRet;
 }
 
-void CHashRoutine::GetHashRoutine(string sHashRoutineName, HASHROUTINE& pHashRoutine, int& nHashLen)
+void CHashRoutine::GetHashRoutine( std::string sHashRoutineName, HASHROUTINE& pHashRoutine, int& nHashLen )
 {
 	uint32 i;
 	for (i = 0; i < vHashRoutineName.size(); i++)

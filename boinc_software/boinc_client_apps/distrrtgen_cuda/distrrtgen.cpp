@@ -56,6 +56,7 @@
 #include "filesys.h"
 #include "boinc_api.h"
 #include "Public.h"
+#include "distrrtgen.h"
 #include "rcuda.h"
 #include "rcuda_ext.h"
 
@@ -129,7 +130,7 @@ int main(int argc, char **argv) {
 	nChainStart = atoll(argv[8]);
 #endif
 	sCheckPoints = argv[9];
-	vector<int> vCPPositions;
+	std::vector<int> vCPPositions;
 	char *cp = strtok((char *)sCheckPoints.c_str(), ",");
 	while(cp != NULL)
 	{

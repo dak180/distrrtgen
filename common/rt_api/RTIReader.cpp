@@ -23,7 +23,7 @@
 
 #include "RTIReader.h"
 
-RTIReader::RTIReader(string Filename)
+RTIReader::RTIReader( std::string Filename )
 {
 	m_pIndex = NULL;
 	m_pFile = fopen(Filename.c_str(), "rb");
@@ -31,7 +31,7 @@ RTIReader::RTIReader(string Filename)
 		printf("could not open file %s\n", Filename.c_str());
 		return;		
 	}
-	string sIndex = Filename.append(".index").c_str();
+	std::string sIndex = Filename.append(".index").c_str();
 	FILE *pFileIndex = fopen(sIndex.c_str(), "rb");
 	if(pFileIndex == NULL) {
 		printf("could not open index file %s\n", sIndex.c_str());
@@ -40,8 +40,14 @@ RTIReader::RTIReader(string Filename)
 	m_chainPosition = 0;
 
 	// Load the index file
+#if defined(_WIN32) && !defined(__GNUC__)
 	long nIndexFileLen = GetFileLen(pFileIndex);
 	long nFileLen = GetFileLen(m_pFile);
+#else
+	long nIndexFileLen = GetFileLen( sIndex );
+	long nFileLen = GetFileLen( Filename );
+#endif
+
 	unsigned int nTotalChainCount = nFileLen / 8;
 	if (nFileLen % 8 != 0)
 		printf("file length mismatch (%lu bytes)\n", nFileLen);
@@ -59,7 +65,7 @@ RTIReader::RTIReader(string Filename)
 #ifdef _MEMORYDEBUG
 			printf("Allocating %u MB memory for RTIReader::m_pIndex", nIndexFileLen / 11 / (1024 * 1024));
 #endif
-			m_pIndex = new (nothrow) IndexChain[nIndexFileLen / 11];
+			m_pIndex = new (std::nothrow) IndexChain[nIndexFileLen / 11];
 			if(m_pIndex == NULL) {
 				printf("\nFailed allocating %ld MB memory.\n", nIndexFileLen / 11 / (1024 * 1024));
 				exit(-2);

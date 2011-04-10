@@ -112,7 +112,7 @@ int main(int argc, char **argv) {
 	nChainStart = atoll(argv[8]);
 #endif
 	sCheckPoints = argv[9];
-	vector<uint32> vCPPositions;
+	std::vector<uint32> vCPPositions;
 	char *cp = strtok((char *)sCheckPoints.c_str(), ",");
 	while(cp != NULL)
 	{

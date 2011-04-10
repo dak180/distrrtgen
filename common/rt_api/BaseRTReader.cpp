@@ -23,3 +23,18 @@
  */
 
 #include "BaseRTReader.h"
+
+uint32 BaseRTReader::getChainLength()
+{
+	return chainLength;
+}
+
+std::string BaseRTReader::getSalt()
+{
+	return salt;
+}
+
+void BaseRTReader::setSalt( std::string salt )
+{
+	this->salt = salt;
+}

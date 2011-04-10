@@ -121,6 +121,8 @@ void tty_flush(void);
 timeval sub_timeofday( timeval tv2, timeval tv );
 
 long GetFileLen(FILE* file);
+long GetFileLen(char* file);
+long GetFileLen(string file);
 string TrimString(string s);
 bool boinc_ReadLinesFromFile(string sPathName, vector<string>& vLine);
 bool ReadLinesFromFile(string sPathName, vector<string>& vLine);

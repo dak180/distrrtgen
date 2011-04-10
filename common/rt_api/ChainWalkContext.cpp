@@ -35,7 +35,7 @@
 
 //////////////////////////////////////////////////////////////////////
 
-string CChainWalkContext::m_sHashRoutineName;
+std::string CChainWalkContext::m_sHashRoutineName;
 HASHROUTINE CChainWalkContext::m_pHashRoutine;
 int CChainWalkContext::m_nHashLen;
 int CChainWalkContext::m_nPlainLenMinTotal = 0;
@@ -43,7 +43,7 @@ int CChainWalkContext::m_nPlainLenMaxTotal = 0;
 int CChainWalkContext::m_nHybridCharset = 0;
 bool CChainWalkContext::isOldRtFormat = false;
 bool CChainWalkContext::isRti2RtFormat = false;
-vector<stCharset> CChainWalkContext::m_vCharset;
+std::vector<stCharset> CChainWalkContext::m_vCharset;
 uint64 CChainWalkContext::m_nPlainSpaceUpToX[MAX_PLAIN_LEN];
 uint64 CChainWalkContext::m_nPlainSpaceTotal;
 unsigned char CChainWalkContext::m_Salt[MAX_SALT_LEN];
@@ -61,7 +61,7 @@ CChainWalkContext::~CChainWalkContext()
 {
 }
 
-bool CChainWalkContext::LoadCharset(string sName)
+bool CChainWalkContext::LoadCharset( std::string sName )
 {
 	m_vCharset.clear();
 	if (sName == "byte")
@@ -87,7 +87,7 @@ bool CChainWalkContext::LoadCharset(string sName)
 		m_nHybridCharset = 0;
 	
 	bool readCharset = false;
-	vector<string> vLine;
+	std::vector<std::string> vLine;
 
 	#ifdef BOINC
 		if ( boinc_ReadLinesFromFile( "charset.txt", vLine ) )
@@ -108,11 +108,11 @@ bool CChainWalkContext::LoadCharset(string sName)
 			if (vLine[i][0] == '#')
 				continue;
 
-			vector<string> vPart;
+			std::vector<std::string> vPart;
 			if (SeperateString(vLine[i], "=", vPart))
 			{
 				// sCharsetName
-				string sCharsetName = TrimString(vPart[0]);
+				std::string sCharsetName = TrimString(vPart[0]);
 				if (sCharsetName == "")
 					continue;
 								
@@ -136,7 +136,7 @@ bool CChainWalkContext::LoadCharset(string sName)
 				}
 
 				// sCharsetContent
-				string sCharsetContent = TrimString(vPart[1]);
+				std::string sCharsetContent = TrimString(vPart[1]);
 				if (sCharsetContent == "" || sCharsetContent == "[]")
 					continue;
 				if (sCharsetContent[0] != '[' || sCharsetContent[sCharsetContent.size() - 1] != ']')
@@ -156,7 +156,7 @@ bool CChainWalkContext::LoadCharset(string sName)
 				// Is it a hybrid?
 				if( m_nHybridCharset != 0 )
 				{
-					vector<tCharset> vCharsets;
+					std::vector<tCharset> vCharsets;
 					GetHybridCharsets(sName, vCharsets);
 					if(sCharsetName == vCharsets[m_vCharset.size()].sName)
 					{
@@ -198,7 +198,7 @@ bool CChainWalkContext::LoadCharset(string sName)
 
 //////////////////////////////////////////////////////////////////////
 
-bool CChainWalkContext::SetHashRoutine(string sHashRoutineName)
+bool CChainWalkContext::SetHashRoutine( std::string sHashRoutineName )
 {
 	CHashRoutine hr;
 	hr.GetHashRoutine(sHashRoutineName, m_pHashRoutine, m_nHashLen);
@@ -211,7 +211,7 @@ bool CChainWalkContext::SetHashRoutine(string sHashRoutineName)
 		return false;
 }
 
-bool CChainWalkContext::SetPlainCharset(string sCharsetName, int nPlainLenMin, int nPlainLenMax)
+bool CChainWalkContext::SetPlainCharset( std::string sCharsetName, int nPlainLenMin, int nPlainLenMax)
 {
 	// m_PlainCharset, m_nPlainCharsetLen, m_sPlainCharsetName, m_sPlainCharsetContent
 	if (!LoadCharset(sCharsetName))
@@ -289,16 +289,16 @@ bool CChainWalkContext::SetSalt(unsigned char *Salt, int nSaltLength)
 	return true;
 }
 
-bool CChainWalkContext::SetupWithPathName(string sPathName, int& nRainbowChainLen, int& nRainbowChainCount)
+bool CChainWalkContext::SetupWithPathName( std::string sPathName, int& nRainbowChainLen, int& nRainbowChainCount)
 {
 	// something like lm_alpha#1-7_0_100x16_test.rt
 
 #ifdef _WIN32
-	string::size_type nIndex = sPathName.find_last_of('\\');
+	std::string::size_type nIndex = sPathName.find_last_of('\\');
 #else
-	string::size_type nIndex = sPathName.find_last_of('/');
+	std::string::size_type nIndex = sPathName.find_last_of('/');
 #endif
-	if (nIndex != string::npos)
+	if (nIndex != std::string::npos)
 		sPathName = sPathName.substr(nIndex + 1);
 
 	if (sPathName.size() < 3)
@@ -325,21 +325,21 @@ bool CChainWalkContext::SetupWithPathName(string sPathName, int& nRainbowChainLe
 	}
 
 	// Parse
-	vector<string> vPart;
+	std::vector<std::string> vPart;
 	if (!SeperateString(sPathName, "___x_", vPart))
 	{
 		printf("filename %s not identified\n", sPathName.c_str());
 		return false;
 	}
 
-	string sHashRoutineName   = vPart[0];
+	std::string sHashRoutineName   = vPart[0];
 	int nRainbowTableIndex    = atoi(vPart[2].c_str());
 	nRainbowChainLen          = atoi(vPart[3].c_str());
 	nRainbowChainCount        = atoi(vPart[4].c_str());
 
 	// Parse charset definition
-	string sCharsetDefinition = vPart[1];
-	string sCharsetName;
+	std::string sCharsetDefinition = vPart[1];
+	std::string sCharsetName;
 	int nPlainLenMin = 0, nPlainLenMax = 0;		
 
 //	printf("Charset: %s", sCharsetDefinition.c_str());
@@ -350,7 +350,7 @@ bool CChainWalkContext::SetupWithPathName(string sPathName, int& nRainbowChainLe
 	}
 	else
 	{
-		if ( sCharsetDefinition.find('#') == string::npos )		// For backward compatibility, "#1-7" is implied
+		if ( sCharsetDefinition.find('#') == std::string::npos )		// For backward compatibility, "#1-7" is implied
 		{			
 			sCharsetName = sCharsetDefinition;
 			nPlainLenMin = 1;
@@ -358,7 +358,7 @@ bool CChainWalkContext::SetupWithPathName(string sPathName, int& nRainbowChainLe
 		}
 		else
 		{
-			vector<string> vCharsetDefinitionPart;
+			std::vector<std::string> vCharsetDefinitionPart;
 			if (!SeperateString(sCharsetDefinition, "#-", vCharsetDefinitionPart))
 			{
 				printf("filename %s not identified\n", sPathName.c_str());
@@ -389,7 +389,7 @@ bool CChainWalkContext::SetupWithPathName(string sPathName, int& nRainbowChainLe
 	return true;
 }
 
-string CChainWalkContext::GetHashRoutineName()
+std::string CChainWalkContext::GetHashRoutineName()
 {
 	return m_sHashRoutineName;
 }
@@ -399,12 +399,12 @@ int CChainWalkContext::GetHashLen()
 	return m_nHashLen;
 }
 
-string CChainWalkContext::GetPlainCharsetName()
+std::string CChainWalkContext::GetPlainCharsetName()
 {
 	return m_vCharset[0].m_sPlainCharsetName;
 }
 
-string CChainWalkContext::GetPlainCharsetContent()
+std::string CChainWalkContext::GetPlainCharsetContent()
 {
 	return m_vCharset[0].m_sPlainCharsetContent;
 }
@@ -711,9 +711,9 @@ const uint64 *CChainWalkContext::GetIndexPtr()
 	return &m_nIndex;
 }
 
-string CChainWalkContext::GetPlain()
+std::string CChainWalkContext::GetPlain()
 {
-	string sRet;
+	std::string sRet;
 	int i;
 	for (i = 0; i < m_nPlainLen; i++)
 	{
@@ -727,12 +727,12 @@ string CChainWalkContext::GetPlain()
 	return sRet;
 }
 
-string CChainWalkContext::GetBinary()
+std::string CChainWalkContext::GetBinary()
 {
 	return HexToStr(m_Plain, m_nPlainLen);
 }
 
-string CChainWalkContext::GetHash()
+std::string CChainWalkContext::GetHash()
 {
 	return HexToStr(m_Hash, m_nHashLen);
 }

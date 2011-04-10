@@ -30,7 +30,8 @@
 #endif
 #include "Public.h"
 #include "BaseRTReader.h"
-using namespace std;
+
+//using namespace std;
 
 class RTIReader : BaseRTReader
 {
@@ -40,7 +41,7 @@ private:
 	unsigned int m_nIndexSize;
 	IndexChain *m_pIndex;
 public:
-	RTIReader(string Filename);
+	RTIReader( std::string Filename );
 	~RTIReader(void);
 
 	int ReadChains(uint32 &numChains, RainbowChain *pData);
