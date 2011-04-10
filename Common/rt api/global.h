@@ -47,4 +47,24 @@
 	#endif
 #endif
 
+#if defined(_WIN32) && !defined(__GNUC__)
+	#define uint16 unsigned short
+#else
+	#ifndef u_int16_t
+		#define uint16 unsigned short
+	#else
+		#define uint16 u_int16_t
+	#endif
+#endif
+
+#if defined(_WIN32) && !defined(__GNUC__)
+	#define uint8 unsigned char
+#else
+	#ifndef u_int8_t
+		#define uint8 unsigned char
+	#else
+		#define uint8 u_int8_t
+	#endif
+#endif
+
 #endif /* !GLOBAL_H */
