@@ -18,36 +18,36 @@
     <ClCompile Include="converti2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Common\rt api\MemoryPool.cpp">
+    <ClCompile Include="..\..\common\rt api\MemoryPool.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Common\rt api\Public.cpp">
+    <ClCompile Include="..\..\common\rt api\Public.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Common\rt api\BaseRTReader.cpp">
+    <ClCompile Include="..\..\common\rt api\BaseRTReader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Common\rt api\RTIReader.cpp">
+    <ClCompile Include="..\..\common\rt api\RTIReader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Common\rt api\RTReader.cpp">
+    <ClCompile Include="..\..\common\rt api\RTReader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\Common\rt api\MemoryPool.h">
+    <ClInclude Include="..\..\common\rt api\MemoryPool.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Common\rt api\Public.h">
+    <ClInclude Include="..\..\common\rt api\Public.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Common\rt api\RTIReader.h">
+    <ClInclude Include="..\..\common\rt api\RTIReader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Common\rt api\RTReader.h">
+    <ClInclude Include="..\..\common\rt api\RTReader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Common\rt api\BaseRTReader.h">
+    <ClInclude Include="..\..\common\rt api\BaseRTReader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

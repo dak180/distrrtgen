@@ -122,7 +122,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="/boinc/lib;/boinc/api;/boinc/zip;/boinc/client/win;/boinc/;&quot;C:\Users\mwj\git\Common\rt api&quot;"
+				AdditionalIncludeDirectories="/boinc/lib;/boinc/api;/boinc/zip;/boinc/client/win;/boinc/;&quot;C:\Users\mwj\git\common\rt api&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_MT;_CONSOLE"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
@@ -187,15 +187,15 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\..\Common\rt api\ChainWalkContext.cpp"
+				RelativePath="..\..\..\common\rt api\ChainWalkContext.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\Common\rt api\des_enc.c"
+				RelativePath="..\..\..\common\rt api\des_enc.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\Common\rt api\des_setkey.c"
+				RelativePath="..\..\..\common\rt api\des_setkey.c"
 				>
 			</File>
 			<File
@@ -203,27 +203,27 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\Common\rt api\ecb_enc.c"
+				RelativePath="..\..\..\common\rt api\ecb_enc.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\Common\rt api\HashAlgorithm.cpp"
+				RelativePath="..\..\..\common\rt api\HashAlgorithm.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\Common\rt api\HashRoutine.cpp"
+				RelativePath="..\..\..\common\rt api\HashRoutine.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\Common\rt api\md4.cpp"
+				RelativePath="..\..\..\common\rt api\md4.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\Common\rt api\md5.cpp"
+				RelativePath="..\..\..\common\rt api\md5.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\Common\rt api\Public.cpp"
+				RelativePath="..\..\..\common\rt api\Public.cpp"
 				>
 			</File>
 			<File
@@ -259,15 +259,15 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\..\..\Common\rt api\ChainWalkContext.h"
+				RelativePath="..\..\..\common\rt api\ChainWalkContext.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\Common\rt api\des.h"
+				RelativePath="..\..\..\common\rt api\des.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\Common\rt api\des_locl.h"
+				RelativePath="..\..\..\common\rt api\des_locl.h"
 				>
 			</File>
 			<File
@@ -275,27 +275,27 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\Common\rt api\HashAlgorithm.h"
+				RelativePath="..\..\..\common\rt api\HashAlgorithm.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\Common\rt api\HashRoutine.h"
+				RelativePath="..\..\..\common\rt api\HashRoutine.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\Common\rt api\md4.h"
+				RelativePath="..\..\..\common\rt api\md4.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\Common\rt api\md5.h"
+				RelativePath="..\..\..\common\rt api\md5.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\Common\rt api\podd.h"
+				RelativePath="..\..\..\common\rt api\podd.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\Common\rt api\Public.h"
+				RelativePath="..\..\..\common\rt api\Public.h"
 				>
 			</File>
 			<File
@@ -307,11 +307,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\Common\rt api\sk.h"
+				RelativePath="..\..\..\common\rt api\sk.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\Common\rt api\spr.h"
+				RelativePath="..\..\..\common\rt api\spr.h"
 				>
 			</File>
 		</Filter>

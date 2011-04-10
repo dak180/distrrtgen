@@ -20,7 +20,7 @@
 #ifndef RTWRITE_H
 #define RTWRITE_H
 
-#include "RTCommon.h"
+#include "RTcommon.h"
 
 class RTWrite
 {

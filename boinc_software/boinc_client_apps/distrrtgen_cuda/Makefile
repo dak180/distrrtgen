@@ -32,9 +32,9 @@ COMMON_LIB_DIR = /usr/lib
 CUDA_PATH = /usr/local/cuda
 CUDA_LIB = libcudart.so.2
 #CUDA_LIB = libcudart.so.3
-INCLUDES = -I../../../Common/rt\ api -I$(BOINC_DIR) -I$(BOINC_LIB_DIR) \
+INCLUDES = -I../../../common/rt_api -I$(BOINC_DIR) -I$(BOINC_LIB_DIR) \
 	-I$(BOINC_API_DIR) -I$(CUDA_PATH)/include
-COMMON_API_PATH = ../../../Common/rt\ api
+COMMON_API_PATH = ../../../common/rt_api
 
 OPTIMIZATION = -O3
 WARNALL = -Wextra -Wunused-macros -Wunsafe-loop-optimizations -Wundef \
@@ -63,13 +63,13 @@ distrrtgen: $(CUDA_LIB) libgcc_s.so.1 libstdc++.so.6 $(BOINC_API_DIR)/libboinc_a
 	$(CXX) $(LFLAGS) $(OBJS) $(LIBS) -o distrrtgen
 
 $(CUDA_LIB):
-	ln -s $(CUDA_PATH)/lib64/$(CUDA_LIB) $(CUDA_LIB)
+	if [ !-f $(CUDA_LIB) ]; then ln -s $(CUDA_PATH)/lib64/$(CUDA_LIB) $(CUDA_LIB); fi
 
 libstdc++.so.6:
-	ln -s `$(CC) $(CXXFLAGS) -print-file-name=libstdc++.so.6`
+	if [ !-f libstdc++.so.6 ]; then ln -s `$(CC) $(CXXFLAGS) -print-file-name=libstdc++.so.6`; fi
 
 libgcc_s.so.1:
-	ln -s `$(CC) $(CXXFLAGS) -print-file-name=libgcc_s.so.1`
+	if [ !-f libgcc_s.so.1 ]; then ln -s `$(CC) $(CXXFLAGS) -print-file-name=libgcc_s.so.1`; fi
 
 clean:
 	/bin/rm -f distrrtgen *.o
@@ -120,6 +120,6 @@ rcuda_ext.o: rcuda_ext.h rcuda_ext.cpp $(COMMON_API_PATH)/ChainWalkContext.h
 	$(CXX) $(CXXFLAGS) rcuda_ext.cpp
 
 rcuda.o: rcuda.h rcuda.cu $(COMMON_API_PATH)/Public.h $(COMMON_API_PATH)/global.h
-	$(CUDA_PATH)/bin/nvcc $(OPTIMIZATION) $(DEBUG) -I../../../Common/rt\ api --compile rcuda.cu
-#	$(CUDA_PATH)/bin/nvcc -G $(OPTIMIZATION) $(DEBUG) -I../../../Common/rt\ api --compile rcuda.cu
-#	$(CUDA_PATH)/bin/nvcc -G $(DEBUG) --machine 32 -I../../../Common/rt\ api --compile rcuda.cu
+	$(CUDA_PATH)/bin/nvcc $(OPTIMIZATION) $(DEBUG) -I../../../common/rt_api --compile rcuda.cu
+#	$(CUDA_PATH)/bin/nvcc -G $(OPTIMIZATION) $(DEBUG) -I../../../common/rt_api --compile rcuda.cu
+#	$(CUDA_PATH)/bin/nvcc -G $(DEBUG) --machine 32 -I../../../common/rt_api --compile rcuda.cu

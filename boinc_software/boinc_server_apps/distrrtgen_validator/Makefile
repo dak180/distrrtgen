@@ -42,7 +42,7 @@ MYSQL_LIB_DIR = /usr/local/lib/mysql
 COMMON_LIB_DIR = /usr/local/lib
 # Debian GNU/Linux
 #COMMON_LIB_DIR = /usr/lib
-COMMON_API_PATH = ../../../Common/rt\ api
+COMMON_API_PATH = ../../../common/rt_api
 
 # NetBSD doesn't like native
 #-mtune=native

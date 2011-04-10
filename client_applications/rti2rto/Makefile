@@ -1,12 +1,12 @@
 SHELL = /bin/sh
 CC = g++
 OPTIMIZATION = -O3
-INCLUDES = -I../../Common/rt\ api
+INCLUDES = -I../../common/rt_api
 CFLAGS = -Wall -ansi $(INCLUDES) $(OPTIMIZATION) -c $(DEBUG)
 LFLAGS = -Wall -ansi $(INCLUDES) $(OPTIMIZATION) $(DEBUG)
 LIBS = 
 OBJS = MemoryPool.o Public.o RTI2Reader.o RTIReader.o
-COMMON_API_PATH = ../../Common/rt\ api
+COMMON_API_PATH = ../../common/rt_api
 
 all: rti2rto
 

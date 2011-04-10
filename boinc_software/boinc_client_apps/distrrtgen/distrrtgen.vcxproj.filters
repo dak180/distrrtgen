@@ -15,75 +15,75 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\Common\rt api\ChainWalkContext.cpp">
+    <ClCompile Include="..\..\..\common\rt api\ChainWalkContext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\Common\rt api\des_enc.c">
+    <ClCompile Include="..\..\..\common\rt api\des_enc.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\Common\rt api\des_setkey.c">
+    <ClCompile Include="..\..\..\common\rt api\des_setkey.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="distrrtgen.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\Common\rt api\ecb_enc.c">
+    <ClCompile Include="..\..\..\common\rt api\ecb_enc.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\Common\rt api\HashAlgorithm.cpp">
+    <ClCompile Include="..\..\..\common\rt api\HashAlgorithm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\Common\rt api\HashRoutine.cpp">
+    <ClCompile Include="..\..\..\common\rt api\HashRoutine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\Common\rt api\md4.cpp">
+    <ClCompile Include="..\..\..\common\rt api\md4.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\Common\rt api\md5.cpp">
+    <ClCompile Include="..\..\..\common\rt api\md5.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\Common\rt api\Public.cpp">
+    <ClCompile Include="..\..\..\common\rt api\Public.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\Common\rt api\ChainWalkContext.h">
+    <ClInclude Include="..\..\..\common\rt api\ChainWalkContext.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Common\rt api\des.h">
+    <ClInclude Include="..\..\..\common\rt api\des.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Common\rt api\des_locl.h">
+    <ClInclude Include="..\..\..\common\rt api\des_locl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="distrrtgen.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Common\rt api\HashAlgorithm.h">
+    <ClInclude Include="..\..\..\common\rt api\HashAlgorithm.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Common\rt api\HashRoutine.h">
+    <ClInclude Include="..\..\..\common\rt api\HashRoutine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Common\rt api\md4.h">
+    <ClInclude Include="..\..\..\common\rt api\md4.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Common\rt api\md5.h">
+    <ClInclude Include="..\..\..\common\rt api\md5.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Common\rt api\podd.h">
+    <ClInclude Include="..\..\..\common\rt api\podd.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Common\rt api\Public.h">
+    <ClInclude Include="..\..\..\common\rt api\Public.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Common\rt api\sk.h">
+    <ClInclude Include="..\..\..\common\rt api\sk.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Common\rt api\spr.h">
+    <ClInclude Include="..\..\..\common\rt api\spr.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Common\rt api\global.h">
+    <ClInclude Include="..\..\..\common\rt api\global.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

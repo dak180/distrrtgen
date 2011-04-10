@@ -39,8 +39,8 @@ BOINC_LIB_DIR = $(BOINC_DIR)/lib
 #BOINC_INC_DIR = /usr/local/include/boinc
 CC = g++
 COMMON_LIB_DIR = /usr/lib
-INCLUDES = -I../../../Common/rt\ api -I$(BOINC_DIR) -I$(BOINC_LIB_DIR) -I$(BOINC_API_DIR) -I$(BOINC_INC_DIR)
-COMMON_API_PATH = ../../../Common/rt\ api
+INCLUDES = -I../../../common/rt_api -I$(BOINC_DIR) -I$(BOINC_LIB_DIR) -I$(BOINC_API_DIR) -I$(BOINC_INC_DIR)
+COMMON_API_PATH = ../../../common/rt_api
 
 OPTIMIZATION = -O3
 

@@ -2,13 +2,13 @@ SHELL = /bin/sh
 CXX = g++
 CC = gcc
 OPTIMIZATION = -O3
-INCLUDES = -I../../Common/rt\ api
+INCLUDES = -I../../common/rt_api
 # XXX todo currently only 32-bit targets work
 CFLAGS = -Wall -m32 -ansi $(INCLUDES) $(OPTIMIZATION) -c $(DEBUG)
 LFLAGS = -Wall -m32 -ansi $(INCLUDES) $(OPTIMIZATION) $(DEBUG)
 LIBS = 
 OBJS = MemoryPool.o Public.o RTI2Reader.o RTIReader.o RTReader.o
-COMMON_API_PATH = ../../Common/rt\ api
+COMMON_API_PATH = ../../common/rt_api
 
 all: converti2
 
