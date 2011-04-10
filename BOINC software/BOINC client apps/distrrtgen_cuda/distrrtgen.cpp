@@ -56,6 +56,7 @@
 #include "filesys.h"
 #include "boinc_api.h"
 #include "Public.h"
+#include "distrrtgen.h"
 #include "rcuda.h"
 #include "rcuda_ext.h"
 
