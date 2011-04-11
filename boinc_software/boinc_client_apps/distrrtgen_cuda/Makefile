@@ -120,6 +120,6 @@ rcuda_ext.o: rcuda_ext.h rcuda_ext.cpp $(COMMON_API_PATH)/ChainWalkContext.h
 	$(CXX) $(CXXFLAGS) rcuda_ext.cpp
 
 rcuda.o: rcuda.h rcuda.cu $(COMMON_API_PATH)/Public.h $(COMMON_API_PATH)/global.h
-	$(CUDA_PATH)/bin/nvcc $(OPTIMIZATION) $(DEBUG) -I../../../common/rt_api --compile rcuda.cu
+	$(CUDA_PATH)/bin/nvcc --compiler-bindir=/usr/bin/gcc-4.3 $(OPTIMIZATION) $(DEBUG) -I../../../common/rt_api --compile rcuda.cu
 #	$(CUDA_PATH)/bin/nvcc -G $(OPTIMIZATION) $(DEBUG) -I../../../common/rt_api --compile rcuda.cu
 #	$(CUDA_PATH)/bin/nvcc -G $(DEBUG) --machine 32 -I../../../common/rt_api --compile rcuda.cu
