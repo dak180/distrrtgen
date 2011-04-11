@@ -13,7 +13,8 @@
 #include "MemoryPool.h"
 #include "RTI2Reader.h"
 #include "RTIReader.h"
-using namespace std;
+
+//using namespace std;
 
 void Usage()
 {
@@ -28,11 +29,11 @@ void Usage()
 	printf("         rti2rto md5_*.rti\n");
 }
 #ifdef _WIN32
-void GetTableList(string sWildCharPathName, vector<string>& vPathName)
+void GetTableList( std::string sWildCharPathName, std::vector<std::string>& vPathName)
 {
 	vPathName.clear();
 
-	string sPath;
+	std::string sPath;
 	int n = sWildCharPathName.find_last_of('\\');
 	if (n != -1)
 		sPath = sWildCharPathName.substr(0, n + 1);
@@ -43,11 +44,11 @@ void GetTableList(string sWildCharPathName, vector<string>& vPathName)
 	{
 		do
 		{
-			string sName = fd.name;
+			std::string sName = fd.name;
 			if (sName != "." && sName != ".." && !(fd.attrib & _A_SUBDIR))
 			{
-				string sPathName = sPath + sName;
-				vPathName.push_back(sPathName);
+				std::string pathName = sPath + sName;
+				vPathName.push_back(pathName);
 			}
 		} while (_findnext(handle, &fd) == 0);
 
@@ -55,54 +56,55 @@ void GetTableList(string sWildCharPathName, vector<string>& vPathName)
 	}
 }
 #else
-void GetTableList(int argc, char* argv[], vector<string>& vPathName)
+void GetTableList(int argc, char* argv[], std::vector<std::string>& vPathName)
 {
 	vPathName.clear();
 
 	int i;
 	for (i = 1; i < argc; i++)
 	{
-		string sPathName = argv[i];
+		std::string pathName = argv[i];
 		struct stat buf;
-		if (lstat(sPathName.c_str(), &buf) == 0)
+		if (lstat(pathName.c_str(), &buf) == 0)
 		{
 			if (S_ISREG(buf.st_mode))
-				vPathName.push_back(sPathName);
+				vPathName.push_back(pathName);
 
 		}
 	}
 }
 #endif
 
-
-void ConvertRainbowTable(string sPathName, string sResultFileName, string sType)
+// ConvertRainbowTable(vPathName[i], resultFile, sType);
+void ConvertRainbowTable( std::string pathName, std::string resultFileName, std::string sType )
 {
 #ifdef _WIN32
-	int nIndex = sPathName.find_last_of('\\');
+	std::string::size_type nIndex = pathName.find_last_of('\\');
 #else
-	int nIndex = sPathName.find_last_of('/');
+	std::string::size_type nIndex = pathName.find_last_of('/');
 #endif
-	string sFileName;
-	if (nIndex != -1)
-		sFileName = sPathName.substr(nIndex + 1);
+	std::string fileName;
+
+	if ( nIndex != std::string::npos )
+		fileName = pathName.substr( nIndex + 1 );
 	else
-		sFileName = sPathName;
+		fileName = pathName;
 
 	// Info
-	printf("%s:\n", sFileName.c_str());
-	FILE *fResult = fopen(sResultFileName.c_str(), "wb");
+	printf("%s:\n", fileName.c_str());
+	FILE *fResult = fopen(resultFileName.c_str(), "wb");
 	if(fResult == NULL)
 	{
-		printf("Could not open %s for write access", sResultFileName.c_str());
+		printf("Could not open %s for write access", resultFileName.c_str());
 		return;
 	}
 	static CMemoryPool mp;
 	uint64 nAllocatedSize;
 	BaseRTReader *reader = NULL;
 	if(sType == "RTI2")
-		reader = (BaseRTReader*)new RTI2Reader(sFileName);
+		reader = (BaseRTReader*)new RTI2Reader( pathName );
 	else if(sType == "RTI")
-		reader = (BaseRTReader*)new RTIReader(sFileName);
+		reader = (BaseRTReader*)new RTIReader( pathName );
 	else 
 	{
 		printf("Invalid table type '%s'", sType.c_str());
@@ -148,8 +150,8 @@ int main(int argc, char* argv[])
 		
 		return 0;
 	}
-	string sWildCharPathName = argv[1];
-	vector<string> vPathName;
+	std::string sWildCharPathName = argv[1];
+	std::vector<std::string> vPathName;
 	GetTableList(sWildCharPathName, vPathName);
 #else
 	if (argc < 2)
@@ -162,7 +164,7 @@ int main(int argc, char* argv[])
 		printf("%i: %s\n", i, argv[i]);
 	}
 	// vPathName
-	vector<string> vPathName;
+	std::vector<std::string> vPathName;
 	GetTableList(argc, argv, vPathName);
 #endif
 	if (vPathName.size() == 0)
@@ -172,16 +174,16 @@ int main(int argc, char* argv[])
 	}
 	for (uint32 i = 0; i < vPathName.size(); i++)
 	{
-		string sResultFile, sType;
+		std::string resultFile, sType;
 			
 		if(vPathName[i].substr(vPathName[i].length() - 4, vPathName[i].length()) == "rti2")
 		{
-			sResultFile = vPathName[i].substr(0, vPathName[i].length() - 2); // Resulting file is .rt, not .rti2
+			resultFile = vPathName[i].substr(0, vPathName[i].length() - 2); // Resulting file is .rt, not .rti2
 			sType = "RTI2";
 		}
 		else if(vPathName[i].substr(vPathName[i].length() - 3, vPathName[i].length()) == "rti")
 		{
-			sResultFile = vPathName[i].substr(0, vPathName[i].length() - 1); // Resulting file is .rt, not .rti
+			resultFile = vPathName[i].substr(0, vPathName[i].length() - 1); // Resulting file is .rt, not .rti
 			sType = "RTI";
 		}
 		else 
@@ -189,7 +191,7 @@ int main(int argc, char* argv[])
 			printf("File %s is not a RTI or a RTI2 file", vPathName[i].c_str());
 			continue;
 		}
-		ConvertRainbowTable(vPathName[i], sResultFile, sType);
+		ConvertRainbowTable(vPathName[i], resultFile, sType);
 		printf("\n");
 	}
 	return 0;

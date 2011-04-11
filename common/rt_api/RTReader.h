@@ -36,7 +36,6 @@
 class RTReader : BaseRTReader
 {
 private:
-	FILE *m_pFile;
 	unsigned int m_chainPosition;
 
 public:

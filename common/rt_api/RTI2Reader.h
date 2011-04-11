@@ -31,37 +31,37 @@
 	#include <io.h>
 #endif
 
+#include <fstream>
+#include <iostream>
 #include <vector>
 #include "BaseRTReader.h"
+#include "RTI2Common.h"
 
-using namespace std;
-
-typedef struct 
-{
-	char header[4];
-	unsigned char rti_startptlength, rti_endptlength, rti_cplength, rti_index_numchainslength;
-	uint64 prefixstart;
-	unsigned int *m_cppos;
-} RTI2Header;
+//using namespace std;
 
 class RTI2Reader : BaseRTReader
 {
 private:
-	FILE *m_pFile;
-	uint32 m_chainPosition;
+	std::ifstream fin;
+	uint32 chainPosition;
 	unsigned char *m_pPos, *m_pChainPos;
-	static RTI2Header *m_pHeader;
+	RTI20_File in;
+	RTI20_File_Header header;
+	RTI20_Index index;
+	uint8 *data;
 	unsigned char *m_pIndex;
 	uint32 m_chainsizebytes;
 	uint32 m_indexrowsizebytes;
+	std::vector<SubKeySpace> subKeySpaces;
+	std::vector<uint32> checkPointPositions;
 	
+	int readRTI2String( std::ifstream &fin, void *str, uint32 charSize = 0 );
 
 public:
-	RTI2Reader(string Filename);
+	RTI2Reader( std::string filename );
 	~RTI2Reader(void);
 	int ReadChains(uint32 &numChains, RainbowChain *pData);
 	uint32 GetChainsLeft();
-	static RTI2Header *GetHeader() { return m_pHeader; }
 };
 
 

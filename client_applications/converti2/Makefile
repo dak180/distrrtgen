@@ -27,7 +27,8 @@ INCLUDES = -I../../common/rt_api
 CFLAGS = -Wall -m32 -ansi $(INCLUDES) $(OPTIMIZATION) -c $(DEBUG)
 LFLAGS = -Wall -m32 -ansi $(INCLUDES) $(OPTIMIZATION) $(DEBUG)
 LIBS = 
-OBJS = MemoryPool.o Public.o RTI2Reader.o RTIReader.o RTReader.o
+OBJS = BaseRTReader.o BaseRTWriter.o MemoryPool.o Public.o RTI2Common.o \
+	RTI2Reader.o RTIReader.o RTReader.o RTI2Writer.o
 COMMON_API_PATH = ../../common/rt_api
 
 all: converti2
@@ -54,11 +55,20 @@ win32: CC=i586-mingw32msvc-gcc
 win32: LIBS += -L/usr/lib/gcc/i586-mingw32msvc/4.2.1-sjlj/lib
 win32: all
 
+BaseRTReader.o: $(COMMON_API_PATH)/Public.h $(COMMON_API_PATH)/BaseRTReader.h
+	$(CXX) $(CFLAGS) $(COMMON_API_PATH)/BaseRTReader.cpp
+
+BaseRTWriter.o: $(COMMON_API_PATH)/Public.h $(COMMON_API_PATH)/BaseRTWriter.h
+	$(CXX) $(CFLAGS) $(COMMON_API_PATH)/BaseRTWriter.cpp
+
 MemoryPool.o: $(COMMON_API_PATH)/MemoryPool.h $(COMMON_API_PATH)/MemoryPool.cpp $(COMMON_API_PATH)/Public.h
 	$(CXX) $(CFLAGS) $(COMMON_API_PATH)/MemoryPool.cpp
 
 Public.o: $(COMMON_API_PATH)/Public.h $(COMMON_API_PATH)/Public.cpp
 	$(CXX) $(CFLAGS) $(COMMON_API_PATH)/Public.cpp
+
+RTI2Common.o: $(COMMON_API_PATH)/RTI2Common.h
+	$(CXX) $(CFLAGS) $(COMMON_API_PATH)/RTI2Common.cpp
 
 RTI2Reader.o: $(COMMON_API_PATH)/RTI2Reader.h $(COMMON_API_PATH)/RTI2Reader.cpp
 	$(CXX) $(CFLAGS) $(COMMON_API_PATH)/RTI2Reader.cpp
@@ -68,3 +78,8 @@ RTIReader.o: $(COMMON_API_PATH)/RTIReader.h $(COMMON_API_PATH)/RTIReader.cpp
 
 RTReader.o: $(COMMON_API_PATH)/RTReader.h $(COMMON_API_PATH)/RTReader.cpp
 	$(CXX) $(CFLAGS) $(COMMON_API_PATH)/RTReader.cpp
+
+RTI2Writer.o: $(COMMON_API_PATH)/RTI2Writer.h \
+	$(COMMON_API_PATH)/RTI2Writer.cpp $(COMMON_API_PATH)/RTI2Common.h \
+	$(COMMON_API_PATH)/RTI2Common.cpp
+	$(CXX) $(CFLAGS) $(COMMON_API_PATH)/RTI2Writer.cpp

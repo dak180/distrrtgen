@@ -1,42 +1,48 @@
-#include <string>
-#include <vector>
-#ifdef _WIN32
-	#include <io.h>
-	#include <conio.h>
-#else
-	#include <sys/types.h>
-	#include <sys/stat.h>
-	#include <unistd.h>
-#endif
+/*
+* converti2 is a tool to convert from RT and RTI to RTI2
+*
+* Copyright 2009, 2010, 2011 Martin Westergaard Jørgensen <martinwj2005@gmail.com>
+* Copyright 2010, 2011 James Nobis <frt@quelrod.net>
+*
+* This file is part of converti2.
+*
+* converti2 is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 2 of the License, or
+* (at your option) any later version.
+*
+* converti2 is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with converti2.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <math.h>
-#include <vector>
-#include <sstream>
-#include "Public.h"
-#include "MemoryPool.h"
-#include "RTIReader.h"
-#include "RTReader.h"
+#include "converti2.h"
 
-using namespace std;
+//using namespace std;
 
-void Usage()
+Converti2::Converti2( int argc, char** argv )
 {
-	printf("converti2 - Original to Indexed rainbow table converter\n");
-	printf("by Martin Westergaard <martinwj2005@gmail.com>\n");
-	printf("http://www.freerainbowtables.com\n\n");
-
-	printf("usage: converti2 rainbow_table_pathname\n");
-	printf("rainbow_table_pathname: pathname of the rainbow table(s), wildchar(*, ?) supported\n");
-	printf("\n");
-	printf("example: converti2 *.rt\n");
-	printf("         converti2 md5_*.rt\n");
+	sptl = 40;
+	eptl = 16;
+	showDistribution = false;
+	hasCheckPoints = false;
+	argi = 1;
+	argsUsed = 0;
+	checkPointBits = 0;
+	this->argc = argc;
+	this->argv = argv;
 }
 
+bool Converti2::shouldShowDistribution()
+{
+	return showDistribution;
+}
 
-int GetMaxBits(uint64 highvalue)
+int Converti2::GetMaxBits(uint64 highvalue)
 {
 	if(highvalue < 0x02)
 		return 1;
@@ -236,24 +242,26 @@ int GetMaxBits(uint64 highvalue)
 
 }
 
-#ifdef _WIN32
-void GetTableList(string sWildCharPathName, vector<string>& vPathName)
+#if defined(_WIN32) && !defined(__GNUC__)
+void Converti2::GetTableList( std::string sWildCharPathName)
 {
 	vPathName.clear();
 
-	string sPath;
-	int n = sWildCharPathName.find_last_of('\\');
-	if (n != -1)
-		sPath = sWildCharPathName.substr(0, n + 1);
+	std::string path;
+	std::string::size_type n = sWildCharPathName.find_last_of('\\');
+	if ( n != std::string::npos )
+		path = sWildCharPathName.substr(0, n + 1);
 
 	_finddata_t fd;
 	long handle = _findfirst(sWildCharPathName.c_str(), &fd);
-	if (handle != -1) {
+	if (handle != -1)
+	{
 		do	{
-			string sName = fd.name;
-			if (sName != "." && sName != ".." && !(fd.attrib & _A_SUBDIR))	{
-				string sPathName = sPath + sName;
-				vPathName.push_back(sPathName);
+			std::string name = fd.name;
+			if (name != "." && name != ".." && !(fd.attrib & _A_SUBDIR))
+			{
+				pathName = path + name;
+				vPathName.push_back(pathName);
 			}
 		} while (_findnext(handle, &fd) == 0);
 
@@ -261,360 +269,673 @@ void GetTableList(string sWildCharPathName, vector<string>& vPathName)
 	}
 }
 #else
-void GetTableList(int argc, char* argv[], vector<string>& vPathName)
+void Converti2::GetTableList()
 {
 	vPathName.clear();
 
 	int i;
 	for (i = 1; i < argc; i++)
 	{
-		string sPathName = argv[i];
+		pathName = argv[i];
 		struct stat buf;
-		if (lstat(sPathName.c_str(), &buf) == 0)
+		if (lstat(pathName.c_str(), &buf) == 0)
 		{
 			if (S_ISREG(buf.st_mode))
-				vPathName.push_back(sPathName);
-
+				vPathName.push_back(pathName);
 		}
 	}
 }
 #endif
 
-
-void ConvertRainbowTable(string sPathName, string sResultFileName, unsigned int rti_startptlength, unsigned int rti_endptlength, int showDistribution, int hascp, int rti_cplength, vector<unsigned int> rti_cppos)
+int Converti2::sharedSetup()
 {
-#ifdef _WIN32
-	int nIndex = sPathName.find_last_of('\\');
-#else
-	int nIndex = sPathName.find_last_of('/');
-#endif
-	string sFileName;
-	if (nIndex != -1) {
-		sFileName = sPathName.substr(nIndex + 1);
-	}
-	else {
-		sFileName = sPathName;
-	}
-	unsigned int distribution[64] = {0};
-	unsigned int numProcessedChains = 0;
-	FILE* fileR = NULL;
-	BaseRTReader *reader = NULL;
-	if(sPathName.substr(sPathName.length() - 2, sPathName.length()) == "rt")
-		reader = (BaseRTReader*)new RTReader(sPathName);
-	else if(sPathName.substr(sPathName.length() - 3, sPathName.length()) == "rti")
-		reader = (BaseRTReader*)new RTIReader(sPathName);
-	if(reader == NULL) {
-		printf("%s is not a supported file (Only RT and RTI is supported)\n", sPathName.c_str());
-		return;
-	}
-	// Info
-	printf("%s:\n", sFileName.c_str());
-	if(showDistribution == 0) {
-		fileR = fopen(sResultFileName.c_str(), "wb");
-	}
-	if (fileR != NULL || showDistribution == 1) {
-		// File length check
-
-		int size = reader->GetChainsLeft() * sizeof(RainbowChain);
-			static CMemoryPool mp;
-			uint64 nAllocatedSize;
-			RainbowChain* pChain = (RainbowChain*)mp.Allocate(size, nAllocatedSize);			
-			uint32 chainrowsize = (uint32)ceil((float)(rti_startptlength + rti_endptlength + rti_cplength) / 8) * 8 ; // The size in bits (in whole bytes)
-			unsigned int chainrowsizebytes = chainrowsize / 8;
-
-			if (pChain != NULL)	{
-				nAllocatedSize = nAllocatedSize / sizeof(RainbowChain) * sizeof(RainbowChain);
-				unsigned int nChains = nAllocatedSize / sizeof(RainbowChain);
-				uint64 curPrefix = 0, prefixStart = 0;
-				vector<IndexRow> indexes;
-				unsigned int chainsLeft;
-				while((chainsLeft = reader->GetChainsLeft()) > 0) {
-					
-/*					if (ftell(file) == nFileLen)
-						break;*/
-					printf("%u chains left to read\n", chainsLeft);
-					//int nReadThisRound;
-					clock_t t1 = clock();
-					printf("reading...\n");
-#ifdef _MEMORYDEBUG
-			printf("Grabbing %i chains from file\n", nChains);
-#endif
-					reader->ReadChains(nChains, pChain);
-#ifdef _MEMORYDEBUG
-			printf("Recieved %i chains from file\n", nChains);
-#endif
-					clock_t t2 = clock();
-					float fTime = 1.0f * (t2 - t1) / CLOCKS_PER_SEC;
-					printf("reading time: %.2f s\n", fTime);		
-					printf("converting %i chains...\n", nChains);
-					t1 = clock();
-					for(unsigned int i = 0; i < nChains; i++)	{
-						if(showDistribution == 1) {
-							distribution[GetMaxBits(pChain[i].nIndexS)-1]++;
-						}
-						else
-						{
-							uint64 chainrow = pChain[i].nIndexS; // Insert the complete start point								 
-							chainrow |= ((uint64)pChain[i].nIndexE & (0xffffffff >> (32 - rti_endptlength))) << rti_startptlength; // 
-/*							if(hascp == 1 && rti_cplength > 0) {
-								chainrow |= (uint64)pChain[i].nCheckPoint << rti_startptlength + rti_endptlength;
-							}*/
-							fwrite(&chainrow, 1, chainrowsizebytes, fileR);			
-							uint64 prefix = pChain[i].nIndexE >> rti_endptlength;
-							if(i == 0) curPrefix = prefix;
-							if(prefix != curPrefix && numProcessedChains - prefixStart > 0)	{
-								if(prefix < curPrefix) {
-									printf("**** Error writeChain(): Prefix is smaller than previous prefix. %llu < %llu****\n", prefix, curPrefix);
-									exit(1);									
-								}
-								//unsigned char index[11] = {0}; // [0 - 10]
-								unsigned int numchains = numProcessedChains - prefixStart;
-								IndexRow index;
-								index.prefix = curPrefix;
-//										index.prefixstart = prefixStart;
-								index.numchains = numchains;
-								indexes.push_back(index);
-								prefixStart = numProcessedChains;
-								curPrefix = prefix; 
-							}
-						}
-						numProcessedChains++;
-					}		
-					t2 = clock();
-					fTime = 1.0f * (t2 - t1) / CLOCKS_PER_SEC;
-					printf("conversion time: %.2f s\n", fTime);		
-					if(showDistribution == 1) {
-						for(int i = 0; i < 64; i++)	{
-							printf("%u - %u\n", (i+1), distribution[i]);
-						}
-						delete reader;
-						return;
-					}
-
-				}
-	
-		
-	
-				// We need to write the last index down
-				IndexRow index;
-				index.prefix = curPrefix;
-				index.prefixstart = prefixStart;
-				index.numchains = numProcessedChains - prefixStart;
-				indexes.push_back(index);
-
-				IndexRow high = {0}; // Used to find the highest numbers. This tells us how much we can pack the index bits
-				for(uint32 i = 0; i < indexes.size(); i++)
-				{
-					if(indexes[i].numchains > high.numchains)
-						high.numchains = indexes[i].numchains;
-/*						if(indexes[i].prefixstart > high.prefixstart)
-						high.prefixstart = indexes[i].prefixstart;
-					if(indexes[i].prefix > high.prefix)
-						high.prefix = indexes[i].prefix;
-*/
-				}
-				high.prefix = indexes[indexes.size()-1].prefix; // The last prefix is always the highest prefix
-//					unsigned int m_rti_index_prefixlength = GetMaxBits(high.prefix);
-				unsigned int m_rti_index_numchainslength = GetMaxBits(high.numchains);
-//					unsigned int m_rti_index_indexlength = GetMaxBits(high.prefixstart);
-				uint32 m_indexrowsize = (uint32)ceil((float)(/*m_rti_index_indexlength + */m_rti_index_numchainslength) / 8) * 8; // The size in bits (in whole bytes)	
-				unsigned int m_indexrowsizebytes = m_indexrowsize / 8;
-				FILE *pFileIndex = fopen(sResultFileName.append(".index").c_str(), "wb");
-				fwrite("RTI2", 1, 4, pFileIndex);
-				fwrite(&rti_startptlength, 1, 1, pFileIndex);
-				fwrite(&rti_endptlength, 1, 1, pFileIndex);
-				fwrite(&rti_cplength, 1, 1, pFileIndex);
-//					fwrite(&m_rti_index_indexlength , 1, 1, pFileIndex);
-
-				fwrite(&m_rti_index_numchainslength, 1, 1, pFileIndex);
-				for(uint32 i = 0; i < rti_cppos.size(); i++)	{
-					fwrite(&rti_cppos[i], 1, 4, pFileIndex); // The position of the checkpoints
-				}
-//					fwrite(&m_rti_index_prefixlength, 1, 1, pFileIndex);
-				int zero = 0;
-				fwrite(&indexes[0].prefix, 1, 8, pFileIndex); // Write the first prefix
-				unsigned int lastPrefix = 0;
-				for(uint32 i = 0; i < indexes.size(); i++)	{
-					if(i == 0) {
-						lastPrefix = indexes[0].prefix;
-					}
-					//unsigned int indexrow = 0;
-					// Checks how big a distance there is between the current and the next prefix. eg cur is 3 and next is 10 = 7.
-					unsigned int diffSize = indexes[i].prefix - lastPrefix; 
-					if(i > 0 && diffSize > 1) {
-						//indexrow |= indexes[i].prefixstart;
-						//printf("Diffsize is %u\n", diffSize);
-
-						// then write the distance amount of 00's
-						if(diffSize > 1000) {
-							printf("WARNING! The distance to the next prefix is %i. Do you want to continue writing %i bytes of 0x00? Press y to continue", diffSize, (diffSize*m_indexrowsizebytes));
-							#ifdef _WIN32
-							if ( _getch() != 'y' ) {
-							#else
-							if ( tty_getchar() != 'y' ) {
-							#endif
-								printf("Aborting...");
-								exit(1);
-							}
-						}
-						for(uint32 j = 1; j < diffSize; j++)
-						{								
-							fwrite(&zero, 1, m_indexrowsizebytes, pFileIndex);
-						}
-					}					
-					fwrite(&indexes[i].numchains, 1, m_indexrowsizebytes, pFileIndex);
-					lastPrefix = indexes[i].prefix;
-				}
-				fclose(pFileIndex);
-			}
-			else {
-				printf("memory allocation fail\n");
-			}			
-			// Already finished?
-	}
-	else {
-		printf("can't open file\n");
-	}
-	if(reader != NULL)
-		delete reader;
-	if(fileR != NULL) {
-		fclose(fileR);
-	}
-		
-}
-
-int main(int argc, char* argv[])
-{
-	int argi = 1, i, argsUsed = 0;
-	unsigned int sptl = 40, eptl = 16;
-	int showDistribution = 0;
-	int usecp = 0;// How many bits to use from the index
-	int hascp = 0; 
-	vector<unsigned int> cppositions;
-	if (argc == 1) {
-		Usage();		
-		return 0;
-	}
-	else if(argc > 2) {
+	if(argc > 2)
+	{
 		for (; argi < argc; argi++)
 		{
-			if(strcmp(argv[argi], "-d") == 0 && (argsUsed & 0x8) == 0) {
+			if(strcmp(argv[argi], "-d") == 0 && (argsUsed & 0x8) == 0)
+			{
 				// Enable verbose mode
 				argsUsed |= 0x8;				
-				showDistribution = 1;
+				showDistribution = true;
 			}			
-			else if (strncmp(argv[argi], "-sptl=", 6) == 0 && (argsUsed & 0x1) == 0) {
+			else if (strncmp(argv[argi], "-sptl=", 6) == 0 && (argsUsed & 0x1) == 0)
+			{
 				// Maximum index for starting point
 				argsUsed |= 0x1;
 				sptl = 0;
-				for (i = 6; argv[argi][i] >= '0' && argv[argi][i] <= '9'; i++) {
+				for (i = 6; argv[argi][i] >= '0' && argv[argi][i] <= '9'; i++)
+				{
 					sptl *= 10;
 					sptl += ((int) argv[argi][i]) - 0x30;
 				}
-				if (argv[argi][i] != '\0') {
+
+				if (argv[argi][i] != '\0')
+				{
 					printf("Error: Invalid number.\n\n");
-					Usage();
-					return 1;
+					usage();
+					exit( 1 );
 				}
-				if (i > 23) { // i - 3 > 20				
+
+				if (i > 23)
+				{
+					// i - 3 > 20				
 					printf("Error: Number is too large.\n\n");
-					Usage();
-					return 1;
+					usage();
+					exit( 1 );
 				}			
 			}
 
-			else if (strncmp(argv[argi], "-eptl=", 6) == 0 && (argsUsed & 0x2) == 0) {
+			else if (strncmp(argv[argi], "-eptl=", 6) == 0 && (argsUsed & 0x2) == 0)
+			{
 				// Maximum index for ending points
 				argsUsed |= 0x2;
 				eptl = 0;
-				for (i = 6; argv[argi][i] >= '0' && argv[argi][i] <= '9'; i++) {
+				for (i = 6; argv[argi][i] >= '0' && argv[argi][i] <= '9'; i++)
+				{
 					eptl *= 10;
 					eptl += ((int) argv[argi][i]) - 0x30;
 				}
-				if (argv[argi][i] != '\0') {
+				if (argv[argi][i] != '\0')
+				{
 					printf("Error: Invalid number.\n\n");
-					Usage();
-					return 1;
+					usage();
+					exit( 1 );
 				}
-				if (i > 23) { // i - 3 > 20				
+				if (i > 23)
+				{
+					// i - 3 > 20				
 					printf("Error: Number is too large.\n\n");
-					Usage();
-					return 1;
+					usage();
+					exit( 1 );
 				}			
 			}
-			else if(strncmp(argv[argi], "-usecp=", 7) == 0 && (argsUsed & 0x4) == 0) {
+			else if(strncmp(argv[argi], "-usecp=", 7) == 0 && (argsUsed & 0x4) == 0)
+			{
 				argsUsed |= 0x4;
-				hascp = 1;
-				usecp = 0;
+				hasCheckPoints = 1;
+				checkPointBits = 0;
 				unsigned int cppos = 0;
-				for(i = 7; argv[argi][i] != ' ' && argv[argi][i] != '\n' && argv[argi][i] != 0;) {
+				for(i = 7; argv[argi][i] != ' ' && argv[argi][i] != '\n' && argv[argi][i] != 0;)
+				{
 					if(cppositions.size() > 0) i++;
 					for (; argv[argi][i] >= '0' && argv[argi][i] <= '9'; i++)
 					{
 						cppos *= 10;
 						cppos += ((int) argv[argi][i]) - 0x30;
 					}
-/*					if(argv[argi][i] == ',')
-					{*/
-						cppositions.push_back(cppos);
-						usecp++;
-						cppos = 0;
-					//}
+
+					cppositions.push_back(cppos);
+					checkPointBits++;
+					cppos = 0;
 				}
-				if (argv[argi][i] != '\0') {
+				if (argv[argi][i] != '\0')
+				{
 					printf("Error: Invalid number.\n\n");
-					Usage();
+					usage();
 					return 1;
 				}
-				if (usecp > 16) { // i - 3 > 20
+				if ( checkPointBits > 16)
+				{ // i - 3 > 20
 					printf("Error: Number is too large.\n\n");
-					Usage();
-					return 1;
+					usage();
+					exit( 1 );
 				}				
-				else {
-					printf("Using %i bits of the checkpoints\n", usecp);
+				else
+				{
+					printf("Using %i bits of the checkpoints\n", checkPointBits );
 				}
 			}
 
 		}		
 	}
-	vector<string> vPathName;
+
 #ifdef _WIN32
-	string sWildCharPathName = argv[1];
-	GetTableList(sWildCharPathName, vPathName);
+	std::string sWildCharPathName = argv[1];
+	GetTableList(sWildCharPathName);
 #else
-	GetTableList(argc, argv, vPathName);
+	GetTableList();
 #endif
-	if (vPathName.size() == 0) {
+	if (vPathName.size() == 0)
+	{
 		printf("no rainbow table found\n");
-		return 0;
+		return EXIT_FAILURE;
 	}
-	for (uint32 i = 0; i < vPathName.size(); i++) {
-		string sResultFile;
-		int n = vPathName[i].find_last_of('\\');
-		if (n != -1) {
-			if(vPathName[i].substr(vPathName[i].length() - 3, vPathName[i].length()) == "rti")	{
-				sResultFile = vPathName[i].substr(n+1, vPathName[i].length()) + "2";				
-			}
-			else {
-				sResultFile = vPathName[i].substr(n+1, vPathName[i].length()) + "i2";
-			}
+
+	return EXIT_SUCCESS;
+}
+
+void Converti2::doShowDistribution()
+{
+
+
+}
+
+void Converti2::convertRainbowTables()
+{
+	std::string resultFile;
+
+	for (uint32 i = 0; i < vPathName.size(); i++)
+	{
+		std::string::size_type n = vPathName[i].find_last_of('\\');
+		if ( n != std::string::npos )
+		{
+			if(vPathName[i].substr(vPathName[i].length() - 3, vPathName[i].length()) == "rti")
+				resultFile = vPathName[i].substr(n+1, vPathName[i].length()) + "2";				
+			else
+				resultFile = vPathName[i].substr(n+1, vPathName[i].length()) + "i2";
 		}
-		else {
-			if(vPathName[i].substr(vPathName[i].length() - 3, vPathName[i].length()) == "rti")	{
-				sResultFile = vPathName[i] + "2";				
-			} else {
-				sResultFile = vPathName[i] + "i2"; // Resulting file is .rt, not .rti
-			}
+		else
+		{
+			if(vPathName[i].substr(vPathName[i].length() - 3, vPathName[i].length()) == "rti")
+				resultFile = vPathName[i] + "2";
+			else
+				resultFile = vPathName[i] + "i2"; // Resulting file is .rt, not .rti
 		}
-		if(usecp == 0 && showDistribution == 0) {
-			printf("Using %i of 64 bits. sptl: %i, eptl: %i, cp: %i. Chains will be %i bytes in size\n", (sptl + eptl + usecp), sptl, eptl, usecp, ((sptl + eptl + usecp) / 8));
+
+		if( checkPointBits == 0 && !shouldShowDistribution() )
+		{
+			printf("Using %i of 64 bits. sptl: %i, eptl: %i, cp: %i. Chains will be %i bytes in size\n", (sptl + eptl + checkPointBits), sptl, eptl, checkPointBits, ((sptl + eptl + checkPointBits) / 8));
 		}
-		if(sptl + eptl + usecp > 64) {
+
+		if( (sptl + eptl + checkPointBits) > 64)
+		{
+			fprintf( stderr, "(sptl + eptl + checkPointBits) > 64\n" );
 			exit(1);
 		}
-		ConvertRainbowTable(vPathName[i], sResultFile, sptl, eptl, showDistribution, hascp, usecp, cppositions);
-		printf("\n");
+
+		convertRainbowTable( resultFile, vPathName.size() );
 	}
-	return 0;
+}
+
+void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
+{
+#ifdef _WIN32
+	std::string::size_type nIndex = pathName.find_last_of('\\');
+#else
+	std::string::size_type nIndex = pathName.find_last_of('/');
+#endif
+	std::string fileName;
+
+	if ( nIndex != std::string::npos )
+		fileName = pathName.substr(nIndex + 1);
+	else
+		fileName = pathName;
+
+	unsigned int distribution[64] = {0};
+	unsigned int numProcessedChains = 0;
+	BaseRTReader *reader = NULL;
+	BaseRTWriter *writer = NULL;
+	bool isOldRtFormat = false;
+	CharacterSet charSet;
+
+	if ( fileName.length() < 3 )
+	{
+		printf( "%s is not a rainbow table\n", pathName.c_str() );
+		exit( 1 );
+	}
+
+	if ( fileName.substr( fileName.length() - 4 ) == ".rti" )
+		isOldRtFormat = false;
+	else if ( fileName.substr( fileName.length() - 3 ) == ".rt" )
+		isOldRtFormat = true;
+
+	if ( isOldRtFormat )
+		reader = (BaseRTReader*)new RTReader(pathName);
+	else 
+		reader = (BaseRTReader*)new RTIReader(pathName);
+
+	if(reader == NULL)
+	{
+		printf("%s is not a supported file (Only RT and RTI is supported)\n", pathName.c_str());
+		return;
+	}
+
+	std::vector<std::string> vPart;
+
+	if ( !SeperateString( fileName, "___x_", vPart ) )
+	{
+		printf("filename %s not identified\n", pathName.c_str());
+		exit( 1 );
+	}
+
+	std::string sHashRoutineName = vPart[0];
+	uint32 rainbowTableIndex = atoi(vPart[2].c_str());
+	uint32 rainbowChainLen = atoi(vPart[3].c_str());
+	uint32 rainbowChainCount = atoi(vPart[4].c_str());
+
+	std::vector<std::string> vPart2;
+	// vPart[5] ex distrrtgen[p][i]_00.rti
+	if ( !SeperateString( vPart[5], "_.", vPart2 ) )
+	{
+		printf( "filename %s not identified\n", pathName.c_str() );
+		exit( 1 );
+	}
+
+	uint32 fileIndex = atoi( vPart2[1].c_str() );
+
+	// XXX todo charset definitions
+
+	// Parse charset definition
+	std::string sCharsetDefinition = vPart[1];
+	std::string sCharsetName;
+	int nPlainLenMin = 0, nPlainLenMax = 0;
+	std::vector<SubKeySpace> tmpSubKeySpaces;
+	SubKeySpace tmpSubKeySpace;
+
+	tmpSubKeySpaces.clear();
+
+	// XXX handle hybrid/hybrid2
+	if(sCharsetDefinition.substr(0, 6) == "hybrid") // Hybrid table
+	{
+		sCharsetName = sCharsetDefinition;
+	}
+	else
+	{
+		// For backward compatibility, "#1-7" is implied
+		if ( sCharsetDefinition.find('#') == std::string::npos )
+		{
+			sCharsetName = sCharsetDefinition;
+			nPlainLenMin = 1;
+			nPlainLenMax = 7;
+		}
+		else
+		{
+			std::vector<std::string> vCharsetDefinitionPart;
+			if (!SeperateString(sCharsetDefinition, "#-", vCharsetDefinitionPart))
+			{
+				printf("filename %s not identified\n", pathName.c_str());
+				exit( 1 );
+			}
+			else
+			{
+				sCharsetName = vCharsetDefinitionPart[0];
+				nPlainLenMin = atoi(vCharsetDefinitionPart[1].c_str());
+				nPlainLenMax = atoi(vCharsetDefinitionPart[2].c_str());
+			}
+		}
+	}
+
+	// XXX implement
+	if ( sCharsetName == "byte" )
+	{
+		
+	}
+	else if ( sCharsetName.substr( 0, 6 ) == "hybrid" )
+	{
+
+	}
+
+	bool readCharset = false;
+	bool foundCharset = false;
+
+	std::vector<std::string> line;
+
+	if ( ReadLinesFromFile("charset.txt", line) )
+		readCharset = true;
+	else if ( ReadLinesFromFile(GetApplicationPath() + "charset.txt", line ) )
+		readCharset = true;
+
+	if ( readCharset )
+	{
+		uint32 i;
+
+		for ( i = 0; i < line.size(); i++ )
+		{
+			// Filter comment
+			if ( line[i][0] == '#' )
+				continue;
+
+			std::vector<std::string> part;
+			if ( SeperateString( line[i], "=", part ) )
+			{
+				std::string tmpCharsetName = TrimString( part[0] );
+
+				if ( tmpCharsetName == "" )
+					continue;
+
+				// check charset
+				bool charsetNameCheckPass = true;
+				uint32 j;
+
+				for ( j = 0; j < tmpCharsetName.size(); j++ )
+				{
+					if ( !isalpha( tmpCharsetName[j] )
+						&& !isdigit( tmpCharsetName[j] )
+						&& ( tmpCharsetName[j] != '-' ) )
+					{
+						charsetNameCheckPass = false;
+						break;
+					}
+				}
+
+				if ( !charsetNameCheckPass )
+				{
+					std::cerr << "invalid charset name " << tmpCharsetName
+						<< " in charset configuration file" << std::endl;
+					continue;
+				}
+
+				std::string charsetContent = TrimString( part[1] );
+				if ( charsetContent == "" || charsetContent == "[]" )
+					continue;
+				if ( charsetContent[0] != '['
+					|| charsetContent[charsetContent.size() - 1 ] != ']' )
+				{
+					std::cerr << "invalid charset content " << tmpCharsetName
+						<< " in charset configuration file" << std::endl;
+					continue;
+				}
+				charsetContent = charsetContent.substr( 1, charsetContent.size() - 2 );
+
+				if ( charsetContent.size() > MAX_PLAIN_LEN )
+				{
+					std::cerr << "charset content " << tmpCharsetName
+						<< " is too long" << std::endl;
+					continue;
+				}
+				
+				// XXX if hybrid
+				if ( false )
+				{
+
+				}	
+				else if ( tmpCharsetName == sCharsetName )
+				{
+					foundCharset = true;
+
+					tmpSubKeySpace.perPositionCharacterSets.clear();
+
+					tmpSubKeySpace.hybridSets = 0x1;
+					
+					charSet.characterSet1.clear();
+					charSet.characterSet2.clear();
+					charSet.characterSet3.clear();
+					charSet.characterSet4.clear();
+					
+					charSet.characterSet1.assign( (uint8*) charsetContent.c_str(), ((uint8*) charsetContent.c_str()) + charsetContent.size() / 8 );
+
+					for ( int a = 0; a < nPlainLenMax; a++ )
+					{
+						tmpSubKeySpace.passwordLength.push_back( a + 1 );
+						tmpSubKeySpace.charSetFlags.push_back( 1 );
+						tmpSubKeySpace.perPositionCharacterSets.push_back( charSet );
+					}
+
+					tmpSubKeySpaces.push_back( tmpSubKeySpace );
+				}
+			}
+		}
+
+		if ( !foundCharset )
+		{
+			std::cerr << "charset " << sCharsetName << " not found in charset.txt"
+				<< std::endl;
+		}
+	}
+	else
+	{
+		std::cerr << "can't open charset configuration file" << std::endl;
+		exit( 1 );
+	}
+
+	// Info
+	printf("%s:\n", fileName.c_str());
+
+	// XXX showDistribution shouldn't be mixed in here
+	if( !showDistribution )
+	{
+		writer = (BaseRTWriter*)new RTI2Writer( resultFileName );
+		writer->setStartPointLen( sptl );
+		writer->setEndPointLen( eptl );
+		writer->setCheckPointLen( checkPointBits );
+		writer->setCheckPointPos( cppositions );
+		writer->setChainLength( rainbowChainLen );
+		writer->setTableIndex( rainbowTableIndex );
+		writer->setChainCount( rainbowChainCount );
+		writer->setFileIndex( fileIndex );
+		// XXX this is just taking input of the number of rt/rti files to be
+		// converted and needs to be more robust, such as scanning the directory
+		writer->setFileCount( files );
+
+		writer->setAlgorithm( sHashRoutineName );
+		writer->setSubKeySpaces( tmpSubKeySpaces );
+
+//		fwrite(&m_rti_index_numchainslength, 1, 1, pFileIndex);
+	}
+
+	if (writer != NULL || showDistribution )
+	{
+		// File length check
+
+		int size = reader->GetChainsLeft() * sizeof(RainbowChain);
+		static CMemoryPool mp;
+		uint64 nAllocatedSize;
+		RainbowChain* pChain = (RainbowChain*)mp.Allocate(size, nAllocatedSize);			
+		//uint32 chainrowsize = (uint32)ceil((float)(sptl + eptl + checkPointBits) / 8) * 8 ; // The size in bits (in whole bytes)
+		uint32 chainSize = (uint32)ceil((float)(sptl + eptl + checkPointBits) / 8 ) * 8;
+		// chainSize / 8
+		//unsigned int chainSizeBytes = chainSize >> 3;
+
+		if ( writer != NULL )
+			writer->setChainSize( chainSize );
+
+		if (pChain != NULL)
+		{
+			nAllocatedSize = nAllocatedSize / sizeof(RainbowChain) * sizeof(RainbowChain);
+			unsigned int nChains = nAllocatedSize / sizeof(RainbowChain);
+			uint64 curPrefix = 0, prefixStart = 0;
+			std::vector<IndexRow> indexes;
+			unsigned int chainsLeft;
+
+			while((chainsLeft = reader->GetChainsLeft()) > 0)
+			{
+				printf("%u chains left to read\n", chainsLeft);
+				//int nReadThisRound;
+				clock_t t1 = clock();
+				printf("reading...\n");
+#ifdef _MEMORYDEBUG
+				printf("Grabbing %i chains from file\n", nChains);
+#endif
+				reader->ReadChains(nChains, pChain);
+#ifdef _MEMORYDEBUG
+				printf("Recieved %i chains from file\n", nChains);
+#endif
+				clock_t t2 = clock();
+				float fTime = 1.0f * (t2 - t1) / CLOCKS_PER_SEC;
+				printf("reading time: %.2f s\n", fTime);		
+				printf("converting %i chains...\n", nChains);
+				t1 = clock();
+
+				for(unsigned int i = 0; i < nChains; i++)
+				{
+					if( showDistribution )
+						distribution[GetMaxBits(pChain[i].nIndexS)-1]++;
+					else
+					{
+						uint64 chainrow = pChain[i].nIndexS; // Insert the complete start point								 
+						chainrow |= ((uint64)pChain[i].nIndexE & (0xffffffff >> (32 - eptl))) << sptl; // 
+/*						if(hasCheckPoints == 1 && checkPointBits > 0)
+ *						{
+							chainrow |= (uint64)pChain[i].nCheckPoint << sptl + eptl;
+						}*/
+
+						if ( writer != NULL )
+							writer->addDataChain( &chainrow );
+						//fwrite(&chainrow, 1, chainSizeBytes, fileR);
+						uint64 prefix = pChain[i].nIndexE >> eptl;
+						if(i == 0)
+							curPrefix = prefix;
+
+						if(prefix != curPrefix && numProcessedChains - prefixStart > 0)
+						{
+							if(prefix < curPrefix)
+							{
+								printf("**** Error writeChain(): Prefix is smaller than previous prefix. %llu < %llu****\n", prefix, curPrefix);
+								exit(1);									
+							}
+
+							//unsigned char index[11] = {0}; // [0 - 10]
+							unsigned int numchains = numProcessedChains - prefixStart;
+
+							IndexRow index;
+							index.prefix = curPrefix;
+//							index.prefixstart = prefixStart;
+							index.numchains = numchains;
+							indexes.push_back(index);
+							prefixStart = numProcessedChains;
+							curPrefix = prefix; 
+						}
+					}
+					numProcessedChains++;
+				}
+
+				t2 = clock();
+				fTime = 1.0f * (t2 - t1) / CLOCKS_PER_SEC;
+				printf("conversion time: %.2f s\n", fTime);		
+				if( showDistribution )
+				{
+					for(int i = 0; i < 64; i++)
+						printf("%u - %u\n", (i+1), distribution[i]);
+
+					delete reader;
+					return;
+				}
+			}
+
+			// XXX write prefix indexes into RTI2Writer
+			
+			// We need to write the last index down
+			IndexRow index;
+			index.prefix = curPrefix;
+			index.prefixstart = prefixStart;
+			index.numchains = numProcessedChains - prefixStart;
+			indexes.push_back(index);
+
+			IndexRow high = {0}; // Used to find the highest numbers. This tells us how much we can pack the index bits
+			for(uint32 i = 0; i < indexes.size(); i++)
+			{
+				if(indexes[i].numchains > high.numchains)
+					high.numchains = indexes[i].numchains;
+
+/*				if(indexes[i].prefixstart > high.prefixstart)
+					high.prefixstart = indexes[i].prefixstart;
+				if(indexes[i].prefix > high.prefix)
+					high.prefix = indexes[i].prefix;
+*/
+			}
+
+			high.prefix = indexes[indexes.size()-1].prefix; // The last prefix is always the highest prefix
+//			unsigned int m_rti_index_prefixlength = GetMaxBits(high.prefix);
+			unsigned int m_rti_index_numchainslength = GetMaxBits(high.numchains);
+			uint32 m_indexrowsize = (uint32)ceil((float)(/*m_rti_index_indexlength + */m_rti_index_numchainslength) / 8) * 8; // The size in bits (in whole bytes)	
+			unsigned int m_indexrowsizebytes = m_indexrowsize / 8;
+			//FILE *pFileIndex = fopen( (resultFileName + ".index").c_str(), "wb");
+	//		fwrite(&m_rti_index_indexlength , 1, 1, fileR);
+
+			//fwrite( &m_rti_index_numchainslength, 1, 1, pFileIndex );
+			//int zero = 0;
+			//fwrite(&indexes[0].prefix, 1, 8, pFileIndex); // Write the first prefix
+			if ( writer != NULL )
+			{
+				writer->setPrefixStart( indexes[0].prefix );
+				writer->setPrefixCount( indexes.size() );
+			}
+
+			unsigned int lastPrefix = 0;
+			for(uint32 i = 0; i < indexes.size(); i++)
+			{
+				if(i == 0)
+					lastPrefix = indexes[0].prefix;
+
+				//unsigned int indexrow = 0;
+				// Checks how big a distance there is between the current and the next prefix. eg cur is 3 and next is 10 = 7.
+				unsigned int diffSize = indexes[i].prefix - lastPrefix; 
+				if(i > 0 && diffSize > 1)
+				{
+					//indexrow |= indexes[i].prefixstart;
+					//printf("Diffsize is %u\n", diffSize);
+
+					// then write the distance amount of 00's
+					if(diffSize > 1000)
+					{
+						printf("WARNING! The distance to the next prefix is %i. Do you want to continue writing %i bytes of 0x00? Press y to continue", diffSize, (diffSize*m_indexrowsizebytes));
+					#ifdef _WIN32
+						if ( _getch() != 'y' )
+						{
+					#else
+						if ( tty_getchar() != 'y' )
+						{
+					#endif
+							printf("Aborting...");
+							exit(1);
+						}
+					}
+
+					/*
+					 * XXX ???
+						for(uint32 j = 1; j < diffSize; j++)
+						fwrite(&zero, 1, m_indexrowsizebytes, pFileIndex);
+					*/
+				}
+
+				//fwrite(&indexes[i].numchains, 1, m_indexrowsizebytes, pFileIndex);
+				writer->addIndexChain( &indexes[i].prefixstart );
+
+				lastPrefix = indexes[i].prefix;
+			}
+			//fclose(pFileIndex);
+		}
+		else
+			printf("memory allocation fail\n");
+
+		if(reader != NULL)
+			delete reader;
+
+		if ( writer != NULL )
+		{
+			writer->writeHeader();
+			writer->writeIndex();
+			writer->writeData();
+			delete writer;
+		}
+	}
+}
+
+static void usage()
+{
+	printf("converti2 - Original to Indexed rainbow table converter\n");
+	printf("by Martin Westergaard <martinwj2005@gmail.com>\n");
+	printf("http://www.freerainbowtables.com\n\n");
+
+	printf("usage: converti2 rainbow_table_pathname\n");
+	printf("rainbow_table_pathname: pathname of the rainbow table(s), wildchar(*, ?) supported\n");
+	printf("\n");
+	printf("example: converti2 *.rt[i]\n");
+	printf("         converti2 md5_*.rt[i]\n");
+	printf("list SP: converti2 -d *.rt[i]\n");
+}
+
+int main(int argc, char** argv)
+{
+	Converti2 *converti2;
+
+	if (argc == 1)
+	{
+		usage();		
+		return 0;
+	}
+
+	converti2 = new Converti2( argc, argv );
+	if ( converti2->sharedSetup() != EXIT_SUCCESS )
+	{
+		printf( "fatal error in sharedSetup()\n" );
+		return EXIT_FAILURE;
+	}
+
+	converti2->convertRainbowTables();
+
+	printf("\n");
+
+	return EXIT_SUCCESS;
 }

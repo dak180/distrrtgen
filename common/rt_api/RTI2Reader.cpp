@@ -21,60 +21,321 @@
  * along with freerainbowtables.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "BaseRTReader.h"
 #include "RTI2Reader.h"
 
 #include <math.h>
 
-RTI2Header *RTI2Reader::m_pHeader = NULL;
-RTI2Reader::RTI2Reader(string Filename)
+RTI2Reader::RTI2Reader( std::string filename )
 {
-	//m_pIndexPos = NULL, m_pChainPos = NULL;;
-	m_pIndex = NULL;
-	m_pFile = fopen(Filename.c_str(), "rb");
-	if(m_pFile == NULL)
-	{
-		printf("Unable to open file %s", Filename.c_str());
-		exit(1);
-	}
-	FILE *pFileIndex = fopen(Filename.append(".index").c_str(), "rb");
-	if(pFileIndex == NULL)
-	{
-		printf("Unable to open file %s", Filename.append(".index").c_str());
-		exit(1);
-	}
-	m_chainPosition = 0;
+	SubKeySpace subKeySpace;
+	CharacterSet charSet;
+	char *str;
+	uint8 *indexTmp;
+	uint32 a, b, c, subKeySpacesTmp = 0, hybridSets = 0, passwordLength = 0
+		, count, sum = 0, chainSize;
+	int ret;
+	uint8 characterSetFlags;
 
-	long len = GetFileLen(pFileIndex);
-	fseek(pFileIndex, 0, SEEK_SET);
+	fin.open( filename.c_str(), std::ios_base::binary | std::ios_base::in );
 
-	m_pIndex = new (nothrow) unsigned char[len];
-	if(m_pIndex == NULL) {
-		printf("Error allocating %ld MB memory for index in RTI2Reader::RTI2Reader()", len / (1024 * 1024));
-		exit(-2);
-	}
-	if(fread(m_pIndex, 1, len, pFileIndex) != (unsigned long)len)
+	if( !fin.read( (char*) (&header), sizeof(header) ).good() )
 	{
-		printf("Error while reading index file");
-		exit(1);
+		std::cerr << "readHeader fin.read() error" << std::endl;
+		exit( 1 ); // file error
 	}
-	fclose(pFileIndex);
-	m_pHeader = new RTI2Header();	
-	memcpy(m_pHeader, m_pIndex, sizeof(RTI2Header));
-	m_pHeader->m_cppos = (unsigned int*)(m_pIndex + 8);
-	m_pHeader->prefixstart = *(uint64*)(m_pIndex + 8 + (m_pHeader->rti_cplength * 4));
-	m_chainsizebytes = (uint32)ceil((float)(m_pHeader->rti_startptlength + m_pHeader->rti_endptlength + m_pHeader->rti_cplength) / 8); // Get the size of each chain in bytes
-	m_indexrowsizebytes = (uint32)ceil((float)m_pHeader->rti_index_numchainslength / 8);
-	// Check the filesize
-	fseek(m_pFile, 0, SEEK_END);
-	len = ftell(m_pFile);
-	fseek(m_pFile, 0, SEEK_SET);
-	if(len % m_chainsizebytes > 0)
+
+	if ( header.tag != 0x32495452 ) // RTI2
+		exit( 3 ); // bad tag
+
+	if ( header.minor != 0 )
 	{
-		printf("Invalid filesize %lu\n", len);
-		return;
+		std::cerr << "readHeader bad minor version" << std::endl;
+		exit( 4 ); // bad minor version
+	}
+
+	if ( header.startPointBits == 0 || header.startPointBits > 64 )
+	{
+		std::cerr << "readHeader parsing error" << std::endl;
+		std::cerr << "header.startPointBits: " << header.startPointBits << std::endl;
+		exit( 2 ); // invalid header
+	}
+
+	if ( header.endPointBits == 0 || header.endPointBits > 64 )
+	{
+		std::cerr << "readHeader parsing error" << std::endl;
+		std::cerr << "header.endPointBits: " << header.endPointBits << std::endl;
+		exit( 2 ); // invalid header
+	}
+
+	if ( header.checkPointBits > 64 )
+	{
+		std::cerr << "readHeader parsing error" << std::endl;
+		std::cerr << "header.checkPointBits: " << header.checkPointBits << std::endl;
+		exit( 2 ); // invalid header
+	}
+
+	if ( header.startPointBits + header.checkPointBits + header.endPointBits
+		> 64 )
+	{
+		std::cerr << "readHeader parsing error" << std::endl;
+		std::cerr << "header.startPointBits + header.checkPointBits + header.endPointBits > 64" << std::endl;
+		std::cerr << "header.startPointBits: " << header.startPointBits << std::endl;
+		std::cerr << "header.endPointBits: " << header.endPointBits << std::endl;
+		std::cerr << "header.checkPointBits: " << header.checkPointBits << std::endl;
+		exit( 2 ); // invalid header
+	}
+
+	if ( header.fileIndex > header.files )
+	{
+		std::cerr << "readHeader parsing error" << std::endl;
+		std::cerr << "fileIndex: " << header.fileIndex << std::endl;
+		std::cerr << "files: " << header.files << std::endl;
+		exit( 2 ); // invalid header
+	}
+
+	if ( header.algorithm > 19 )
+	{
+		std::cerr << "readHeader parsing error" << std::endl;
+		std::cerr << "undefined algorithm: " << header.algorithm << std::endl;
+		exit( 2 ); // invalid header
+	}
+
+	if (  header.reductionFunction > 3 
+		|| (header.reductionFunction <  2 && header.tableIndex > 65535)
+		|| (header.reductionFunction == 2 && header.tableIndex >   255))
+	{
+		std::cerr << "readHeader parsing error" << std::endl;
+		std::cerr << "invalid reductionFunction parameters" << std::endl;
+		std::cerr << "header.reductionFunction: " << header.reductionFunction << std::endl;
+		std::cerr << "header.tableIndex: " << header.tableIndex << std::endl;
+		exit( 2 ); // invalid header
+	}
+
+	if ( header.tableIndex != 0
+		&&  ((header.reductionFunction < 2 && header.chainLength - 2 > header.tableIndex << 16)
+			|| (header.reductionFunction == 3 && header.chainLength > header.tableIndex))) // I think this might be "header.chainLength - 2 > header.tableIndex" need to double check
+	{
+		// Sc00bz remarks "(these tables suck)"
+		std::cerr << "WARNING: Table index is not large enough for this chain length"
+			<< std::endl;
+	}
+
+	// XXX copies from header to setters or full RTI20_File struct?
+
+	str = new char[1024];
+
+	// Salt
+	setSalt( "" );
+
+	if ( header.algorithm == 0
+		|| ( header.algorithm >= 15 && header.algorithm <= 19 ))
+	{
+		ret = readRTI2String( fin, str );
+
+		if ( ret < 0 )
+		{
+			delete [] str;
+			exit( -ret );
+		}
+
+		str[ret] = 0;
+		setSalt( str );
 	}
 	
+	// Sub keyspaces
+	subKeySpaces.clear();
 
+	if ( !fin.read( (char*) (&subKeySpacesTmp), 1 ).good() )
+	{
+		std::cerr << "readHeader fin.read() error" << std::endl;
+		delete [] str;
+		exit( 1 ); // file error
+	}
+
+	if  ( subKeySpacesTmp == 0 )
+	{
+		std::cerr << "readHeader fin.read() error" << std::endl;
+		std::cerr << "subKeySpaces missing from header" << std::endl;
+		delete [] str;
+		exit( 2 ); // invalid header
+	}
+
+	for ( a = 0; a < subKeySpacesTmp; a++ )
+	{
+		subKeySpace.perPositionCharacterSets.clear();
+
+		if ( !fin.read( (char*) (&hybridSets), 1 ).good() )
+		{
+			std::cerr << "readHeader fin.read() error" << std::endl;
+			delete [] str;
+			exit( 1 ); // file error
+		}
+
+		if ( hybridSets == 0 )
+		{
+			delete [] str;
+			exit( 2 ); // invalid header
+		}
+
+		// Hybrid sets
+		for ( b = 0; b < hybridSets; b++ )
+		{
+			// Password length
+			if ( !fin.read( (char*) (&passwordLength), 1 ).good() )
+			{
+				std::cerr << "readHeader fin.read() error" << std::endl;
+				delete [] str;
+				exit( 1 ); // file error
+			}
+
+			if ( passwordLength == 0 )
+			{
+				delete [] str;
+				exit( 2 ); //invalid header
+			}
+
+			// Character set flags
+			if ( !fin.read( (char*) (&characterSetFlags), 1 ).good() )
+			{
+				std::cerr << "readHeader fin.read() error" << std::endl;
+				delete [] str;
+				exit( 1 ); // file error
+			}
+
+			if ( characterSetFlags == 0 )
+			{
+				delete [] str;
+				exit( 2 ); // invalid header
+			}
+
+			// Character set
+			charSet.characterSet1.clear();
+			charSet.characterSet2.clear();
+			charSet.characterSet3.clear();
+			charSet.characterSet4.clear();
+
+			if ( characterSetFlags & 1 )
+			{
+				ret = readRTI2String( fin, str, 1 );
+				if ( ret < 0 )
+				{
+					delete [] str;
+					exit( -ret );
+				}
+
+				charSet.characterSet1.assign((uint8*) str, ((uint8*) str) + ret);
+			}
+
+			if ( characterSetFlags & 2 )
+			{
+				ret = readRTI2String( fin, str, 2 );
+
+				if ( ret < 0 )
+				{
+					delete [] str;
+					exit( -ret );
+				}
+
+				charSet.characterSet2.assign((uint16*) str, ((uint16*) str) + ret);
+			}
+
+			if ( characterSetFlags & 4 )
+			{
+				ret = readRTI2String( fin, str, 3 );
+
+				if ( ret < 0 )
+				{
+					delete [] str;
+					exit( -ret );
+				}
+
+				charSet.characterSet3.assign((uint24*) str, ((uint24*) str) + ret);
+			}
+
+			if ( characterSetFlags & 8 )
+			{
+				ret = readRTI2String( fin, str, 4 );
+
+				if ( ret < 0 )
+				{
+					delete [] str;
+					exit( -ret );
+				}
+
+				charSet.characterSet4.assign((uint32*) str, ((uint32*) str) + ret);
+			}
+
+			for ( c = 0; c < passwordLength; c++ )
+			{
+				subKeySpace.perPositionCharacterSets.push_back(charSet);
+			}
+		}
+	}
+
+	subKeySpaces.push_back(subKeySpace);
+
+	// Check point positions
+	if ( !fin.read( str, 4 * header.checkPointBits ).good() )
+	{
+		std::cerr << "readHeader fin.read() error" << std::endl;
+		delete [] str;
+		exit( 1 ); // file error
+	}
+
+	checkPointPositions.assign((uint32*) str, ((uint32*) str) + header.checkPointBits);
+	delete [] str;
+
+	// *** Index ***
+	if ( !fin.read( (char*) (index.firstPrefix), 8 ).good() )
+	{
+		std::cerr << "readIndex fin.read() error" << std::endl;
+		exit( 1 ); // file error
+	}
+
+	if ( !fin.read((char*) (&count), 4 ).good() )
+	{
+		std::cerr << "readIndex fin.read() error" << std::endl;
+		exit( 1 ); // file error
+	}
+
+	if ( count == 0 )
+	{
+		exit( 1 ); // file error
+	}
+
+	indexTmp = new uint8[count];
+
+	if ( !fin.read( (char*) indexTmp, count ).good() )
+	{
+		std::cerr << "readIndex fin.read() error" << std::endl;
+		delete [] indexTmp;
+		exit( 1 ); // file error
+	}
+
+	index.prefixIndex.reserve(count + 1);
+	index.prefixIndex.push_back(sum);
+
+	for (a = 0; a < count; a++)
+	{
+		sum += indexTmp[a];
+		index.prefixIndex.push_back(sum);
+		count--;
+	}
+
+	delete [] indexTmp;
+
+	// *** Data ***
+	chainSize = (header.startPointBits + header.checkPointBits + header.endPointBits + 7) >> 3;
+	data = new uint8[chainSize * sum + 8 - chainSize]; // (8 - chainSize) to avoid "reading past the end of the array" error
+
+	if ( !fin.read( (char*) (data), chainSize * sum ).good() )
+	{
+		std::cerr << "readIndex fin.read() error" << std::endl;
+		delete [] data;
+		data = NULL;
+		exit( 1 ); // file error
+	}
 }
 
 RTI2Reader::~RTI2Reader(void)
@@ -84,80 +345,50 @@ RTI2Reader::~RTI2Reader(void)
 
 }
 
+int RTI2Reader::readRTI2String( std::ifstream &fin, void *str, uint32 charSize )
+{
+/*
+ * String length (1 byte)
+ * String (String length bytes or (charSize * (String length + 1)) bytes)
+*/
+	uint32 size = 0;
+	int ret = 0;
+
+	if ( !fin.read( (char*) (&ret), 1 ).good() )
+	{
+		std::cerr << "readHeader find.read() error" << std::endl;
+		return -1; // file error
+	}
+
+	if ( charSize )
+	{
+		ret++;
+		size = charSize * ret;
+	}
+
+	if ( size > 0 )
+	{
+		if ( !fin.read( (char*) str, size ).good() )
+		{
+			std::cerr << "readHeader fin.read() error" << std::endl;
+			return -1; //file error
+		}
+	}
+
+	return ret;
+}
+
 uint32 RTI2Reader::GetChainsLeft()
 {
+	/*  XXX
 	long len = GetFileLen(m_pFile);
 	return len / m_chainsizebytes - m_chainPosition;
+	*/
+
+	return 0;
 }
 
 int RTI2Reader::ReadChains(unsigned int &numChains, RainbowChain *pData)
 {
-	if(strncmp(m_pHeader->header, "RTI2", 4) != 0)
-	{
-		numChains = 0;
-		return -1;
-	}
-	unsigned char *pNumChains = m_pIndex + (m_pHeader->rti_cplength * 4) + 16; // Pointer into the index containing info about how many numbers are in the first chain prefix
-	unsigned int i = 0;
-	unsigned int indexRow = 0; // Current offset into the index
-	unsigned int curRowPosition = 0;
-	
-	while(true) // Fast forward to current position
-	{
-		/// XXX
-		// ALERT: Possible problem here if m_indexrowsizebytes > 1 as pNumChains is a unsigned char.
-		unsigned int NumChainsInRow = (unsigned int)*(pNumChains + indexRow * m_indexrowsizebytes);
-		if(m_indexrowsizebytes > 1)
-		{
-			//XXX Have to find a solution to this problem
-			printf( "FATAL: m_indexrowsizebytes > 1: %d\n", m_indexrowsizebytes ); 
-			exit(2);
-		}
-		if(i + NumChainsInRow > m_chainPosition)
-		{
-			curRowPosition = m_chainPosition - i;
-			break; // The current position is somewhere within this prefix
-		}
-		indexRow++;		
-		i += NumChainsInRow;
-	}
-	
-	uint64 chainrow = 0; // Buffer to store a single read chain
-	unsigned int chainsProcessed = 0; // Number of chains processed
-
-	// XXX: same problem with unsigned char here.
-	unsigned int NumChainsInRow = *(pNumChains + indexRow);
-	while(chainsProcessed < numChains && fread(&chainrow, 1, m_chainsizebytes, m_pFile) == m_chainsizebytes)
-	{
-		if(curRowPosition >= NumChainsInRow)
-		{ // Skip to next index row position
-			indexRow++;
-			curRowPosition = 0;
-			NumChainsInRow = *(pNumChains + indexRow);
-		}
-		while(NumChainsInRow == 0) // We skip forward until we hit a index with > 0 chains
-		{
-			indexRow++;
-			NumChainsInRow = *(pNumChains + indexRow);
-			curRowPosition = 0;
-		}
-		// Load the starting point from the data
-		pData[chainsProcessed].nIndexS = chainrow << ( 64 - m_pHeader->rti_startptlength );
-		pData[chainsProcessed].nIndexS = pData[chainsProcessed].nIndexS >> ( 64 - m_pHeader->rti_startptlength );
-
-		// Load the ending point prefix	
-		pData[chainsProcessed].nIndexE = ( m_pHeader->prefixstart + indexRow ) << m_pHeader->rti_endptlength;
-		// Append the ending point suffix
-#if defined(_WIN32) && !defined(__GNUC__)
-		pData[chainsProcessed].nIndexE |= (chainrow & (0xFFFFFFFFFFFFFFFFI64 >> m_pHeader->rti_cplength)) >> m_pHeader->rti_startptlength;
-#else
-		pData[chainsProcessed].nIndexE |= (chainrow & (0xFFFFFFFFFFFFFFFFllu >> m_pHeader->rti_cplength)) >> m_pHeader->rti_startptlength;
-#endif
-		//pData[chainsProcessed].nCheckPoint = (chainrow >> m_pHeader->rti_startptlength + m_pHeader->rti_endptlength);
-		curRowPosition++;
-		chainsProcessed++;
-	}
-	numChains = chainsProcessed;
-	m_chainPosition += numChains;
 	return 0;
 }
