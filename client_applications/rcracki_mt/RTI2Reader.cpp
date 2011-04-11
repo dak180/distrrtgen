@@ -37,10 +37,10 @@ RTI2Reader::RTI2Reader(string Filename)
 		printf("Unable to open file %s", Filename.c_str());
 		exit(1);
 	}
-	FILE *pFileIndex = fopen(Filename.append(".index").c_str(), "rb");
+	FILE *pFileIndex = fopen( (Filename + ".index").c_str(), "rb");
 	if(pFileIndex == NULL)
 	{
-		printf("Unable to open file %s", Filename.append(".index").c_str());
+		printf("Unable to open file %s", ( Filename + ".index").c_str());
 		exit(1);
 	}
 	m_chainPosition = 0;
