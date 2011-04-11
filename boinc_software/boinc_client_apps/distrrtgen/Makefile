@@ -43,6 +43,7 @@ INCLUDES = -I../../../common/rt_api -I$(BOINC_DIR) -I$(BOINC_LIB_DIR) -I$(BOINC_
 COMMON_API_PATH = ../../../common/rt_api
 
 OPTIMIZATION = -O3
+WARNALL = -Wextra -Wunused-macros -Wunsafe-loop-optimizations -Wundef -Woverlength-strings -Wdisabled-optimization -Wformat-extra-args -Wformat-security -Winline
 
 CXXFLAGS = -g \
     -static -static-libgcc \
@@ -77,6 +78,9 @@ clean:
 
 debug: DEBUG += -DDEBUG -g
 debug: all
+
+debugall: DEBUG += -DDEBUG -g $(WARNALL)
+debugall: distrrtgen
 
 distclean:
 	/bin/rm -f distrrtgen *.o libstdc++.a stderr.txt boinc_lockfile result \
