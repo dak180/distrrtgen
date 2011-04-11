@@ -89,7 +89,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>../../../common/rt api;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../../common/rt_api;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>BOINC;WIN32;_DEBUG;_MT;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -114,7 +114,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <WholeProgramOptimization>true</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>..\..\..\common\rt api;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\common\rt_api;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>BOINC;WIN32;NDEBUG;_MT;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -198,31 +198,31 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\common\rt api\ChainWalkContext.cpp" />
-    <ClCompile Include="..\..\..\common\rt api\des_enc.c" />
-    <ClCompile Include="..\..\..\common\rt api\des_setkey.c" />
+    <ClCompile Include="..\..\..\common\rt_api\ChainWalkContext.cpp" />
+    <ClCompile Include="..\..\..\common\rt_api\des_enc.c" />
+    <ClCompile Include="..\..\..\common\rt_api\des_setkey.c" />
     <ClCompile Include="distrrtgen.cpp" />
-    <ClCompile Include="..\..\..\common\rt api\ecb_enc.c" />
-    <ClCompile Include="..\..\..\common\rt api\HashAlgorithm.cpp" />
-    <ClCompile Include="..\..\..\common\rt api\HashRoutine.cpp" />
-    <ClCompile Include="..\..\..\common\rt api\md4.cpp" />
-    <ClCompile Include="..\..\..\common\rt api\md5.cpp" />
-    <ClCompile Include="..\..\..\common\rt api\Public.cpp" />
+    <ClCompile Include="..\..\..\common\rt_api\ecb_enc.c" />
+    <ClCompile Include="..\..\..\common\rt_api\HashAlgorithm.cpp" />
+    <ClCompile Include="..\..\..\common\rt_api\HashRoutine.cpp" />
+    <ClCompile Include="..\..\..\common\rt_api\md4.cpp" />
+    <ClCompile Include="..\..\..\common\rt_api\md5.cpp" />
+    <ClCompile Include="..\..\..\common\rt_api\Public.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\common\rt api\ChainWalkContext.h" />
-    <ClInclude Include="..\..\..\common\rt api\des.h" />
-    <ClInclude Include="..\..\..\common\rt api\des_locl.h" />
-    <ClInclude Include="..\..\..\common\rt api\global.h" />
+    <ClInclude Include="..\..\..\common\rt_api\ChainWalkContext.h" />
+    <ClInclude Include="..\..\..\common\rt_api\des.h" />
+    <ClInclude Include="..\..\..\common\rt_api\des_locl.h" />
+    <ClInclude Include="..\..\..\common\rt_api\global.h" />
     <ClInclude Include="distrrtgen.h" />
-    <ClInclude Include="..\..\..\common\rt api\HashAlgorithm.h" />
-    <ClInclude Include="..\..\..\common\rt api\HashRoutine.h" />
-    <ClInclude Include="..\..\..\common\rt api\md4.h" />
-    <ClInclude Include="..\..\..\common\rt api\md5.h" />
-    <ClInclude Include="..\..\..\common\rt api\podd.h" />
-    <ClInclude Include="..\..\..\common\rt api\Public.h" />
-    <ClInclude Include="..\..\..\common\rt api\sk.h" />
-    <ClInclude Include="..\..\..\common\rt api\spr.h" />
+    <ClInclude Include="..\..\..\common\rt_api\HashAlgorithm.h" />
+    <ClInclude Include="..\..\..\common\rt_api\HashRoutine.h" />
+    <ClInclude Include="..\..\..\common\rt_api\md4.h" />
+    <ClInclude Include="..\..\..\common\rt_api\md5.h" />
+    <ClInclude Include="..\..\..\common\rt_api\podd.h" />
+    <ClInclude Include="..\..\..\common\rt_api\Public.h" />
+    <ClInclude Include="..\..\..\common\rt_api\sk.h" />
+    <ClInclude Include="..\..\..\common\rt_api\spr.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
