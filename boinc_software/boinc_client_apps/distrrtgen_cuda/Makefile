@@ -63,13 +63,13 @@ distrrtgen: $(CUDA_LIB) libgcc_s.so.1 libstdc++.so.6 $(BOINC_API_DIR)/libboinc_a
 	$(CXX) $(LFLAGS) $(OBJS) $(LIBS) -o distrrtgen
 
 $(CUDA_LIB):
-	if [ !-f $(CUDA_LIB) ]; then ln -s $(CUDA_PATH)/lib64/$(CUDA_LIB) $(CUDA_LIB); fi
+	if [ ! -f $(CUDA_LIB) ]; then ln -s $(CUDA_PATH)/lib64/$(CUDA_LIB) $(CUDA_LIB); fi
 
 libstdc++.so.6:
-	if [ !-f libstdc++.so.6 ]; then ln -s `$(CC) $(CXXFLAGS) -print-file-name=libstdc++.so.6`; fi
+	if [ ! -f libstdc++.so.6 ]; then ln -s `$(CC) $(CXXFLAGS) -print-file-name=libstdc++.so.6`; fi
 
 libgcc_s.so.1:
-	if [ !-f libgcc_s.so.1 ]; then ln -s `$(CC) $(CXXFLAGS) -print-file-name=libgcc_s.so.1`; fi
+	if [ ! -f libgcc_s.so.1 ]; then ln -s `$(CC) $(CXXFLAGS) -print-file-name=libgcc_s.so.1`; fi
 
 clean:
 	/bin/rm -f distrrtgen *.o
