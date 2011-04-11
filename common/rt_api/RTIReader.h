@@ -36,7 +36,6 @@
 class RTIReader : BaseRTReader
 {
 private:
-	FILE *m_pFile;
 	unsigned int m_chainPosition;
 	unsigned int m_nIndexSize;
 	IndexChain *m_pIndex;
