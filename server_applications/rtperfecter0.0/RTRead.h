@@ -21,7 +21,7 @@
 #define RTREAD_H
 
 #include <sys/types.h>
-#include "RTcommon.h"
+#include "RTCommon.h"
 
 struct FileList
 {
