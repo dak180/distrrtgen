@@ -746,6 +746,7 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 				printf("reading time: %.2f s\n", fTime);		
 				printf("converting %i chains...\n", nChains);
 				t1 = clock();
+				uint64 tmpMinimumStartPoint = 0xFFFFFFFFFFFFFFFFllu;
 
 				for(unsigned int i = 0; i < nChains; i++)
 				{
@@ -754,6 +755,9 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 					else
 					{
 						uint64 chainrow = pChain[i].nIndexS; // Insert the complete start point								 
+						if ( chainrow < tmpMinimumStartPoint )
+							tmpMinimumStartPoint = chainrow;
+
 						chainrow |= ((uint64)pChain[i].nIndexE & (0xffffffff >> (32 - eptl))) << sptl; // 
 /*						if(hasCheckPoints == 1 && checkPointBits > 0)
  *						{
@@ -789,6 +793,8 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 					}
 					numProcessedChains++;
 				}
+
+				writer->setMinimumStartPoint( tmpMinimumStartPoint );
 
 				t2 = clock();
 				fTime = 1.0f * (t2 - t1) / CLOCKS_PER_SEC;

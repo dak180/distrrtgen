@@ -98,6 +98,13 @@ void RTI2Writer::setFileIndex( uint32 fileIndex )
 	out.header.fileIndex = fileIndex;
 }
 
+int RTI2Writer::setMinimumStartPoint( uint64 tmpMinimumStartPoint )
+{
+	out.header.rtParams.minimumStartPoint = tmpMinimumStartPoint;
+
+	return 0;
+}
+
 void RTI2Writer::setPrefixCount( uint32 prefixIndexCount )
 {
 	prefixCount = prefixIndexCount;
@@ -167,10 +174,8 @@ int RTI2Writer::writeHeader()
 	fwrite( &out.header.checkPointBits, 1, 1, pFile );
 	fwrite( &out.header.fileIndex, 1, sizeof( out.header.fileIndex ), pFile );
 	fwrite( &out.header.files, 1, sizeof( out.header.files ), pFile );
-	// XXX minimumStartPoint
-	uint64 tempMinStartPoint = 123;
-	fwrite( &tempMinStartPoint, 1, 8, pFile );
-	
+
+	fwrite( &out.header.rtParams.minimumStartPoint, 1, 8, pFile );
 	fwrite( &out.header.rtParams.chainLength, 1
 		, sizeof(out.header.rtParams.chainLength), pFile );
 	fwrite( &out.header.rtParams.tableIndex, 1

@@ -66,6 +66,7 @@ public:
 	void setFileIndex( uint32 fileIndex );
 	void setFileCount( uint32 fileCount );
 	//void setIndexNumberChainsLen( uint8 indexNumberChainsLen );
+	int setMinimumStartPoint( uint64 tmpMinimumStartPoint );
 	void setPrefixCount( uint32 prefixIndexCount );
 	void setPrefixStart( uint64 prefixStart );
 	void setSalt( std::string salt );
