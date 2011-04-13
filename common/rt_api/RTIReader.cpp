@@ -31,7 +31,7 @@ RTIReader::RTIReader( std::string Filename )
 		printf("could not open file %s\n", Filename.c_str());
 		return;		
 	}
-	std::string sIndex = Filename.append(".index").c_str();
+	std::string sIndex = Filename + ".index";
 	FILE *pFileIndex = fopen(sIndex.c_str(), "rb");
 	if(pFileIndex == NULL) {
 		printf("could not open index file %s\n", sIndex.c_str());
@@ -125,6 +125,7 @@ int RTIReader::ReadChains(uint32 &numChains, RainbowChain *pData)
 	memset(pData, 0x00, sizeof(RainbowChain) * numChains);
 	unsigned int readChains = 0;
 	unsigned int chainsleft = GetChainsLeft();
+
 	for(uint32 i = 0; i < m_nIndexSize; i++)
 	{
 		if(m_chainPosition + readChains > m_pIndex[i].nFirstChain + m_pIndex[i].nChainCount) // We found the matching index
@@ -160,5 +161,4 @@ RTIReader::~RTIReader(void)
 		delete m_pIndex;
 	if(m_pFile != NULL)
 		fclose(m_pFile);
-
 }
