@@ -839,6 +839,12 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 			//fwrite(&indexes[0].prefix, 1, 8, pFileIndex); // Write the first prefix
 			if ( writer != NULL )
 			{
+				/* XXX debug
+				std::cout << "setPrefixStart indexes[0].prefix: "
+					<< indexes[0].prefix << std::endl;
+				std::cout << "setPrefixCount: "
+					<< indexes.size() << std::endl;
+				*/
 				writer->setPrefixStart( indexes[0].prefix );
 				writer->setPrefixCount( indexes.size() );
 			}
@@ -878,6 +884,10 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 
 				//fwrite(&indexes[i].numchains, 1, m_indexrowsizebytes, pFileIndex);
 				writer->addIndexChain( &indexes[i].prefixstart );
+				/* XXX debug
+				std::cout << "addIndexChain: "
+					<< indexes[i].prefixstart << std::endl;
+				*/
 
 				lastPrefix = indexes[i].prefix;
 			}

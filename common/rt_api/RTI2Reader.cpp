@@ -493,8 +493,12 @@ void RTI2Reader::Dump()
 	std::cout << "index.firstPrefix: " << index.firstPrefix << std::endl;
 	std::cout << "index.prefixIndex.size(): "
 		<< index.prefixIndex.size()  << std::endl;
-	std::cout << "index.prefixIndex[0]: "
-		<< index.prefixIndex[0] << std::endl;
+
+	for ( uint32 i = 0; i < index.prefixIndex.size(); i++ )
+	{
+		std::cout << "index.prefixIndex[" << i << "]: "
+			<< index.prefixIndex[i] << std::endl;
+	}
 
 	// XXX data
 }
