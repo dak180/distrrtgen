@@ -23,6 +23,8 @@
 
 #include "RTI2Common.h"
 #include <map>
+#include <iterator>
+#include <iostream>
 
 enum algorithmValue { Custom
 	, LM
@@ -75,51 +77,16 @@ static void initializeAlgorithmMap()
 uint8 getAlgorithmId( std::string algorithmName )
 {
 	initializeAlgorithmMap();
+	std::map<std::string, algorithmValue>::iterator iter;
 
-	switch( mapAlgorithmValue[algorithmName] )
+	iter = mapAlgorithmValue.find(algorithmName);
+
+	if ( iter == mapAlgorithmValue.end() )
 	{
-		case Custom:
-			return 0;
-		case LM:
-			return 1;
-		case NTLM:
-			return 2;
-		case MD2:
-			return 3;
-		case MD4:
-			return 4;
-		case MD5:
-			return 5;
-		case DoubleMD5:
-			return 6;
-		case DoubleBinaryMD5:
-			return 7;
-		case CiscoPIX:
-			return 8;
-		case SHA1:
-			return 9;
-		case MySQLSHA1:
-			return 10;
-		case SHA256:
-			return 11;
-		case SHA384:
-			return 12;
-		case SHA512:
-			return 13;
-		case RIPEMD160:
-			return 14;
-		case MSCache:
-			return 15;
-		case HalfLMChallenge:
-			return 16;
-		case SecondHalfLMChallenge:
-			return 17;
-		case NTLMChallenge:
-			return 18;
-		case Oracle:
-			return 19;
-		default:
-			printf( "Hash Algorithm %s is not supported\n", algorithmName.c_str() );
-			exit( 1 );
+		std::cout << "Hash Algorithm " << algorithmName << " is not supported"
+			<< std::endl;
+		exit( 1 );
 	}
+
+	return iter->second;
 }
