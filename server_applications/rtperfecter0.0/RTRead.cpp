@@ -1,5 +1,6 @@
 /*
 	Copyright (C) 2008 Steve Thomas <SMT837784@yahoo.com>
+	Copyright 2011 James Nobis <quel@quelrod.net>
 
 	This file is part of RT Perfecter v0.0.
 
@@ -398,7 +399,7 @@ int RTRead::getInfo(char *file, int len, FileList *ret)
 	// Get file size
 	fseek(pFile, 0, SEEK_END);
 	size = ftell(pFile);
-	if (size & 15 != 0)
+	if ( (size & 15) != 0)
 	{
 		fclose(pFile);
 		printf("Error file size of '%s' is not a multible of 16 bytes.\n", file);

@@ -30,7 +30,7 @@ RTWrite::RTWrite(char *fileName, int maxChainsPerFile)
 
 	m_file = new char[len + 1];
 	m_fileTemp = new char[len + 21];
-	int nChainCount;
+//	int nChainCount;
 #ifdef VERIFYCHAINS
 	CChainWalkContext::SetupWithPathName(fileName, m_nRainbowChainLen, nChainCount);
 #endif
@@ -122,7 +122,7 @@ void RTWrite::writeChain(RTChain *chain)
 		}*/
 		
 	}
-							int cp = 0;
+//							int cp = 0;
 //							if (cwc.GetIndex() == chain->endpt)
 //							{
 								if(chain->startpt == 0)
