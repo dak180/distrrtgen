@@ -655,6 +655,7 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 
 					for ( int a = 0; a < nPlainLenMax; a++ )
 					{
+						tmpSubKeySpace.passwordLength.clear();
 						tmpSubKeySpace.passwordLength.push_back( a + 1 );
 						tmpSubKeySpace.charSetFlags.push_back( 1 );
 						tmpSubKeySpace.perPositionCharacterSets.push_back( charSet );

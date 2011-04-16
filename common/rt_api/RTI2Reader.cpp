@@ -187,6 +187,7 @@ RTI2Reader::RTI2Reader( std::string filename )
 	for ( a = 0; a < subKeySpacesCount; a++ )
 	{
 		subKeySpace.perPositionCharacterSets.clear();
+		subKeySpace.passwordLength.clear();
 
 		if ( !fin.read( (char*) (&hybridSets), 1 ).good() )
 		{
