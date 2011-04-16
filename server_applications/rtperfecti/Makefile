@@ -1,4 +1,5 @@
 #	Copyright (C) 2008 Steve Thomas <SMT837784@yahoo.com>
+#	Copyright 2011 James Nobis <quel@quelrod.net>
 #
 #	This file is part of RT Perfecter.
 #
@@ -15,10 +16,19 @@
 #	You should have received a copy of the GNU General Public License
 #	along with RT Perfecter.  If not, see <http://www.gnu.org/licenses/>.
 
-all: rtperfect
+SHELL = /bin/sh
 
-rtperfect:
-	g++ *.cpp -O3 -o rtperfecti
+CXX = g++
+COMMON_API_PATH = ../../common/rt_api
+INCLUDES = -I$(COMMON_API_PATH)
+OPTIMIZATION = -O3
+
+CXXFLAGS = -Wall $(OPTIMIZATION)
+
+all: main
+
+main:
+	$(CXX) $(CXXFLAGS) RTRead.cpp RTWrite.cpp main.cpp -o rtperfecti
 
 clean:
 	rm -f *.o rtperfecti
