@@ -259,8 +259,7 @@ RTI2Reader::RTI2Reader( std::string filename )
 					exit( -ret );
 				}
 
-				charSet.characterSet1.assign((uint8*) str, ((uint8*) str) + ( ret - 1) );
-				fin.unget();
+				charSet.characterSet1.assign((uint8*) str, ((uint8*) str) + ret );
 			}
 
 			if ( characterSetFlags & 2 )
@@ -273,8 +272,7 @@ RTI2Reader::RTI2Reader( std::string filename )
 					exit( -ret );
 				}
 
-				charSet.characterSet2.assign((uint16*) str, ((uint16*) str) + ( ret - 1) );
-				fin.unget();
+				charSet.characterSet2.assign((uint16*) str, ((uint16*) str) + ret );
 			}
 
 			if ( characterSetFlags & 4 )
@@ -287,8 +285,7 @@ RTI2Reader::RTI2Reader( std::string filename )
 					exit( -ret );
 				}
 
-				charSet.characterSet3.assign((uint24*) str, ((uint24*) str) + ( ret - 1) );
-				fin.unget();
+				charSet.characterSet3.assign((uint24*) str, ((uint24*) str) + ret );
 			}
 
 			if ( characterSetFlags & 8 )
@@ -301,8 +298,7 @@ RTI2Reader::RTI2Reader( std::string filename )
 					exit( -ret );
 				}
 
-				charSet.characterSet4.assign((uint32*) str, ((uint32*) str) + ( ret - 1) );
-				fin.unget();
+				charSet.characterSet4.assign((uint32*) str, ((uint32*) str) + ret );
 			}
 
 			subKeySpace.perPositionCharacterSets.push_back(charSet);

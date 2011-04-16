@@ -223,8 +223,10 @@ int RTI2Writer::writeHeader()
 
 			if ( tmpSubKeySpace.charSetFlags[j] & 1 )
 			{
-				tmpUint8 = charSet.characterSet1.size();
+				tmpUint8 = charSet.characterSet1.size() - 1;
 				fwrite( &tmpUint8, 1, sizeof( uint8 ), pFile );
+
+				++tmpUint8;
 				for ( uint32 k = 0; k < tmpUint8; k++ )
 				{
 					fwrite( &charSet.characterSet1[k], 1, sizeof( uint8 )
@@ -233,9 +235,11 @@ int RTI2Writer::writeHeader()
 			}
 			if ( tmpSubKeySpace.charSetFlags[j] & 2 )
 			{
-				tmpUint8 = charSet.characterSet2.size();
-				fwrite( &tmpUint8, 1, sizeof( uint8 ), pFile );
-				for ( uint32 k = 0; k < tmpUint8; k++ )
+				uint16 tmpUint16 = charSet.characterSet2.size() - 1;
+				fwrite( &tmpUint16, 1, sizeof( uint16 ), pFile );
+
+				++tmpUint16;
+				for ( uint32 k = 0; k < tmpUint16; k++ )
 				{
 					fwrite( &charSet.characterSet2[k], 1, sizeof( uint16 )
 					, pFile );
@@ -243,9 +247,11 @@ int RTI2Writer::writeHeader()
 			}
 			if ( tmpSubKeySpace.charSetFlags[j] & 4 )
 			{
-				tmpUint8 = charSet.characterSet3.size();
-				fwrite( &tmpUint8, 1, sizeof( uint8 ), pFile );
-				for ( uint32 k = 0; k < tmpUint8; k++ )
+				uint32 tmpUint32 = charSet.characterSet3.size() - 1;
+				fwrite( &tmpUint32, 1, sizeof( uint24 ), pFile );
+
+				++tmpUint32;
+				for ( uint32 k = 0; k < tmpUint32; k++ )
 				{
 					fwrite( &charSet.characterSet3, 1, sizeof( uint24 )
 					, pFile );
@@ -253,9 +259,11 @@ int RTI2Writer::writeHeader()
 			}
 			if ( tmpSubKeySpace.charSetFlags[j] & 8 )
 			{
-				tmpUint8 = charSet.characterSet4.size();
-				fwrite( &tmpUint8, 1, sizeof( uint8 ), pFile );
-				for ( uint32 k = 0; k < tmpUint8; k++ )
+				uint32 tmpUint32 = charSet.characterSet4.size() - 1;
+				fwrite( &tmpUint32, 1, sizeof( uint32 ), pFile );
+
+				++tmpUint32;
+				for ( uint32 k = 0; k < tmpUint32; k++ )
 				{
 					fwrite( &charSet.characterSet4, 1, sizeof( uint32 )
 					, pFile );

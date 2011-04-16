@@ -110,6 +110,10 @@ void ConvertRainbowTable( std::string pathName, std::string resultFileName, std:
 		printf("Invalid table type '%s'", sType.c_str());
 		return ;
 	}
+
+	reader->Dump();
+	exit( 10 );
+
 	uint64 size = reader->GetChainsLeft() * sizeof(RainbowChain);
 #ifdef _MEMORYDEBUG
 	printf("Starting allocation of %i bytes\n", size);

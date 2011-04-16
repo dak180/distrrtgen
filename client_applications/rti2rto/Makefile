@@ -17,7 +17,7 @@ rti2rto: $(OBJS)
 clean:
 	rm -f *.o rti2rto
 
-debug: DEBUG += -DDEBUG -g
+debug: DEBUG += -DDEBUG -g -O0
 debug: all
 
 m32: DEBUG += -m32
