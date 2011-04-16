@@ -113,6 +113,7 @@ struct RTI20_File
 	};
 };
 
+#pragma pack(1)
 struct RTI20_File_Header
 {
 	uint32 tag; // "RTI2"
@@ -152,6 +153,7 @@ struct RTI20_File_Header
 			// 3 - GRT  ("GPU RT" uses lookup tables - cryptohaze.com)
 	};
 };
+#pragma pack(0)
 
 uint8 getAlgorithmId( std::string algorithmName );
 

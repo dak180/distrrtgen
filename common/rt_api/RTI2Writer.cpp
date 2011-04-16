@@ -129,7 +129,7 @@ void RTI2Writer::setStartPointLen( uint8 startPointLen )
 
 int RTI2Writer::setSubKeySpaces( std::vector<SubKeySpace> tmpSubKeySpaces )
 {
-	out.header.rtParams.subKeySpaces = tmpSubKeySpaces;
+	out.header.rtParams.subKeySpaces.assign( tmpSubKeySpaces.begin(), tmpSubKeySpaces.end() );
 
 	return 0;
 }
@@ -184,15 +184,27 @@ int RTI2Writer::writeHeader()
 		, sizeof( out.header.rtParams.algorithm ), pFile );
 	fwrite( &out.header.rtParams.reductionFunction, 1
 		, sizeof( out.header.rtParams.reductionFunction ), pFile );
-	fwrite( out.header.rtParams.salt.c_str(), 1
-		, sizeof( out.header.rtParams.salt ) * out.header.rtParams.salt.length()
-		, pFile );
+	
+	uint8 tmpUint8;
+
+	// XXX centralize the check for algorithm has salt
+	if ( out.header.rtParams.algorithm == 0 ||
+		( out.header.rtParams.algorithm >= 15 
+		  && out.header.rtParams.algorithm <= 19 )
+		)
+	{
+		tmpUint8 = sizeof( char ) * out.header.rtParams.salt.length();
+		fwrite( &tmpUint8, 1, 1, pFile );
+
+		if ( tmpUint8 > 0 )
+			fwrite( out.header.rtParams.salt.c_str(), 1, tmpUint8, pFile );
+	}
 
 	// subKeySpaces
 	
-	uint32 tmpUint32 = out.header.rtParams.subKeySpaces.size() + 1;
+	tmpUint8 = out.header.rtParams.subKeySpaces.size();
 	
-	fwrite( &tmpUint32, 1, sizeof( uint32 ), pFile );
+	fwrite( &tmpUint8, sizeof( uint8 ), 1, pFile );
 
 	CharacterSet charSet;
 	
@@ -211,19 +223,43 @@ int RTI2Writer::writeHeader()
 
 			if ( tmpSubKeySpace.charSetFlags[j] & 1 )
 			{
-				fwrite( &charSet.characterSet1, 1, sizeof( uint8 ), pFile );
+				tmpUint8 = charSet.characterSet1.size();
+				fwrite( &tmpUint8, 1, sizeof( uint8 ), pFile );
+				for ( uint32 k = 0; k < tmpUint8; k++ )
+				{
+					fwrite( &charSet.characterSet1[k], 1, sizeof( uint8 )
+					, pFile );
+				}
 			}
 			if ( tmpSubKeySpace.charSetFlags[j] & 2 )
 			{
-				fwrite( &charSet.characterSet2, 1, sizeof( uint16 ), pFile );
+				tmpUint8 = charSet.characterSet2.size();
+				fwrite( &tmpUint8, 1, sizeof( uint8 ), pFile );
+				for ( uint32 k = 0; k < tmpUint8; k++ )
+				{
+					fwrite( &charSet.characterSet2[k], 1, sizeof( uint16 )
+					, pFile );
+				}
 			}
 			if ( tmpSubKeySpace.charSetFlags[j] & 4 )
 			{
-				fwrite( &charSet.characterSet3, 1, sizeof( uint24 ), pFile );
+				tmpUint8 = charSet.characterSet3.size();
+				fwrite( &tmpUint8, 1, sizeof( uint8 ), pFile );
+				for ( uint32 k = 0; k < tmpUint8; k++ )
+				{
+					fwrite( &charSet.characterSet3, 1, sizeof( uint24 )
+					, pFile );
+				}
 			}
 			if ( tmpSubKeySpace.charSetFlags[j] & 8 )
 			{
-				fwrite( &charSet.characterSet4, 1, sizeof( uint32 ), pFile );
+				tmpUint8 = charSet.characterSet4.size();
+				fwrite( &tmpUint8, 1, sizeof( uint8 ), pFile );
+				for ( uint32 k = 0; k < tmpUint8; k++ )
+				{
+					fwrite( &charSet.characterSet4, 1, sizeof( uint32 )
+					, pFile );
+				}
 			}
 		}
 	}
@@ -252,6 +288,7 @@ int RTI2Writer::writeData()
 int RTI2Writer::writeIndex()
 {
 	fwrite( &out.index.firstPrefix, 1, sizeof( out.index.firstPrefix ), pFile );
+	fwrite( &prefixCount, 1, sizeof( prefixCount ), pFile );
 
 	for( uint32 i = 0; i < out.index.prefixIndex.size(); i++)
 	{

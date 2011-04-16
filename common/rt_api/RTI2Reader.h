@@ -44,14 +44,14 @@ class RTI2Reader : BaseRTReader
 private:
 	std::ifstream fin;
 	uint32 chainPosition;
-	unsigned char *m_pPos, *m_pChainPos;
+	uint8 *dataPos,*indexPos;
 	RTI20_File in;
 	RTI20_File_Header header;
 	RTI20_Index index;
 	uint8 *data;
-	unsigned char *m_pIndex;
-	uint32 m_chainsizebytes;
+	uint32 chainSizeBytes;
 	uint32 m_indexrowsizebytes;
+	uint32 numChains;
 	std::vector<SubKeySpace> subKeySpaces;
 	std::vector<uint32> checkPointPositions;
 	
@@ -62,6 +62,8 @@ public:
 	~RTI2Reader(void);
 	int ReadChains(uint32 &numChains, RainbowChain *pData);
 	uint32 GetChainsLeft();
+
+	void Dump();
 };
 
 

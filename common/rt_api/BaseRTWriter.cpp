@@ -2,9 +2,7 @@
  * freerainbowtables is a project for generating, distributing, and using
  * perfect rainbow tables
  *
- * Copyright 2010, 2011 Martin Westergaard Jørgensen <martinwj2005@gmail.com>
- * Copyright 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
- * Copyright 2010, 2011 James Nobis <frt@quelrod.net>
+ * Copyright 2011 James Nobis <frt@quelrod.net>
  *
  * This file is part of freerainbowtables.
  *
@@ -22,23 +20,63 @@
  * along with freerainbowtables.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "BaseRTReader.h"
+#include "BaseRTWriter.h"
 
-uint32 BaseRTReader::getChainLength()
+//using namespace std;
+
+int BaseRTWriter::addIndexChain( uint32 *chain )
 {
-	return chainLength;
+	return EXIT_SUCCESS;
 }
 
-std::string BaseRTReader::getSalt()
+std::string BaseRTWriter::getAlgorithm()
+{
+	return hashAlgorithm;
+}
+
+std::string BaseRTWriter::getSalt()
 {
 	return salt;
 }
 
-void BaseRTReader::setSalt( std::string salt )
+void BaseRTWriter::setAlgorithm( std::string hashRoutineName )
+{
+	hashAlgorithm = hashRoutineName;
+}
+
+void BaseRTWriter::setFileCount( uint32 fileCount )
+{
+
+}
+
+void BaseRTWriter::setSalt( std::string salt )
 {
 	this->salt = salt;
 }
 
-void BaseRTReader::Dump()
+int BaseRTWriter::setSubKeySpaces( std::vector<SubKeySpace> tmpSubKeySpaces )
 {
+
+	return 0;
+}
+
+int BaseRTWriter::setMinimumStartPoint( uint64 tmpMinimumStartPoint )
+{
+
+	return 0;
+}
+
+int BaseRTWriter::writeData()
+{
+	return EXIT_SUCCESS;
+}
+
+int BaseRTWriter::writeHeader()
+{
+	return EXIT_SUCCESS;
+}
+
+int BaseRTWriter::writeIndex()
+{
+	return EXIT_SUCCESS;
 }

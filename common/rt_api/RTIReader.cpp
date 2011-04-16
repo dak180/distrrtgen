@@ -134,6 +134,7 @@ int RTIReader::ReadChains(uint32 &numChains, RainbowChain *pData)
 		{
 			pData[readChains].nIndexE = m_pIndex[i].nPrefix << 16;
 			int endpoint = 0; // We have to set it to 0
+			// XXX start points may not exceed 6 bytes ( 2^48 )
 			fread(&pData[readChains].nIndexS, 6, 1, m_pFile);
 			fread(&endpoint, 2, 1, m_pFile);
 			pData[readChains].nIndexE += endpoint;

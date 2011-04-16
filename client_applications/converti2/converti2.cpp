@@ -514,8 +514,6 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 
 	uint32 fileIndex = atoi( vPart2[1].c_str() );
 
-	// XXX todo charset definitions
-
 	// Parse charset definition
 	std::string sCharsetDefinition = vPart[1];
 	std::string sCharsetName;
@@ -653,16 +651,18 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 					charSet.characterSet3.clear();
 					charSet.characterSet4.clear();
 					
-					charSet.characterSet1.assign( (uint8*) charsetContent.c_str(), ((uint8*) charsetContent.c_str()) + charsetContent.size() / 8 );
+					charSet.characterSet1.assign( (uint8*) charsetContent.c_str(), ((uint8*) charsetContent.c_str()) + charsetContent.size() );
 
 					for ( int a = 0; a < nPlainLenMax; a++ )
 					{
 						tmpSubKeySpace.passwordLength.push_back( a + 1 );
 						tmpSubKeySpace.charSetFlags.push_back( 1 );
 						tmpSubKeySpace.perPositionCharacterSets.push_back( charSet );
+
+						tmpSubKeySpaces.push_back( tmpSubKeySpace );
 					}
 
-					tmpSubKeySpaces.push_back( tmpSubKeySpace );
+					break;
 				}
 			}
 		}
@@ -727,6 +727,7 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 			uint64 curPrefix = 0, prefixStart = 0;
 			std::vector<IndexRow> indexes;
 			unsigned int chainsLeft;
+			uint64 tmpMinimumStartPoint = 0xFFFFFFFFFFFFFFFFllu;
 
 			while((chainsLeft = reader->GetChainsLeft()) > 0)
 			{
@@ -746,7 +747,6 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 				printf("reading time: %.2f s\n", fTime);		
 				printf("converting %i chains...\n", nChains);
 				t1 = clock();
-				uint64 tmpMinimumStartPoint = 0xFFFFFFFFFFFFFFFFllu;
 
 				for(unsigned int i = 0; i < nChains; i++)
 				{
@@ -758,9 +758,9 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 						if ( chainrow < tmpMinimumStartPoint )
 							tmpMinimumStartPoint = chainrow;
 
-						chainrow |= ((uint64)pChain[i].nIndexE & (0xffffffff >> (32 - eptl))) << sptl; // 
+						chainrow |= ((uint64)pChain[i].nIndexE & (0xffffffff >> (32 - eptl))) << sptl;
 /*						if(hasCheckPoints == 1 && checkPointBits > 0)
- *						{
+						{
 							chainrow |= (uint64)pChain[i].nCheckPoint << sptl + eptl;
 						}*/
 
@@ -779,12 +779,10 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 								exit(1);									
 							}
 
-							//unsigned char index[11] = {0}; // [0 - 10]
 							unsigned int numchains = numProcessedChains - prefixStart;
 
 							IndexRow index;
 							index.prefix = curPrefix;
-//							index.prefixstart = prefixStart;
 							index.numchains = numchains;
 							indexes.push_back(index);
 							prefixStart = numProcessedChains;
@@ -793,8 +791,6 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 					}
 					numProcessedChains++;
 				}
-
-				writer->setMinimumStartPoint( tmpMinimumStartPoint );
 
 				t2 = clock();
 				fTime = 1.0f * (t2 - t1) / CLOCKS_PER_SEC;
@@ -808,6 +804,8 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 					return;
 				}
 			}
+
+			writer->setMinimumStartPoint( tmpMinimumStartPoint );
 
 			// XXX write prefix indexes into RTI2Writer
 			
@@ -823,23 +821,19 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 			{
 				if(indexes[i].numchains > high.numchains)
 					high.numchains = indexes[i].numchains;
-
-/*				if(indexes[i].prefixstart > high.prefixstart)
-					high.prefixstart = indexes[i].prefixstart;
-				if(indexes[i].prefix > high.prefix)
-					high.prefix = indexes[i].prefix;
-*/
 			}
 
 			high.prefix = indexes[indexes.size()-1].prefix; // The last prefix is always the highest prefix
-//			unsigned int m_rti_index_prefixlength = GetMaxBits(high.prefix);
 			unsigned int m_rti_index_numchainslength = GetMaxBits(high.numchains);
 			uint32 m_indexrowsize = (uint32)ceil((float)(/*m_rti_index_indexlength + */m_rti_index_numchainslength) / 8) * 8; // The size in bits (in whole bytes)	
 			unsigned int m_indexrowsizebytes = m_indexrowsize / 8;
 			//FILE *pFileIndex = fopen( (resultFileName + ".index").c_str(), "wb");
-	//		fwrite(&m_rti_index_indexlength , 1, 1, fileR);
+			/*
+			for(uint32 i = 0; i < rti_cppos.size(); i++) {
+				fwrite(&rti_cppos[i], 1, 4, pFileIndex); // The position of the checkpoints
+			}
+			*/
 
-			//fwrite( &m_rti_index_numchainslength, 1, 1, pFileIndex );
 			//int zero = 0;
 			//fwrite(&indexes[0].prefix, 1, 8, pFileIndex); // Write the first prefix
 			if ( writer != NULL )
@@ -854,14 +848,10 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 				if(i == 0)
 					lastPrefix = indexes[0].prefix;
 
-				//unsigned int indexrow = 0;
 				// Checks how big a distance there is between the current and the next prefix. eg cur is 3 and next is 10 = 7.
 				unsigned int diffSize = indexes[i].prefix - lastPrefix; 
 				if(i > 0 && diffSize > 1)
 				{
-					//indexrow |= indexes[i].prefixstart;
-					//printf("Diffsize is %u\n", diffSize);
-
 					// then write the distance amount of 00's
 					if(diffSize > 1000)
 					{

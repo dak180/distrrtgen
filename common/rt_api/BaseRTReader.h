@@ -48,6 +48,8 @@ public:
 
 	virtual std::string getSalt();
 	virtual void setSalt( std::string salt );
+
+	virtual void Dump();
 	
 	virtual ~BaseRTReader()  { };
 };
