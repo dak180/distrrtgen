@@ -724,7 +724,11 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 			uint64 curPrefix = 0, prefixStart = 0;
 			std::vector<IndexRow> indexes;
 			unsigned int chainsLeft;
+		#if defined(_WIN32) && !defined(__GNUC__)
+			uint64 tmpMinimumStartPoint = 0xFFFFFFFFFFFFFFFFI64;
+		#else
 			uint64 tmpMinimumStartPoint = 0xFFFFFFFFFFFFFFFFllu;
+		#endif
 
 			while((chainsLeft = reader->GetChainsLeft()) > 0)
 			{
