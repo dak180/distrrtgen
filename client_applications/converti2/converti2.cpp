@@ -386,7 +386,6 @@ int Converti2::sharedSetup()
 					printf("Using %i bits of the checkpoints\n", checkPointBits );
 				}
 			}
-
 		}		
 	}
 
@@ -720,7 +719,8 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 		if (pChain != NULL)
 		{
 			nAllocatedSize = nAllocatedSize / sizeof(RainbowChain) * sizeof(RainbowChain);
-			unsigned int nChains = nAllocatedSize / sizeof(RainbowChain);
+			// XXX safe for now...fix to use uint64 throughout
+			unsigned int nChains = (uint32) nAllocatedSize / sizeof(RainbowChain);
 			uint64 curPrefix = 0, prefixStart = 0;
 			std::vector<IndexRow> indexes;
 			unsigned int chainsLeft;
@@ -784,6 +784,7 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 								exit(1);									
 							}
 
+							// XXX 32-bit = 32-bit - 64-bit
 							unsigned int numchains = numProcessedChains - prefixStart;
 
 							IndexRow index;
@@ -814,7 +815,9 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 
 			// We need to write the last index down
 			IndexRow index;
+			// XXX 32-bit = 64-bit
 			index.prefix = curPrefix;
+			// XXX 32-bit = 64-bit
 			index.prefixstart = prefixStart;
 			index.numchains = numProcessedChains - prefixStart;
 			indexes.push_back(index);

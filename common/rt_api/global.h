@@ -24,6 +24,13 @@
 #ifndef _GLOBAL_H
 #define _GLOBAL_H
 
+/*
+ * XXX
+ * add universal support for unsigned 64-bit int values like the MAX
+ * 0xFFFFFFFFFFFFFFFFI64 (_UI64_MAX)
+ * 0xFFFFFFFFFFFFFFFFllu
+ */
+
 #if defined(_WIN32) && !defined(__GNUC__)
 	#define uint64 unsigned __int64
 #else

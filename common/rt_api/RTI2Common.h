@@ -153,7 +153,9 @@ struct RTI20_File_Header
 			// 3 - GRT  ("GPU RT" uses lookup tables - cryptohaze.com)
 	};
 };
-#pragma pack(0)
+#pragma pack()
+
+// you can't use pack(0) - it makes VC++ angry
 
 uint8 getAlgorithmId( std::string algorithmName );
 
