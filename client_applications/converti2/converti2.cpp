@@ -2,7 +2,7 @@
 * converti2 is a tool to convert from RT and RTI to RTI2
 *
 * Copyright 2009, 2010, 2011 Martin Westergaard Jørgensen <martinwj2005@gmail.com>
-* Copyright 2010, 2011 James Nobis <frt@quelrod.net>
+* Copyright 2010, 2011 James Nobis <quel@quelrod.net>
 *
 * This file is part of converti2.
 *
@@ -701,8 +701,6 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 
 		writer->setAlgorithm( sHashRoutineName );
 		writer->setSubKeySpaces( tmpSubKeySpaces );
-
-//		fwrite(&m_rti_index_numchainslength, 1, 1, pFileIndex);
 	}
 
 	if (writer != NULL || showDistribution )
@@ -713,10 +711,8 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 		static CMemoryPool mp;
 		uint64 nAllocatedSize;
 		RainbowChain* pChain = (RainbowChain*)mp.Allocate(size, nAllocatedSize);			
-		//uint32 chainrowsize = (uint32)ceil((float)(sptl + eptl + checkPointBits) / 8) * 8 ; // The size in bits (in whole bytes)
-		uint32 chainSize = (uint32)ceil((float)(sptl + eptl + checkPointBits) / 8 ) * 8;
-		// chainSize / 8
-		//unsigned int chainSizeBytes = chainSize >> 3;
+		uint32 chainSize = (uint32)ceil((float)(sptl + eptl + checkPointBits) / 8) * 8; 
+		uint32 chainSizeBytes = chainSize >> 3;
 
 		if ( writer != NULL )
 			writer->setChainSize( chainSize );
@@ -759,20 +755,24 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 						if ( chainrow < tmpMinimumStartPoint )
 							tmpMinimumStartPoint = chainrow;
 
-						chainrow |= ((uint64)pChain[i].nIndexE & (0xffffffff >> (32 - eptl))) << sptl;
+						// XXX check points go here
+
 /*						if(hasCheckPoints == 1 && checkPointBits > 0)
 						{
 							chainrow |= (uint64)pChain[i].nCheckPoint << sptl + eptl;
 						}*/
 
+						chainrow |= ((uint64)pChain[i].nIndexE & (0xffffffff >> (32 - eptl))) << sptl;
+						
 						if ( writer != NULL )
 							writer->addDataChain( &chainrow );
-						//fwrite(&chainrow, 1, chainSizeBytes, fileR);
+
 						uint64 prefix = pChain[i].nIndexE >> eptl;
+
 						if(i == 0)
 							curPrefix = prefix;
 
-						if(prefix != curPrefix && numProcessedChains - prefixStart > 0)
+						if ( prefix != curPrefix && (numProcessedChains - prefixStart) > 0)
 						{
 							if(prefix < curPrefix)
 							{
@@ -808,8 +808,6 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 
 			writer->setMinimumStartPoint( tmpMinimumStartPoint );
 
-			// XXX write prefix indexes into RTI2Writer
-			
 			// We need to write the last index down
 			IndexRow index;
 			index.prefix = curPrefix;
@@ -825,10 +823,9 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 			}
 
 			high.prefix = indexes[indexes.size()-1].prefix; // The last prefix is always the highest prefix
-			unsigned int m_rti_index_numchainslength = GetMaxBits(high.numchains);
-			uint32 m_indexrowsize = (uint32)ceil((float)(/*m_rti_index_indexlength + */m_rti_index_numchainslength) / 8) * 8; // The size in bits (in whole bytes)	
-			unsigned int m_indexrowsizebytes = m_indexrowsize / 8;
-			//FILE *pFileIndex = fopen( (resultFileName + ".index").c_str(), "wb");
+
+			// m_rti_index_numchainslength == index bit length "N"
+
 			/*
 			for(uint32 i = 0; i < rti_cppos.size(); i++) {
 				fwrite(&rti_cppos[i], 1, 4, pFileIndex); // The position of the checkpoints
@@ -836,15 +833,9 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 			*/
 
 			//int zero = 0;
-			//fwrite(&indexes[0].prefix, 1, 8, pFileIndex); // Write the first prefix
+
 			if ( writer != NULL )
 			{
-				/* XXX debug
-				std::cout << "setPrefixStart indexes[0].prefix: "
-					<< indexes[0].prefix << std::endl;
-				std::cout << "setPrefixCount: "
-					<< indexes.size() << std::endl;
-				*/
 				writer->setPrefixStart( indexes[0].prefix );
 				writer->setPrefixCount( indexes.size() );
 			}
@@ -862,36 +853,22 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 					// then write the distance amount of 00's
 					if(diffSize > 1000)
 					{
-						printf("WARNING! The distance to the next prefix is %i. Do you want to continue writing %i bytes of 0x00? Press y to continue", diffSize, (diffSize*m_indexrowsizebytes));
-					#ifdef _WIN32
-						if ( _getch() != 'y' )
-						{
-					#else
-						if ( tty_getchar() != 'y' )
-						{
-					#endif
-							printf("Aborting...");
-							exit(1);
-						}
+						std::cout << "WARNING! The distance to the next prefix is "
+							<< diffSize << "." << std::endl;
+						std::cout << "Aborting..." << std::endl;
+						exit(1);
 					}
 
 					/*
-					 * XXX ???
 						for(uint32 j = 1; j < diffSize; j++)
 						fwrite(&zero, 1, m_indexrowsizebytes, pFileIndex);
 					*/
 				}
 
-				//fwrite(&indexes[i].numchains, 1, m_indexrowsizebytes, pFileIndex);
-				writer->addIndexChain( &indexes[i].prefixstart );
-				/* XXX debug
-				std::cout << "addIndexChain: "
-					<< indexes[i].prefixstart << std::endl;
-				*/
-
+				writer->addIndexChain( indexes[i].numchains * chainSizeBytes );
+				
 				lastPrefix = indexes[i].prefix;
 			}
-			//fclose(pFileIndex);
 		}
 		else
 			printf("memory allocation fail\n");

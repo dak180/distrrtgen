@@ -1,5 +1,6 @@
 /*
 	Copyright (C) 2008 Steve Thomas <SMT837784@yahoo.com>
+	Copyright 2011 James Nobis <quel@quelrod.net>
 
 	This file is part of RT Perfecter.
 
@@ -30,8 +31,8 @@ RTWrite::RTWrite(char *fileName, int maxChainsPerFile)
 
 	m_file = new char[len + 1];
 	m_fileTemp = new char[len + 21];
-//	int nChainCount;
 #ifdef VERIFYCHAINS
+	int nChainCount;
 	CChainWalkContext::SetupWithPathName(fileName, m_nRainbowChainLen, nChainCount);
 #endif
 	strncpy(m_file, fileName, len);

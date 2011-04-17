@@ -24,7 +24,7 @@
 
 //using namespace std;
 
-int BaseRTWriter::addIndexChain( uint32 *chain )
+int BaseRTWriter::addIndexChain( uint32 chain )
 {
 	return EXIT_SUCCESS;
 }
@@ -37,6 +37,11 @@ std::string BaseRTWriter::getAlgorithm()
 std::string BaseRTWriter::getSalt()
 {
 	return salt;
+}
+
+void BaseRTWriter::Dump()
+{
+
 }
 
 void BaseRTWriter::setAlgorithm( std::string hashRoutineName )

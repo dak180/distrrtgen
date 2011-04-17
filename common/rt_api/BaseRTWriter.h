@@ -45,8 +45,10 @@ public:
 	virtual std::string getAlgorithm();
 	virtual std::string getSalt();
 
-	virtual int addIndexChain( uint32 *chain );
+	virtual int addIndexChain( uint32 chain );
 	virtual void addDataChain( uint64 *chain ) = 0;
+
+	virtual void Dump();
 
 	virtual void setAlgorithm( std::string hashRoutineName );
 	virtual void setChainCount( uint32 chains ) = 0;

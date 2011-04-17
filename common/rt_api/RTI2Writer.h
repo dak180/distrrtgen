@@ -75,7 +75,10 @@ public:
 	void setTableIndex( uint32 tableIndex );
 
 	void addDataChain( uint64 *chain );
-	int addIndexChain( uint32 *chain );
+	int addIndexChain( uint32 chain );
+
+	void Dump();
+
 	int writeChains(uint32 &numChains, RainbowChain *pData);
 	int writeHeader();
 	int writeData();
