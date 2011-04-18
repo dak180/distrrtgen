@@ -159,7 +159,7 @@ uint32 RTIReader::GetChainsLeft()
 RTIReader::~RTIReader(void)
 {
 	if(m_pIndex != NULL)
-		delete m_pIndex;
+		delete [] m_pIndex;
 	if(m_pFile != NULL)
 		fclose(m_pFile);
 }
