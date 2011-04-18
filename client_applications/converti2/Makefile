@@ -23,9 +23,8 @@ CXX = g++
 CC = gcc
 OPTIMIZATION = -O3
 INCLUDES = -I../../common/rt_api
-# XXX todo currently only 32-bit targets work
-CFLAGS = -Wall -m32 -ansi $(INCLUDES) $(OPTIMIZATION) -c $(DEBUG)
-LFLAGS = -Wall -m32 -ansi $(INCLUDES) $(OPTIMIZATION) $(DEBUG)
+CFLAGS = -Wall -ansi $(INCLUDES) $(OPTIMIZATION) -c $(DEBUG)
+LFLAGS = -Wall -ansi $(INCLUDES) $(OPTIMIZATION) $(DEBUG)
 LIBS = 
 OBJS = BaseRTReader.o BaseRTWriter.o MemoryPool.o Public.o RTI2Common.o \
 	RTI2Reader.o RTIReader.o RTReader.o RTI2Writer.o
