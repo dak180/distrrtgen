@@ -41,6 +41,9 @@ CMemoryPool::CMemoryPool()
 		m_nMemMax = nAvailPhys / 2;					// Leave some memory for CChainWalkSet
 	else
 		m_nMemMax = nAvailPhys - 8 * 1024 * 1024;	// Leave some memory for CChainWalkSet	
+#if defined(_WIN32) && !defined(__GNUC__) && !defined(_WIN64)
+	m_nMemMax = 1024 * 1024 * 512;
+#endif
 }
 
 CMemoryPool::~CMemoryPool()
