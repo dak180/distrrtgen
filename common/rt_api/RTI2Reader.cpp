@@ -356,7 +356,6 @@ RTI2Reader::RTI2Reader( std::string filename )
 	{
 		sum += indexTmp[a];
 		index.prefixIndex.push_back(sum);
-		count--;
 	}
 
 	delete [] indexTmp;
