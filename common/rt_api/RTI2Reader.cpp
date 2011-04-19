@@ -494,11 +494,13 @@ void RTI2Reader::Dump()
 	std::cout << "index.prefixIndex.size(): "
 		<< index.prefixIndex.size()  << std::endl;
 
+	/*
 	for ( uint32 i = 0; i < index.prefixIndex.size(); i++ )
 	{
 		std::cout << "index.prefixIndex[" << i << "]: "
 			<< index.prefixIndex[i] << std::endl;
 	}
+	*/
 
 	// XXX data
 }
@@ -515,6 +517,7 @@ int RTI2Reader::ReadChains(unsigned int &numChains, RainbowChain *pData)
 
 	for( uint32 i = 0; i < index.prefixIndex.size(); i++ )
 	{
+		// we found the matching index
 		if (  (chainPosition + readChains ) > ( index.prefixIndex[i] + index.firstPrefix ) )
 			continue;
 

@@ -49,7 +49,7 @@ RTI2Writer::~RTI2Writer()
 		fclose(pFile);
 
 	if ( dataProc != NULL )
-		delete dataProc;
+		delete [] dataProc;
 }
 
 void RTI2Writer::setAlgorithm( std::string hashRoutineName )
