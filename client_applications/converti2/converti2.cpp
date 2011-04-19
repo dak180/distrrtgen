@@ -443,6 +443,7 @@ void Converti2::convertRainbowTables()
 			exit(1);
 		}
 
+		pathName = vPathName[i];
 		convertRainbowTable( resultFile, vPathName.size() );
 	}
 }
