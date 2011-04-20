@@ -873,7 +873,8 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 					*/
 				}
 
-				writer->addIndexChain( indexes[i].numchains * chainSizeBytes );
+				//writer->addIndexChain( indexes[i].numchains * chainSizeBytes );
+				writer->addIndexChain( indexes[i].numchains );
 				
 				lastPrefix = indexes[i].prefix;
 			}

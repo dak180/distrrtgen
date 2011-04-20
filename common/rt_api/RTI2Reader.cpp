@@ -339,9 +339,9 @@ RTI2Reader::RTI2Reader( std::string filename )
 		exit( 1 ); // file error
 	}
 
-	indexTmp = new uint8[count];
+	indexTmp = new uint8[count * sizeof(uint32)];
 
-	if ( !fin.read( (char*) indexTmp, count ).good() )
+	if ( !fin.read( (char*) indexTmp, count * sizeof(uint32) ).good() )
 	{
 		std::cerr << "readIndex fin.read() error" << std::endl;
 		delete [] indexTmp;
@@ -349,12 +349,12 @@ RTI2Reader::RTI2Reader( std::string filename )
 	}
 
 	index.prefixIndex.reserve(count + 1);
-	indexPos = (uint8*)&index.prefixIndex[0];
 	index.prefixIndex.push_back(sum);
 
 	for (a = 0; a < count; a++)
 	{
-		sum += indexTmp[a];
+		//sum += indexTmp[a];
+		sum += *(((uint32 *)indexTmp) + a);
 		index.prefixIndex.push_back(sum);
 	}
 
@@ -363,8 +363,7 @@ RTI2Reader::RTI2Reader( std::string filename )
 	// *** Data ***
 	chainSizeBytes = (header.startPointBits + header.checkPointBits + header.endPointBits + 7) >> 3;
 	data = new uint8[chainSizeBytes * sum + 8 - chainSizeBytes]; // (8 - chainSizeBytes) to avoid "reading past the end of the array" error
-	numChains = chainSizeBytes * sum;
-	dataPos = data;
+	chainCount = sum;
 
 	if ( !fin.read( (char*) (data), chainSizeBytes * sum ).good() )
 	{
@@ -417,7 +416,7 @@ int RTI2Reader::readRTI2String( std::ifstream &fin, void *str, uint32 charSize )
 
 uint32 RTI2Reader::GetChainsLeft()
 {
-	return numChains - chainPosition;
+	return chainCount - chainPosition;
 }
 
 void RTI2Reader::Dump()
@@ -513,6 +512,7 @@ int RTI2Reader::ReadChains(unsigned int &numChains, RainbowChain *pData)
 
 	uint64 endPointMask = (( (uint64) 1 ) << header.endPointBits ) - 1;
 	uint64 startPointMask = (( (uint64) 1 ) << header.startPointBits ) - 1;
+	uint64 startPointShift = header.endPointBits;
 
 	for( uint32 i = 0; i < index.prefixIndex.size(); i++ )
 	{
@@ -520,7 +520,23 @@ int RTI2Reader::ReadChains(unsigned int &numChains, RainbowChain *pData)
 		if (  (chainPosition + readChains ) > ( index.prefixIndex[i] + index.firstPrefix ) )
 			continue;
 
+		while ( (chainPosition + readChains ) < ( index.prefixIndex[i] + index.firstPrefix ) )
+		{
+			pData[readChains].nIndexE = *((uint64*) ( data + ( ( index.prefixIndex[i] + index.firstPrefix ) * chainSizeBytes ) )) & endPointMask;
+			pData[readChains].nIndexS = ((*((uint64*) ( data + ( ( index.prefixIndex[i] + index.firstPrefix ) * chainSizeBytes ) )) >> startPointShift ) & startPointMask ) + header.minimumStartPoint;
+
+			++readChains;
+
+			if ( readChains == numChains || readChains == chainsleft )
+				break;
+		}
+
+		if ( readChains == numChains )
+			break;
 	}
+
+	if ( readChains != numChains )
+		numChains = readChains; // Update how many chains we read
 
 	chainPosition += readChains;
 	std::cout << "Chain Position is now " << chainPosition << std::endl;
