@@ -513,6 +513,7 @@ int RTI2Reader::ReadChains(unsigned int &numChains, RainbowChain *pData)
 	uint64 endPointMask = (( (uint64) 1 ) << header.endPointBits ) - 1;
 	uint64 startPointMask = (( (uint64) 1 ) << header.startPointBits ) - 1;
 	uint64 startPointShift = header.endPointBits;
+	uint64 chainrow = 0;
 
 	for( uint32 i = 0; i < index.prefixIndex.size(); i++ )
 	{
@@ -522,8 +523,10 @@ int RTI2Reader::ReadChains(unsigned int &numChains, RainbowChain *pData)
 
 		while ( (chainPosition + readChains ) < ( index.prefixIndex[i] + index.firstPrefix ) )
 		{
-			pData[readChains].nIndexE = *((uint64*) ( data + ( ( index.prefixIndex[i] + index.firstPrefix ) * chainSizeBytes ) )) & endPointMask;
-			pData[readChains].nIndexS = ((*((uint64*) ( data + ( ( index.prefixIndex[i] + index.firstPrefix ) * chainSizeBytes ) )) >> startPointShift ) & startPointMask ) + header.minimumStartPoint;
+			chainrow = *((uint64*) ( data + ( ( index.prefixIndex[i] + index.firstPrefix ) * chainSizeBytes ) ));
+			pData[readChains].nIndexE = chainrow & endPointMask;
+
+			pData[readChains].nIndexS = ((chainrow >> startPointShift) & startPointMask) + header.minimumStartPoint;
 
 			++readChains;
 

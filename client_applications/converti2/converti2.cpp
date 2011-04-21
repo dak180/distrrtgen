@@ -712,8 +712,6 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 		uint64 nAllocatedSize;
 		RainbowChain* pChain = (RainbowChain*)mp.Allocate(size, nAllocatedSize);			
 		uint32 chainSize = (uint32)ceil((float)(sptl + eptl + checkPointBits) / 8) * 8; 
-		uint32 chainSizeBytes = chainSize >> 3;
-
 		if ( writer != NULL )
 			writer->setChainSize( chainSize );
 
