@@ -15,7 +15,7 @@ rti2rto: $(OBJS)
 	$(CC) $(LFLAGS) $(OBJS) $(LIBS) rti2rto.cpp -o rti2rto
 
 clean:
-	rm -f *.o rti2rto
+	rm -f *.o rti2rto core
 
 debug: DEBUG += -DDEBUG -g -O0
 debug: all
