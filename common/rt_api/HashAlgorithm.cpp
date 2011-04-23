@@ -5,7 +5,7 @@
  * Copyright (C) Zhu Shuanglei <shuanglei@hotmail.com>
  * Copyright 2009, 2010, 2011 Martin Westergaard Jørgensen <martinwj2005@gmail.com>
  * Copyright 2009, 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
- * Copyright 2009, 2010, 2011 James Nobis <frt@quelrod.net>
+ * Copyright 2009, 2010, 2011 James Nobis <quel@quelrod.net>
  *
  * This file is part of freerainbowtables.
  *
@@ -35,9 +35,12 @@
 #include "md5.h"
 #include "des.h"
 //#include "sha1.h"
-//#include <openssl/sha.h>
-#if defined(_WIN32) && !defined(__GNUC__)
-	#pragma comment(lib, "libeay32.lib")
+
+#if 0
+	#include <openssl/sha.h>
+	#if defined(_WIN32) && !defined(__GNUC__)
+		#pragma comment(lib, "libeay32.lib")
+	#endif
 #endif
 
 #define MSCACHE_HASH_SIZE 16
