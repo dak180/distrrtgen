@@ -53,7 +53,7 @@ private:
 	uint32 prefixCount;
 	
 public:
-	RTI2Writer( std::string Filename );
+	RTI2Writer( std::string filename );
 	~RTI2Writer(void);
 
 	void setAlgorithm( std::string hashRoutineName );

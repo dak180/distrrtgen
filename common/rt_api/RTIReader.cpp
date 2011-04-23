@@ -3,7 +3,7 @@
  * perfect rainbow tables
  *
  * Copyright 2010, 2011 Martin Westergaard Jørgensen <martinwj2005@gmail.com>
- * Copyright 2010, 2011 James Nobis <frt@quelrod.net>
+ * Copyright 2010, 2011 James Nobis <quel@quelrod.net>
  *
  * This file is part of freerainbowtables.
  *
@@ -23,29 +23,30 @@
 
 #include "RTIReader.h"
 
-RTIReader::RTIReader( std::string Filename )
+RTIReader::RTIReader( std::string filename )
 {
+	setFilename( filename );
+
 	m_pIndex = NULL;
-	m_pFile = fopen(Filename.c_str(), "rb");
-	if(m_pFile == NULL) {
-		printf("could not open file %s\n", Filename.c_str());
+	dataFile = fopen(filename.c_str(), "rb");
+	if(dataFile == NULL) {
+		printf("could not open file %s\n", filename.c_str());
 		return;		
 	}
-	std::string sIndex = Filename + ".index";
+	std::string sIndex = filename + ".index";
 	FILE *pFileIndex = fopen(sIndex.c_str(), "rb");
 	if(pFileIndex == NULL) {
 		printf("could not open index file %s\n", sIndex.c_str());
 		return;
 	}
-	m_chainPosition = 0;
 
 	// Load the index file
 #if defined(_WIN32) && !defined(__GNUC__)
 	long nIndexFileLen = GetFileLen(pFileIndex);
-	long nFileLen = GetFileLen(m_pFile);
+	long nFileLen = GetFileLen(dataFile);
 #else
 	long nIndexFileLen = GetFileLen( sIndex );
-	long nFileLen = GetFileLen( Filename );
+	long nFileLen = GetFileLen( filename );
 #endif
 
 	unsigned int nTotalChainCount = nFileLen / 8;
@@ -115,28 +116,31 @@ RTIReader::RTIReader( std::string Filename )
 	//					printf("debug: Index loaded successfully (%u entries)\n", nIndexSize);
 		}		
 	}
-
-
 }
 
-int RTIReader::ReadChains(uint32 &numChains, RainbowChain *pData)
+uint32 RTIReader::getChainsLeft()
+{	
+	return (GetFileLen(dataFile) / 8) - chainPosition;
+}
+
+int RTIReader::readChains(uint32 &numChains, RainbowChain *pData)
 {	
 	// We HAVE to reset the data to 0x00's or we will get in trouble
 	memset(pData, 0x00, sizeof(RainbowChain) * numChains);
 	unsigned int readChains = 0;
-	unsigned int chainsleft = GetChainsLeft();
+	unsigned int chainsleft = getChainsLeft();
 
 	for(uint32 i = 0; i < m_nIndexSize; i++)
 	{
-		if(m_chainPosition + readChains > m_pIndex[i].nFirstChain + m_pIndex[i].nChainCount) // We found the matching index
+		if(chainPosition + readChains > m_pIndex[i].nFirstChain + m_pIndex[i].nChainCount) // We found the matching index
 			continue;
-		while(m_chainPosition + readChains < m_pIndex[i].nFirstChain + m_pIndex[i].nChainCount)
+		while(chainPosition + readChains < m_pIndex[i].nFirstChain + m_pIndex[i].nChainCount)
 		{
 			pData[readChains].nIndexE = m_pIndex[i].nPrefix << 16;
 			int endpoint = 0; // We have to set it to 0
 			// XXX start points may not exceed 6 bytes ( 2^48 )
-			fread(&pData[readChains].nIndexS, 6, 1, m_pFile);
-			fread(&endpoint, 2, 1, m_pFile);
+			fread(&pData[readChains].nIndexS, 6, 1, dataFile);
+			fread(&endpoint, 2, 1, dataFile);
 			pData[readChains].nIndexE += endpoint;
 			readChains++;
 			if(readChains == numChains || readChains == chainsleft) break;
@@ -146,20 +150,37 @@ int RTIReader::ReadChains(uint32 &numChains, RainbowChain *pData)
 	if(readChains != numChains) { 
 		numChains = readChains; // Update how many chains we read
 	}
-	m_chainPosition += readChains;
-	printf("Chain position is now %u\n", m_chainPosition);
+	chainPosition += readChains;
+	printf("Chain position is now %u\n", chainPosition);
 	return 0;
 }
 
-uint32 RTIReader::GetChainsLeft()
-{	
-	return (GetFileLen(m_pFile) / 8) - m_chainPosition;
+void RTIReader::setMinimumStartPoint()
+{
+	uint64 tmpStartPoint;
+	uint16 tmpEndPoint;
+	long originalFilePos = ftell( dataFile );
+
+	//fseek( dataFile, 0, SEEK_SET );
+	rewind( dataFile );
+
+	while ( !feof( dataFile ) )
+	{
+		fread( &tmpStartPoint, 6, 1, dataFile );
+		fread( &tmpEndPoint, 2, 1, dataFile );
+
+		if ( tmpStartPoint < minimumStartPoint )
+			minimumStartPoint = tmpStartPoint;
+	}
+
+	fseek( dataFile, originalFilePos, SEEK_SET );
 }
 
-RTIReader::~RTIReader(void)
+RTIReader::~RTIReader()
 {
-	if(m_pIndex != NULL)
+	if( m_pIndex != NULL )
 		delete [] m_pIndex;
-	if(m_pFile != NULL)
-		fclose(m_pFile);
+
+	if( dataFile != NULL )
+		fclose(dataFile);
 }

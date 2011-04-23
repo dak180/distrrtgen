@@ -59,8 +59,10 @@ private:
 public:
 	RTI2Reader( std::string filename );
 	~RTI2Reader(void);
-	int ReadChains(uint32 &numChains, RainbowChain *pData);
-	uint32 GetChainsLeft();
+
+	uint32 getChainsLeft();
+	int readChains(uint32 &numChains, RainbowChain *pData);
+	void setMinimumStartPoint();
 
 	void Dump();
 };

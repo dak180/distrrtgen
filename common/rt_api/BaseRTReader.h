@@ -4,7 +4,7 @@
  *
  * Copyright 2010, 2011 Martin Westergaard Jørgensen <martinwj2005@gmail.com>
  * Copyright 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
- * Copyright 2010, 2011 James Nobis <frt@quelrod.net>
+ * Copyright 2010, 2011 James Nobis <quel@quelrod.net>
  *
  * This file is part of freerainbowtables.
  *
@@ -37,21 +37,31 @@
 class BaseRTReader
 {
 protected:
-	FILE *m_pFile;
+	FILE *dataFile;
 	uint32 chainLength;
+	uint32 chainPosition;
+	uint64 minimumStartPoint;
+	std::string filename;
 	std::string salt;
 
 public:
-	virtual int ReadChains(uint32 &numChains, RainbowChain *pData) = 0;
-	virtual uint32 GetChainsLeft() = 0;
-	virtual uint32 getChainLength();
+	BaseRTReader();
+	virtual ~BaseRTReader() { };
 
+	virtual uint32 getChainsLeft() = 0;
+	virtual int readChains(uint32 &numChains, RainbowChain *pData) = 0;
+	virtual void setMinimumStartPoint() = 0;
+
+	virtual uint32 getChainLength();
+	virtual std::string getFilename();
 	virtual std::string getSalt();
+	virtual uint64 getMinimumStartPoint();
+
+	virtual void setChainLength( uint32 chainLength );
+	virtual void setFilename( std::string filename );
 	virtual void setSalt( std::string salt );
 
 	virtual void Dump();
-	
-	virtual ~BaseRTReader()  { };
 };
 
 #endif

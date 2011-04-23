@@ -23,29 +23,42 @@
 
 #include "RTReader.h"
 
-RTReader::RTReader( std::string Filename )
+RTReader::RTReader( std::string filename )
 {
-	m_pFile = fopen(Filename.c_str(), "rb");
+	setFilename( filename );
+	dataFile = fopen(filename.c_str(), "rb");
 }
 
-RTReader::~RTReader(void)
+uint32 RTReader::getChainsLeft()
 {
+	return (GetFileLen(dataFile) / 16) - chainPosition;
 }
 
-int RTReader::ReadChains(uint32 &numChains, RainbowChain *pData)
+int RTReader::readChains(uint32 &numChains, RainbowChain *pData)
 {
-	unsigned int numRead = fread(pData, 1, 16 * numChains, m_pFile);
+	unsigned int numRead = fread(pData, 1, 16 * numChains, dataFile);
 	numChains = numRead / 16;
-	m_chainPosition += numChains;
+	chainPosition += numChains;
 	return 0;
 }
 
-uint32 RTReader::GetChainsLeft()
+void RTReader::setMinimumStartPoint()
 {
-	return (GetFileLen(m_pFile) / 16) - m_chainPosition;
-}
+	uint64 tmpStartPoint;
+	uint64 tmpEndPoint;
+	long originalFilePos = ftell( dataFile );
 
-uint32 RTReader::getChainLength()
-{
-	return chainLength;
+	//fseek( dataFile, 0, SEEK_SET );
+	rewind( dataFile );
+
+	while ( !feof( dataFile ) )
+	{
+		fread( &tmpStartPoint, 8, 1, dataFile );
+		fread( &tmpEndPoint, 8, 1, dataFile );
+
+		if ( tmpStartPoint < minimumStartPoint )
+			minimumStartPoint = tmpStartPoint;
+	}
+
+	fseek( dataFile, originalFilePos, SEEK_SET );
 }

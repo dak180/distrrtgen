@@ -4,7 +4,7 @@
  *
  * Copyright 2010, 2011 Martin Westergaard Jørgensen <martinwj2005@gmail.com>
  * Copyright 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
- * Copyright 2010, 2011 James Nobis <frt@quelrod.net>
+ * Copyright 2010, 2011 James Nobis <quel@quelrod.net>
  *
  * This file is part of freerainbowtables.
  *
@@ -24,14 +24,42 @@
 
 #include "BaseRTReader.h"
 
+BaseRTReader::BaseRTReader()
+{
+	chainPosition = 0;
+
+	// set it to the maximum possible value
+	minimumStartPoint = (uint64)-1;
+}
+
 uint32 BaseRTReader::getChainLength()
 {
 	return chainLength;
 }
 
+uint64 BaseRTReader::getMinimumStartPoint()
+{
+	return minimumStartPoint;
+}
+
+std::string BaseRTReader::getFilename()
+{
+	return filename;
+}
+
 std::string BaseRTReader::getSalt()
 {
 	return salt;
+}
+
+void BaseRTReader::setChainLength( uint32 chainLength )
+{
+	this->chainLength = chainLength;
+}
+
+void BaseRTReader::setFilename( std::string filename )
+{
+	this->filename = filename;
 }
 
 void BaseRTReader::setSalt( std::string salt )

@@ -119,6 +119,7 @@ void RTI2Writer::setPrefixStart( uint64 prefixStart )
 
 void RTI2Writer::setSalt( std::string salt )
 {
+	BaseRTWriter::setSalt( salt );
 	out.header.rtParams.salt = salt; // XXX need to set this
 }
 

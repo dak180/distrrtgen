@@ -3,7 +3,7 @@
  * perfect rainbow tables
  *
  * Copyright 2010, 2011 Martin Westergaard Jørgensen <martinwj2005@gmail.com>
- * Copyright 2010, 2011 James Nobis <frt@quelrod.net>
+ * Copyright 2010, 2011 James Nobis <quel@quelrod.net>
  *
  * This file is part of freerainbowtables.
  *
@@ -25,25 +25,25 @@
 #define __RTREADER_H__
 
 #include <string>
-#ifdef WIN32
-#include <io.h>
+
+#if defined(_WIN32) && !defined(__GNUC__)
+	#include <io.h>
 #endif
+
 #include "Public.h"
 #include "BaseRTReader.h"
-
-//using namespace std;
 
 class RTReader : BaseRTReader
 {
 private:
-	unsigned int m_chainPosition;
 
 public:
-	RTReader( std::string Filename );
-	~RTReader(void);
-	int ReadChains(uint32 &numChains, RainbowChain *pData);
-	uint32 GetChainsLeft();
-	uint32 getChainLength();
+	RTReader( std::string filename );
+	~RTReader() { };
+
+	uint32 getChainsLeft();
+	int readChains(uint32 &numChains, RainbowChain *pData);
+	void setMinimumStartPoint();
 };
 
 #endif

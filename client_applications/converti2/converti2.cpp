@@ -468,6 +468,7 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 	BaseRTWriter *writer = NULL;
 	bool isOldRtFormat = false;
 	CharacterSet charSet;
+	uint64 endPointMask, startPointMask, startPointShift;
 
 	if ( fileName.length() < 3 )
 	{
@@ -490,6 +491,8 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 		printf("%s is not a supported file (Only RT and RTI is supported)\n", pathName.c_str());
 		return;
 	}
+
+	reader->setMinimumStartPoint();
 
 	std::vector<std::string> vPart;
 
@@ -683,6 +686,10 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 	// Info
 	printf("%s:\n", fileName.c_str());
 
+	endPointMask = (((uint64) 1) >> eptl) + 1;
+	startPointMask = (((uint64) 1) >> sptl) + 1;
+	startPointShift = eptl;
+
 	// XXX showDistribution shouldn't be mixed in here
 	if( !showDistribution )
 	{
@@ -707,7 +714,7 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 	{
 		// File length check
 
-		int size = reader->GetChainsLeft() * sizeof(RainbowChain);
+		int size = reader->getChainsLeft() * sizeof(RainbowChain);
 		static CMemoryPool mp;
 		uint64 nAllocatedSize;
 		RainbowChain* pChain = (RainbowChain*)mp.Allocate(size, nAllocatedSize);			
@@ -723,13 +730,8 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 			uint64 curPrefix = 0, prefixStart = 0;
 			std::vector<IndexRow> indexes;
 			unsigned int chainsLeft;
-		#if defined(_WIN32) && !defined(__GNUC__)
-			uint64 tmpMinimumStartPoint = 0xFFFFFFFFFFFFFFFFI64;
-		#else
-			uint64 tmpMinimumStartPoint = 0xFFFFFFFFFFFFFFFFllu;
-		#endif
 
-			while((chainsLeft = reader->GetChainsLeft()) > 0)
+			while((chainsLeft = reader->getChainsLeft()) > 0)
 			{
 				printf("%u chains left to read\n", chainsLeft);
 				//int nReadThisRound;
@@ -738,7 +740,7 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 #ifdef _MEMORYDEBUG
 				printf("Grabbing %i chains from file\n", nChains);
 #endif
-				reader->ReadChains(nChains, pChain);
+				reader->readChains(nChains, pChain);
 #ifdef _MEMORYDEBUG
 				printf("Recieved %i chains from file\n", nChains);
 #endif
@@ -754,9 +756,9 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 						distribution[GetMaxBits(pChain[i].nIndexS)-1]++;
 					else
 					{
-						uint64 chainrow = pChain[i].nIndexS; // Insert the complete start point								 
-						if ( chainrow < tmpMinimumStartPoint )
-							tmpMinimumStartPoint = chainrow;
+						uint64 chainrow = pChain[i].nIndexE;
+
+						chainrow |= ( ((uint64)(pChain[i].nIndexS - reader->getMinimumStartPoint()) | startPointMask )) << startPointShift;
 
 						// XXX check points go here
 
@@ -764,8 +766,6 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 						{
 							chainrow |= (uint64)pChain[i].nCheckPoint << sptl + eptl;
 						}*/
-
-						chainrow |= ((uint64)pChain[i].nIndexE & (0xffffffff >> (32 - eptl))) << sptl;
 						
 						if ( writer != NULL )
 							writer->addDataChain( &chainrow );
@@ -809,8 +809,6 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 					return;
 				}
 			}
-
-			writer->setMinimumStartPoint( tmpMinimumStartPoint );
 
 			// We need to write the last index down
 			IndexRow index;

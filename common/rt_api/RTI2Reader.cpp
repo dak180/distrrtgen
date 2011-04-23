@@ -145,6 +145,8 @@ RTI2Reader::RTI2Reader( std::string filename )
 		// XXX finish handling custom algorithm
 	}
 
+	setMinimumStartPoint();
+
 	// Salt
 	setSalt( "" );
 
@@ -378,7 +380,7 @@ RTI2Reader::~RTI2Reader(void)
 {
 	fin.close();
 //	if(m_pIndex != NULL) delete m_pIndex;
-//	if(m_pFile != NULL) fclose(m_pFile);
+//	if(dataFile != NULL) fclose(dataFile);
 }
 
 int RTI2Reader::readRTI2String( std::ifstream &fin, void *str, uint32 charSize )
@@ -414,7 +416,7 @@ int RTI2Reader::readRTI2String( std::ifstream &fin, void *str, uint32 charSize )
 	return ret;
 }
 
-uint32 RTI2Reader::GetChainsLeft()
+uint32 RTI2Reader::getChainsLeft()
 {
 	return chainCount - chainPosition;
 }
@@ -503,32 +505,66 @@ void RTI2Reader::Dump()
 	// XXX data
 }
 
-int RTI2Reader::ReadChains(unsigned int &numChains, RainbowChain *pData)
+int RTI2Reader::readChains(unsigned int &numChains, RainbowChain *pData)
 {
-	// We HAVE to reset the data to 0x00's or we will get in trouble
-	memset(pData, 0x00, sizeof(RainbowChain) * numChains);
 	unsigned int readChains = 0;
-	unsigned int chainsleft = GetChainsLeft();
+	unsigned int chainsleft = getChainsLeft();
 
 	uint64 endPointMask = (( (uint64) 1 ) << header.endPointBits ) - 1;
 	uint64 startPointMask = (( (uint64) 1 ) << header.startPointBits ) - 1;
 	uint64 startPointShift = header.endPointBits;
 	uint64 chainrow = 0;
+	uint32 j;
+
+	// Fast forward to current position
+	// XXX for chainPosition != 0 use a binary search
+	// XXX get rid of this whole monstronsity for a nice pointer
+	
+	/*
+	for( uint32 i = 0; i < index.prefixIndex.size(); i++ )
+	{
+
+
+
+	}*/
 
 	for( uint32 i = 0; i < index.prefixIndex.size(); i++ )
 	{
+		/*
+		printf( "i: %d\n", i );
+		printf( "chainPosition: %d\n", chainPosition );
+		printf( "readChains: %d\n", readChains );
+		*/
+
 		// we found the matching index
+		/*
 		if (  (chainPosition + readChains ) > ( index.prefixIndex[i] + index.firstPrefix ) )
 			continue;
+		*/
+
+		j = 0;
 
 		while ( (chainPosition + readChains ) < ( index.prefixIndex[i] + index.firstPrefix ) )
 		{
-			chainrow = *((uint64*) ( data + ( ( index.prefixIndex[i] + index.firstPrefix ) * chainSizeBytes ) ));
+			chainrow = *((uint64*) ( data + ( ( index.prefixIndex[i-1] + index.firstPrefix + j ) * chainSizeBytes ) ));
+			/*
+			printf( "chainrow: 0x%016llX\n", chainrow );
+			printf( "i: %d\n", i );
+			printf( "j: %d\n", j );
+			printf( "offset: %d\n", ( index.prefixIndex[i-1] + j ) );
+			printf( "chainPosition: %d\n", chainPosition );
+			printf( "readChains: %d\n", readChains );
+
+			exit( 100 );
+			*/
 			pData[readChains].nIndexE = chainrow & endPointMask;
+			//pData[readChains].nIndexE = ( i - 1 ) << header.endPointBits;
+			//pData[readChains].nIndexE |= chainrow >> header.startPointBits;
 
 			pData[readChains].nIndexS = ((chainrow >> startPointShift) & startPointMask) + header.minimumStartPoint;
 
-			++readChains;
+			readChains++;
+			j++;
 
 			if ( readChains == numChains || readChains == chainsleft )
 				break;
@@ -545,4 +581,9 @@ int RTI2Reader::ReadChains(unsigned int &numChains, RainbowChain *pData)
 	std::cout << "Chain Position is now " << chainPosition << std::endl;
 
 	return 0;
+}
+
+void RTI2Reader::setMinimumStartPoint()
+{
+	minimumStartPoint = header.minimumStartPoint;
 }

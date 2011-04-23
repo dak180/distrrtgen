@@ -1,3 +1,25 @@
+/*
+* rti2rto is a tool to convert from RT and RTI to RTI2
+*
+* Copyright 2009, 2010, 2011 Martin Westergaard Jørgensen <martinwj2005@gmail.com>
+* Copyright 2010, 2011 James Nobis <quel@quelrod.net>
+*
+* This file is part of rti2rto.
+*
+* rti2rto is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 2 of the License, or
+* (at your option) any later version.
+*
+* rti2rto is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with rti2rto.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #include <string>
 #include <vector>
 #ifdef _WIN32
@@ -13,8 +35,6 @@
 #include "MemoryPool.h"
 #include "RTI2Reader.h"
 #include "RTIReader.h"
-
-//using namespace std;
 
 void Usage()
 {
@@ -113,7 +133,7 @@ void ConvertRainbowTable( std::string pathName, std::string resultFileName, std:
 
 	reader->Dump();
 
-	uint64 size = reader->GetChainsLeft() * sizeof(RainbowChain);
+	uint64 size = reader->getChainsLeft() * sizeof(RainbowChain);
 #ifdef _MEMORYDEBUG
 	printf("Starting allocation of %i bytes\n", size);
 #endif
@@ -125,12 +145,12 @@ void ConvertRainbowTable( std::string pathName, std::string resultFileName, std:
 	{
 		nAllocatedSize = nAllocatedSize / sizeof(RainbowChain) * sizeof(RainbowChain);		// Round to boundary
 		unsigned int nChains = nAllocatedSize / sizeof(RainbowChain);
-		while(reader->GetChainsLeft() > 0)
+		while(reader->getChainsLeft() > 0)
 		{
 #ifdef _MEMORYDEBUG
 			printf("Grabbing %i chains from file\n", nChains);
 #endif
-			reader->ReadChains(nChains, pChain);
+			reader->readChains(nChains, pChain);
 #ifdef _MEMORYDEBUG
 			printf("Recieved %i chains from file\n", nChains);
 #endif
