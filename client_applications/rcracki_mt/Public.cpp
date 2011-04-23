@@ -30,6 +30,7 @@
 
 #ifdef _WIN32
 	#include <windows.h>
+	#include <sys/stat.h>
 #endif
 
 #if defined(_WIN32) && !defined(__GNUC__)
