@@ -32,8 +32,6 @@
 	#include <io.h>
 #endif
 
-//using namespace std;
-
 class BaseRTReader
 {
 protected:

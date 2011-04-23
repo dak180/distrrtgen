@@ -24,7 +24,6 @@
 #include "RTWrite.h"
 #include <string>
 
-using namespace std;
 RTWrite::RTWrite(char *fileName, int maxChainsPerFile)
 {
 	unsigned int len = strlen(fileName);
@@ -75,7 +74,7 @@ RTWrite::~RTWrite()
 		fwrite(&index, 1, 11, m_pFileIndex); // Position of these chains is: First chain: FILESTART + (iprefix * 8)
 											 //								 Last chain:  FILESTART + (iprefix * 8) + (iprefixs * 8)
 		
-		string sIndex(m_fileTemp);
+		std::string sIndex(m_fileTemp);
 		sIndex.append(".index");
 		if (rename("temp.rt.index", sIndex.c_str()) != 0)
 		{
@@ -244,7 +243,7 @@ void RTWrite::writeChain(RTChain *chain)
 		}
 */
 		fclose(m_pFileIndex);
-		string sIndex(m_fileTemp);
+		std::string sIndex(m_fileTemp);
 		sIndex.append(".index");
 		printf("%s: %u index rows\n\n", sIndex.c_str(), m_numIndexRows);
 		if (rename("temp.rt.index", sIndex.c_str()) != 0)

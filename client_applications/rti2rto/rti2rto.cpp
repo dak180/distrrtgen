@@ -22,14 +22,15 @@
 
 #include <string>
 #include <vector>
-#ifdef _WIN32
-#include <io.h>
+
+#if defined(_WIN32) && !defined(__GNUC__)
+	#include <io.h>
 #else
-	#include <sys/types.h>
-	#include <sys/stat.h>
 	#include <unistd.h>
 #endif
 
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <time.h>
 #include "Public.h"
 #include "MemoryPool.h"

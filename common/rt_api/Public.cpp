@@ -5,7 +5,7 @@
  * Copyright (C) Zhu Shuanglei <shuanglei@hotmail.com>
  * Copyright Martin Westergaard Jørgensen <martinwj2005@gmail.com>
  * Copyright 2009, 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
- * Copyright 2009, 2010, 2011 James Nobis <frt@quelrod.net>
+ * Copyright 2009, 2010, 2011 James Nobis <quel@quelrod.net>
  *
  * This file is part of freerainbowtables.
  *
@@ -31,26 +31,23 @@
 		#include "boinc_win.h"
 	#endif
 #else
-//#include "config.h"
-#include <cstdio>
-#include <cctype>
-#include <ctime>
-#include <cstring>
-#include <cstdlib>
-#include <csignal>
-#include <unistd.h>
+	#include <cstdio>
+	#include <cctype>
+	#include <ctime>
+	#include <cstring>
+	#include <cstdlib>
+	#include <csignal>
+	#include <unistd.h>
+#endif
+
 #include <sys/stat.h>
 
-#endif
 #ifdef BOINC
 	#include "filesys.h"
 	#include "boinc_api.h"
 #endif
-#include "Public.h"
 
-#ifdef _WIN32
-	#include <windows.h>
-#endif
+#include "Public.h"
 
 #if defined(_WIN32) && !defined(__GNUC__)
 	#include <windows.h>
@@ -149,6 +146,17 @@ timeval sub_timeofday( timeval tv2, timeval tv )
 	return final;
 }
 
+/*
+ * 32-bit this is a problem if the file is > (2^31-1) bytes
+ * to get 64-bit behavior on 32 and 64 platforms:
+ * for gcc add these before including sys/types.h and sys/stat.h:
+ * 	#define __USE_LARGEFILE64
+ * 	#define _LARGEFILE_SOURCE
+ * 	#define _LARGEFILE64_SOURCE
+ * 	then use stat64 instead of stat for the structure and the call
+ * for VS
+ * 	use _stat64 for the structure and stat64 for the call
+ */
 long GetFileLen( char* file )
 {
 	struct stat sb;
@@ -159,6 +167,7 @@ long GetFileLen( char* file )
 	return sb.st_size;
 }
 
+// 32-bit this is a problem if the file is > (2^31-1) bytes
 long GetFileLen( std::string file )
 {
 	struct stat sb;
@@ -169,6 +178,12 @@ long GetFileLen( std::string file )
 	return sb.st_size;
 }
 
+/* 
+ * In use by items that resolve boinc filenames
+ * 1) boinc_ReadLinesFromFile in this file
+ * 2) boinc_software/boinc_client_apps/distrrtgen/distrrtgen.cpp
+ * 3) boinc_software/boinc_client_apps/distrrtgen_cuda/distrrtgen.cpp
+ */
 long GetFileLen(FILE* file)
 {
 	// XXX on x86/x86_64 linux returns long
@@ -318,7 +333,7 @@ bool ReadLinesFromFile( std::string sPathName, std::vector<std::string>& vLine )
 	FILE* file = fopen(sPathName.c_str(), "rb");
 	if (file != NULL)
 	{
-		long len = GetFileLen(file);
+		long len = GetFileLen( sPathName );
 		char* data = new char[len + 1];
 		fread(data, 1, len, file);
 		data[len] = '\0';

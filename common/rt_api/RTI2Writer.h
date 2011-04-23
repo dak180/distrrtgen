@@ -2,7 +2,7 @@
  * freerainbowtables is a project for generating, distributing, and using
  * perfect rainbow tables
  *
- * Copyright 2011 James Nobis <frt@quelrod.net>
+ * Copyright 2011 James Nobis <quel@quelrod.net>
  *
  * This file is part of freerainbowtables.
  *
@@ -34,8 +34,6 @@
 #include <vector>
 #include "BaseRTWriter.h"
 #include "RTI2Common.h"
-
-//using namespace std;
 
 #define HEADER_LEN 4
 

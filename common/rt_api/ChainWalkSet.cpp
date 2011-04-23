@@ -5,7 +5,7 @@
  * Copyright (C) Zhu Shuanglei <shuanglei@hotmail.com>
  * Copyright Martin Westergaard Jørgensen <martinwj2005@gmail.com>
  * Copyright 2009, 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
- * Copyright 2009, 2010, 2011 James Nobis <frt@quelrod.net>
+ * Copyright 2009, 2010, 2011 James Nobis <quel@quelrod.net>
  *
  * This file is part of freerainbowtables.
  *
@@ -72,11 +72,8 @@ string CChainWalkSet::CheckOrRotatePreCalcFile()
 		FILE* file = fopen(sReturnPreCalcPath.c_str(), "ab");
 		if(file!=NULL)
 		{
-		#if defined(_WIN32) && !defined(__GNUC__)
-			fileLen = GetFileLen(file);
-		#else
 			fileLen = GetFileLen(sReturnPreCalcPath);
-		#endif
+
 			long unsigned int nextFileLen = fileLen + (sizeof(uint64) * (m_nRainbowChainLen-1));
 			// Rotate to next file if we are going to pass 2GB filesize
 			if (nextFileLen < ((unsigned)2 * 1024 * 1024 * 1024))

@@ -3,7 +3,7 @@
  * perfect rainbow tables
  *
  * Copyright 2010, 2011 Martin Westergaard Jørgensen <martinwj2005@gmail.com>
- * Copyright 2010, 2011 James Nobis <frt@quelrod.net>
+ * Copyright 2010, 2011 James Nobis <quel@quelrod.net>
  *
  * This file is part of freerainbowtables.
  *
@@ -31,7 +31,7 @@ RTReader::RTReader( std::string filename )
 
 uint32 RTReader::getChainsLeft()
 {
-	return (GetFileLen(dataFile) / 16) - chainPosition;
+	return (GetFileLen( getFilename() ) / 16) - chainPosition;
 }
 
 int RTReader::readChains(uint32 &numChains, RainbowChain *pData)

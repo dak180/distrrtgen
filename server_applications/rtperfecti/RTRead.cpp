@@ -26,15 +26,7 @@
 #include <stdlib.h>
 #include "RTRead.h"
 
-#ifdef HAVE_DIRENT_H
-	#include <dirent.h>
-#else
-	// I know Microsoft's compiler, .Net 2005 or older, does not come with this file.
-	// You can use this if you don't have dirent.h: http://www.cs.fiu.edu/~weiss/cop4338_spr06/dirent.h
-	// Umm I'm not sure if the license on that file, which appears to be public domain, conflicts with GPL v3.
-	// So only use that if you need it and the licenses don't conflict.
-	#include "dirent.h"
-#endif
+#include <dirent.h>
 
 #ifdef _WIN32
 	#include <conio.h>

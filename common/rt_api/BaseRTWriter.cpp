@@ -2,7 +2,7 @@
  * freerainbowtables is a project for generating, distributing, and using
  * perfect rainbow tables
  *
- * Copyright 2011 James Nobis <frt@quelrod.net>
+ * Copyright 2011 James Nobis <quel@quelrod.net>
  *
  * This file is part of freerainbowtables.
  *
@@ -21,8 +21,6 @@
  */
 
 #include "BaseRTWriter.h"
-
-//using namespace std;
 
 int BaseRTWriter::addIndexChain( uint32 chain )
 {

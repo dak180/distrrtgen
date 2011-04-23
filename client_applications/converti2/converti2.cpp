@@ -22,8 +22,6 @@
 
 #include "converti2.h"
 
-//using namespace std;
-
 Converti2::Converti2( int argc, char** argv )
 {
 	sptl = 40;

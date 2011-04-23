@@ -3,7 +3,7 @@
  * perfect rainbow tables
  *
  * Copyright 2010, 2011 Martin Westergaard Jørgensen <martinwj2005@gmail.com>
- * Copyright 2010, 2011 James Nobis <frt@quelrod.net>
+ * Copyright 2010, 2011 James Nobis <quel@quelrod.net>
  *
  * This file is part of freerainbowtables.
  *
@@ -558,8 +558,6 @@ int RTI2Reader::readChains(unsigned int &numChains, RainbowChain *pData)
 			exit( 100 );
 			*/
 			pData[readChains].nIndexE = chainrow & endPointMask;
-			//pData[readChains].nIndexE = ( i - 1 ) << header.endPointBits;
-			//pData[readChains].nIndexE |= chainrow >> header.startPointBits;
 
 			pData[readChains].nIndexS = ((chainrow >> startPointShift) & startPointMask) + header.minimumStartPoint;
 

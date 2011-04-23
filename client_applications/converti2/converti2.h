@@ -1,7 +1,7 @@
 /*
 * converti2 is a tool to convert from RT and RTI to RTI2
 *
-* Copyright 2011 James Nobis <frt@quelrod.net>
+* Copyright 2011 James Nobis <quel@quelrod.net>
 *
 * This file is part of converti2.
 *
@@ -29,10 +29,11 @@
 	#include <io.h>
 	#include <conio.h>
 #else
-	#include <sys/types.h>
-	#include <sys/stat.h>
 	#include <unistd.h>
 #endif
+
+#include <sys/types.h>
+#include <sys/stat.h>
 
 #include <stdlib.h>
 #include <string.h>
@@ -45,8 +46,6 @@
 #include "RTIReader.h"
 #include "RTReader.h"
 #include "RTI2Writer.h"
-
-//using namespace std;
 
 class Converti2
 {

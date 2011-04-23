@@ -59,8 +59,6 @@
 // Rainbowcrack code
 #include "ChainWalkContext.h"
 
-using std::string;
-
 /*
 bool early_exit = false;
 bool early_crash = false;
@@ -94,7 +92,7 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "Not enough parameters");
 		return -1;
 	}
-	string sHashRoutineName, sCharsetName, sSalt, sCheckPoints;
+	std::string sHashRoutineName, sCharsetName, sSalt, sCheckPoints;
 	uint32 nRainbowChainCount, nPlainLenMin, nPlainLenMax, nRainbowTableIndex, nRainbowChainLen;
 	uint64 nChainStart;
 	sHashRoutineName = argv[1];

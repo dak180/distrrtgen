@@ -41,13 +41,8 @@ RTIReader::RTIReader( std::string filename )
 	}
 
 	// Load the index file
-#if defined(_WIN32) && !defined(__GNUC__)
-	long nIndexFileLen = GetFileLen(pFileIndex);
-	long nFileLen = GetFileLen(dataFile);
-#else
 	long nIndexFileLen = GetFileLen( sIndex );
 	long nFileLen = GetFileLen( filename );
-#endif
 
 	unsigned int nTotalChainCount = nFileLen / 8;
 	if (nFileLen % 8 != 0)
@@ -120,7 +115,7 @@ RTIReader::RTIReader( std::string filename )
 
 uint32 RTIReader::getChainsLeft()
 {	
-	return (GetFileLen(dataFile) / 8) - chainPosition;
+	return (GetFileLen( getFilename() ) / 8) - chainPosition;
 }
 
 int RTIReader::readChains(uint32 &numChains, RainbowChain *pData)
