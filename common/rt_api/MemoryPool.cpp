@@ -7,6 +7,7 @@
  * Copyright 2009, 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
  * Copyright 2009, 2010, 2011 James Nobis <frt@quelrod.net>
  * Copyright 2010 uroskn
+ * Copyright 2011 Richard W. Watson <rwatson@therichard.com>
  *
  * This file is part of freerainbowtables.
  *
@@ -41,6 +42,12 @@ CMemoryPool::CMemoryPool()
 		m_nMemMax = nAvailPhys / 2;					// Leave some memory for CChainWalkSet
 	else
 		m_nMemMax = nAvailPhys - 8 * 1024 * 1024;	// Leave some memory for CChainWalkSet	
+
+	/*
+	 * XXX goal is to restrict memory usage for 32-bit windows
+	 * this limit is a bit harsh but added due to poor usage in:
+	 * rti2rto, converti2, RTI2Writer/RTI2Reader, and others
+	*/
 #if defined(_WIN32) && !defined(__GNUC__) && !defined(_WIN64)
 	m_nMemMax = 1024 * 1024 * 512;
 #endif

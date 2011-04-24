@@ -3,6 +3,7 @@
 *
 * Copyright 2009, 2010, 2011 Martin Westergaard Jørgensen <martinwj2005@gmail.com>
 * Copyright 2010, 2011 James Nobis <quel@quelrod.net>
+* Copyright 2011 Richard W. Watson <rwatson@therichard.com>
 *
 * This file is part of converti2.
 *
@@ -466,7 +467,6 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 	BaseRTWriter *writer = NULL;
 	bool isOldRtFormat = false;
 	CharacterSet charSet;
-	uint64 endPointMask, startPointMask, startPointShift;
 
 	if ( fileName.length() < 3 )
 	{
@@ -684,9 +684,12 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 	// Info
 	printf("%s:\n", fileName.c_str());
 
-	endPointMask = (((uint64) 1) >> eptl) + 1;
-	startPointMask = (((uint64) 1) >> sptl) + 1;
-	startPointShift = eptl;
+	uint64 startPointMask = (((uint64) 1) >> sptl);
+	uint32 startPointShift = eptl;
+/*
+ 	uint64 checkPointMask = (( (uint64) 1 ) >> eptl );
+	uint32 checkPointShift = eptl + sptl;
+*/
 
 	// XXX showDistribution shouldn't be mixed in here
 	if( !showDistribution )
@@ -696,6 +699,7 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 		writer->setEndPointLen( eptl );
 		writer->setCheckPointLen( checkPointBits );
 		writer->setCheckPointPos( cppositions );
+		writer->setMinimumStartPoint( reader->getMinimumStartPoint() );
 		writer->setChainLength( rainbowChainLen );
 		writer->setTableIndex( rainbowTableIndex );
 		writer->setChainCount( rainbowChainCount );
@@ -758,12 +762,15 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 
 						chainrow |= ( ((uint64)(pChain[i].nIndexS - reader->getMinimumStartPoint()) | startPointMask )) << startPointShift;
 
-						// XXX check points go here
+						/*
+						 * XXX check points go here
 
-/*						if(hasCheckPoints == 1 && checkPointBits > 0)
+						if( hasCheckPoints == 1 && checkPointBits > 0 )
 						{
-							chainrow |= (uint64)pChain[i].nCheckPoint << sptl + eptl;
-						}*/
+							chainrow |= ( (uint64)pChain[i].nCheckPoint | checkPointMask ) << checkPointShift;
+						}
+
+						*/
 						
 						if ( writer != NULL )
 							writer->addDataChain( &chainrow );

@@ -1,5 +1,6 @@
 #	Copyright (C) 2008 Steve Thomas <SMT837784@yahoo.com>
 #	Copyright 2011 James Nobis <quel@quelrod.net>
+#	Copyright 2011 Andrew Dranse <aramith@aramith.org>
 #
 #	This file is part of RT Perfecter.
 #

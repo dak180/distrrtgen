@@ -4,7 +4,8 @@
 # Copyright (C) Zhu Shuanglei <shuanglei@hotmail.com>
 # Copyright Martin Westergaard Jørgensen <martinwj2005@gmail.com>
 # Copyright 2009, 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
-# Copyright 2009, 2010, 2011 James Nobis <frt@quelrod.net>
+# Copyright 2009, 2010, 2011 James Nobis <quel@quelrod.net>
+# Copyright 2011 Andrew Dranse <aramith@aramith.org>
 #
 # This file is part of freerainbowtables.
 #

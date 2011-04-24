@@ -55,20 +55,6 @@ struct IndexChain
 	uint32 nChainCount;
 };
 
-struct FoundRainbowChain
-{
-	uint64 nIndexS;
-	int nIndexE;
-	int nCheckPoint;
-	int nGuessedPos;
-};
-
-struct ChainCheckChain
-{
-	uint64 nIndexS;
-	int nGuessedPos;
-};
-
 struct IndexRow
 {
 	uint64 prefix;
