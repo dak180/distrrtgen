@@ -30,6 +30,9 @@ LIBS =
 OBJS = BaseRTReader.o BaseRTWriter.o MemoryPool.o Public.o RTI2Common.o \
 	RTI2Reader.o RTIReader.o RTReader.o RTI2Writer.o
 COMMON_API_PATH = ../../common/rt_api
+WARNALL = -Wextra -Wunused-macros -Wunsafe-loop-optimizations -Wundef \
+	-Woverlength-strings -Wdisabled-optimization -Wformat-extra-args \
+	-Wformat-security -Winline
 
 all: converti2
 
@@ -41,6 +44,9 @@ clean:
 
 debug: DEBUG += -DDEBUG -g
 debug: all
+
+debugall: DEBUG += -DDEBUG -g $(WARNALL)
+debugall: all
 
 #m32: DEBUG += -m32
 #m32: all
