@@ -51,8 +51,8 @@ class Converti2
 {
 private:
 	void setupSharedData();
-	uint32 sptl;
-	uint32 eptl;
+	uint8 sptl;
+	uint8 eptl;
 	bool showDistribution;
 	bool hasCheckPoints;
 	int argc;
