@@ -18,36 +18,60 @@
     <ClCompile Include="converti2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\common\rt api\MemoryPool.cpp">
+    <ClCompile Include="..\..\common\rt_api\BaseRTReader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\common\rt api\Public.cpp">
+    <ClCompile Include="..\..\common\rt_api\MemoryPool.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\common\rt api\BaseRTReader.cpp">
+    <ClCompile Include="..\..\common\rt_api\Public.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\common\rt api\RTIReader.cpp">
+    <ClCompile Include="..\..\common\rt_api\RTIReader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\common\rt api\RTReader.cpp">
+    <ClCompile Include="..\..\common\rt_api\RTReader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\common\rt_api\RTI2Common.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\common\rt_api\RTI2Reader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\common\rt_api\RTI2Writer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\common\rt_api\BaseRTWriter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\common\rt api\MemoryPool.h">
+    <ClInclude Include="..\..\common\rt_api\BaseRTReader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\common\rt api\Public.h">
+    <ClInclude Include="..\..\common\rt_api\MemoryPool.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\common\rt api\RTIReader.h">
+    <ClInclude Include="..\..\common\rt_api\Public.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\common\rt api\RTReader.h">
+    <ClInclude Include="..\..\common\rt\_api\RTIReader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\common\rt api\BaseRTReader.h">
+    <ClInclude Include="..\..\common\rt_api\RTReader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\rt_api\RTI2Common.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\rt_api\RTI2Reader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\rt_api\RTI2Writer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\rt_api\BaseRTWriter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

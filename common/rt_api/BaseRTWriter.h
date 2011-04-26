@@ -44,7 +44,6 @@ public:
 	virtual std::string getSalt();
 
 	virtual int addIndexChain( uint32 chain );
-	virtual int addIndexChainCount( uint8 count );
 	virtual void addDataChain( uint64 *chain ) = 0;
 
 	virtual void Dump();

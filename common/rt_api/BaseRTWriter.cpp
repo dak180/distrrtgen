@@ -27,11 +27,6 @@ int BaseRTWriter::addIndexChain( uint32 chain )
 	return EXIT_SUCCESS;
 }
 
-int BaseRTWriter::addIndexChainCount( uint8 count )
-{
-	return EXIT_SUCCESS;
-}
-
 std::string BaseRTWriter::getAlgorithm()
 {
 	return hashAlgorithm;
