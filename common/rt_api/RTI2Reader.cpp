@@ -144,7 +144,7 @@ RTI2Reader::RTI2Reader( std::string filename )
 
 		// XXX finish handling custom algorithm
 	}
-	
+
 	setMinimumStartPoint();
 
 	// Salt
@@ -341,9 +341,9 @@ RTI2Reader::RTI2Reader( std::string filename )
 		exit( 1 ); // file error
 	}
 
-	indexTmp = new uint8[count];
+	indexTmp = new uint8[count * sizeof(uint32)];
 
-	if ( !fin.read( (char*) indexTmp, count ).good() )
+	if ( !fin.read( (char*) indexTmp, count * sizeof(uint32) ).good() )
 	{
 		std::cerr << "readIndex fin.read() error" << std::endl;
 		delete [] indexTmp;
@@ -355,7 +355,8 @@ RTI2Reader::RTI2Reader( std::string filename )
 
 	for (a = 0; a < count; a++)
 	{
-		sum += indexTmp[a];
+		//sum += indexTmp[a];
+		sum += *(((uint32 *)indexTmp) + a);
 		index.prefixIndex.push_back(sum);
 	}
 
@@ -378,8 +379,6 @@ RTI2Reader::RTI2Reader( std::string filename )
 RTI2Reader::~RTI2Reader(void)
 {
 	fin.close();
-	delete [] data;
-	data = NULL;
 //	if(m_pIndex != NULL) delete m_pIndex;
 //	if(dataFile != NULL) fclose(dataFile);
 }

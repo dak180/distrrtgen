@@ -154,9 +154,9 @@ void RTI2Writer::addDataChain( uint64 *chain )
 	}
 }
 
-int RTI2Writer::addIndexChainCount( uint8 count )
+int RTI2Writer::addIndexChain( uint32 chain )
 {
-	prefixIndexChainCount.push_back( count );
+	out.index.prefixIndex.push_back( chain );
 
 	return EXIT_SUCCESS;
 }
@@ -308,9 +308,9 @@ int RTI2Writer::writeIndex()
 	fwrite( &out.index.firstPrefix, 1, sizeof( out.index.firstPrefix ), pFile );
 	fwrite( &prefixCount, 1, sizeof( prefixCount ), pFile );
 
-	for( uint32 i = 0; i < prefixIndexChainCount.size(); i++)
+	for( uint32 i = 0; i < out.index.prefixIndex.size(); i++)
 	{
-		fwrite( &prefixIndexChainCount[i], 1, sizeof( uint8 ), pFile );
+		fwrite( &out.index.prefixIndex[i], 1, sizeof( uint32 ), pFile );
 	}
 
 	return EXIT_SUCCESS;

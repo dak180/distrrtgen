@@ -795,7 +795,6 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 
 							IndexRow index;
 							index.prefix = curPrefix;
-							//index.prefixstart = prefixStart;
 							index.numchains = numchains;
 							indexes.push_back(index);
 							prefixStart = numProcessedChains;
@@ -827,8 +826,6 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 			index.numchains = numProcessedChains - prefixStart;
 			indexes.push_back(index);
 
-/*
- * XXX for variable length ceiled byte index packing
 			IndexRow high = {0}; // Used to find the highest numbers. This tells us how much we can pack the index bits
 			for(uint32 i = 0; i < indexes.size(); i++)
 			{
@@ -837,7 +834,6 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 			}
 
 			high.prefix = indexes[indexes.size()-1].prefix; // The last prefix is always the highest prefix
-*/
 
 			// m_rti_index_numchainslength == index bit length "N"
 
@@ -880,14 +876,8 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 					*/
 				}
 
-				if ( indexes[i].numchains > 255 )
-				{
-					std::cerr << "WARNING! A prefix index with more than 255 (1 byte) chains was encountered" << std::endl;
-					std::cerr << "Aborting..." << std::endl;
-					exit(1);
-				}
-
-				writer->addIndexChainCount( indexes[i].numchains );
+				//writer->addIndexChain( indexes[i].numchains * chainSizeBytes );
+				writer->addIndexChain( indexes[i].numchains );
 				
 				lastPrefix = indexes[i].prefix;
 			}
@@ -940,8 +930,6 @@ int main(int argc, char** argv)
 	}
 
 	converti2->convertRainbowTables();
-
-	delete converti2;
 
 	printf("\n");
 

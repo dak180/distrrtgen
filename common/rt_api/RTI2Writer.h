@@ -49,7 +49,6 @@ private:
 	uint32 chainSizeBytes;
 	uint32 chainCount;
 	uint32 prefixCount;
-	std::vector<uint8> prefixIndexChainCount;
 	
 public:
 	RTI2Writer( std::string filename );
@@ -74,7 +73,7 @@ public:
 	void setTableIndex( uint32 tableIndex );
 
 	void addDataChain( uint64 *chain );
-	int addIndexChainCount( uint8 count );
+	int addIndexChain( uint32 chain );
 
 	void Dump();
 
