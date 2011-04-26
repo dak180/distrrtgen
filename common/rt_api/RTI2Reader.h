@@ -47,7 +47,6 @@ private:
 	RTI20_Index index;
 	uint8 *data;
 	uint32 chainSizeBytes;
-	uint32 m_indexrowsizebytes;
 	uint32 chainCount;
 	std::vector<SubKeySpace> subKeySpaces;
 	std::vector<uint32> checkPointPositions;
