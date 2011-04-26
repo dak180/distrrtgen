@@ -684,10 +684,11 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 	// Info
 	printf("%s:\n", fileName.c_str());
 
-	uint64 startPointMask = (((uint64) 1) >> sptl);
+	uint64 startPointMask = (((uint64) -1) >> (64 - sptl));		
 	uint32 startPointShift = eptl;
+	uint64 endPointMask = (((uint64) -1) >> (64 - eptl));
 /*
- 	uint64 checkPointMask = (( (uint64) 1 ) >> eptl );
+ 	uint64 checkPointMask = (( (uint64) -1 ) >> (64 - sptl - eptl) );
 	uint32 checkPointShift = eptl + sptl;
 */
 
@@ -758,9 +759,10 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 						distribution[GetMaxBits(pChain[i].nIndexS)-1]++;
 					else
 					{
-						uint64 chainrow = pChain[i].nIndexE;
+						// Mask off the bits that won't be in an index somewhere...
+						uint64 chainrow = pChain[i].nIndexE & endPointMask;
 
-						chainrow |= ( ((uint64)(pChain[i].nIndexS - reader->getMinimumStartPoint()) | startPointMask )) << startPointShift;
+						chainrow |= ( ((uint64)(pChain[i].nIndexS - reader->getMinimumStartPoint()) & startPointMask )) << startPointShift;
 
 						/*
 						 * XXX check points go here

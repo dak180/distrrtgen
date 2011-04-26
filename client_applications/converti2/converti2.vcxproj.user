@@ -4,4 +4,12 @@
     <LocalDebuggerCommandArguments>C:\Users\mwj\Desktop\tables\*.rti -d</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LocalDebuggerCommandArguments>g:\md5_loweralpha#1-10_0_40000x67108864_distrrtgen[p][i]_00.rti -sptl=36 -eptl=20</LocalDebuggerCommandArguments>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LocalDebuggerCommandArguments>g:\md5_loweralpha#1-10_0_40000x67108864_distrrtgen[p][i]_00.rt -sptl=36 -eptl=20</LocalDebuggerCommandArguments>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+  </PropertyGroup>
 </Project>

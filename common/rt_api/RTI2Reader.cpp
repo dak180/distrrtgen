@@ -511,11 +511,11 @@ int RTI2Reader::readChains(unsigned int &numChains, RainbowChain *pData)
 	unsigned int readChains = 0;
 	unsigned int chainsleft = getChainsLeft();
 
-	uint64 endPointMask = (( (uint64) 1 ) << header.endPointBits ) - 1;
-	uint64 startPointMask = (( (uint64) 1 ) << header.startPointBits ) - 1;
+	uint64 endPointMask = (( (uint64) -1 ) << header.endPointBits ) - 1;
+	uint64 startPointMask = (( (uint64) -1 ) << header.startPointBits ) - 1;
 	uint32 startPointShift = header.endPointBits;
 /*	
-	uint64 checkPointMask = (( (uint64) 1 ) << header.checkPointBits ) - 1;
+	uint64 checkPointMask = (( (uint64) -1 ) << header.checkPointBits ) - 1;
 	uint32 checkPointShift = header.endPointBits + header.StartPointBits;
 */
 

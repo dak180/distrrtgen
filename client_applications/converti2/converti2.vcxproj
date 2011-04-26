@@ -95,7 +95,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>../../common/rt api;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../common/rt_api;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -113,7 +113,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>../../common/rt api;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../common/rt_api;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -134,7 +134,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>../../common/rt api;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../common/rt_api;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -151,19 +151,27 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\common\rt api\BaseRTReader.cpp" />
-    <ClCompile Include="..\..\common\rt api\RTIReader.cpp" />
-    <ClCompile Include="..\..\common\rt api\RTReader.cpp" />
+    <ClCompile Include="..\..\common\rt_api\BaseRTReader.cpp" />
+    <ClCompile Include="..\..\common\rt_api\BaseRTWriter.cpp" />
+    <ClCompile Include="..\..\common\rt_api\RTI2Common.cpp" />
+    <ClCompile Include="..\..\common\rt_api\RTI2Reader.cpp" />
+    <ClCompile Include="..\..\common\rt_api\RTI2Writer.cpp" />
+    <ClCompile Include="..\..\common\rt_api\RTIReader.cpp" />
+    <ClCompile Include="..\..\common\rt_api\RTReader.cpp" />
     <ClCompile Include="converti2.cpp" />
-    <ClCompile Include="..\..\common\rt api\MemoryPool.cpp" />
-    <ClCompile Include="..\..\common\rt api\Public.cpp" />
+    <ClCompile Include="..\..\common\rt_api\MemoryPool.cpp" />
+    <ClCompile Include="..\..\common\rt_api\Public.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\common\rt api\BaseRTReader.h" />
-    <ClInclude Include="..\..\common\rt api\MemoryPool.h" />
-    <ClInclude Include="..\..\common\rt api\Public.h" />
-    <ClInclude Include="..\..\common\rt api\RTIReader.h" />
-    <ClInclude Include="..\..\common\rt api\RTReader.h" />
+    <ClInclude Include="..\..\common\rt_api\BaseRTReader.h" />
+    <ClInclude Include="..\..\common\rt_api\BaseRTWriter.h" />
+    <ClInclude Include="..\..\common\rt_api\MemoryPool.h" />
+    <ClInclude Include="..\..\common\rt_api\Public.h" />
+    <ClInclude Include="..\..\common\rt\_api\RTIReader.h" />
+    <ClInclude Include="..\..\common\rt_api\RTI2Common.h" />
+    <ClInclude Include="..\..\common\rt_api\RTI2Reader.h" />
+    <ClInclude Include="..\..\common\rt_api\RTI2Writer.h" />
+    <ClInclude Include="..\..\common\rt_api\RTReader.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
