@@ -550,9 +550,9 @@ int RTI2Reader::readChains(unsigned int &numChains, RainbowChain *pData)
 
 		j = 0;
 
-		while ( (chainPosition + readChains ) < ( index.prefixIndex[i] + index.firstPrefix ) )
+		while ( (chainPosition + readChains ) < index.prefixIndex[i] )
 		{
-			chainrow = *((uint64*) ( data + ( ( index.prefixIndex[i-1] + index.firstPrefix + j ) * chainSizeBytes ) ));
+			chainrow = *((uint64*) ( data + ( ( index.prefixIndex[i-1] + j ) * chainSizeBytes ) ));
 			/*
 			printf( "chainrow: 0x%016llX\n", chainrow );
 			printf( "i: %d\n", i );
