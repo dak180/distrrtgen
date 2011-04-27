@@ -563,7 +563,11 @@ int RTI2Reader::readChains(unsigned int &numChains, RainbowChain *pData)
 
 			exit( 100 );
 			*/
-			pData[readChains].nIndexE = chainrow & endPointMask;
+
+			// ending point prefix
+			pData[readChains].nIndexE = ( index.firstPrefix + i - 1 ) << header.endPointBits;
+			// ending point suffix
+			pData[readChains].nIndexE |= chainrow & endPointMask;
 
 			pData[readChains].nIndexS = ((chainrow >> startPointShift) & startPointMask) + header.minimumStartPoint;
 
