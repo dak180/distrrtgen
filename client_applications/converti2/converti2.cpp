@@ -730,7 +730,7 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 			nAllocatedSize = nAllocatedSize / sizeof(RainbowChain) * sizeof(RainbowChain);
 			// XXX safe for now...fix to use uint64 throughout
 			unsigned int nChains = (uint32) nAllocatedSize / sizeof(RainbowChain);
-			uint64 curPrefix = 0, prefixStart = 0;
+			uint64 curPrefix = 0, prefixStart = 0, prefix = 0, chainrow = 0;
 			std::vector<IndexRow> indexes;
 			unsigned int chainsLeft;
 
@@ -760,7 +760,7 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 					else
 					{
 						// Mask off the bits that won't be in an index somewhere...
-						uint64 chainrow = pChain[i].nIndexE & endPointMask;
+						chainrow = pChain[i].nIndexE & endPointMask;
 
 						chainrow |= ( ((uint64)(pChain[i].nIndexS - reader->getMinimumStartPoint()) & startPointMask )) << startPointShift;
 
@@ -776,9 +776,9 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 						
 						writer->addDataChain( &chainrow );
 
-						uint64 prefix = pChain[i].nIndexE >> eptl;
+						prefix = pChain[i].nIndexE >> eptl;
 
-						if(i == 0)
+						if ( i == 0 && curPrefix == 0 )
 							curPrefix = prefix;
 
 						if ( prefix != curPrefix && (numProcessedChains - prefixStart) > 0)
