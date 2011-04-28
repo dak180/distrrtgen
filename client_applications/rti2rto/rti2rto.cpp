@@ -132,7 +132,8 @@ void ConvertRainbowTable( std::string pathName, std::string resultFileName, std:
 		return ;
 	}
 
-	reader->Dump();
+	// XXX for debug
+	//reader->Dump();
 
 	uint64 size = reader->getChainsLeft() * sizeof(RainbowChain);
 #ifdef _MEMORYDEBUG

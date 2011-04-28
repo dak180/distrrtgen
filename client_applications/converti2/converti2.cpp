@@ -684,11 +684,11 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 	// Info
 	printf("%s:\n", fileName.c_str());
 
-	uint64 startPointMask = (((uint64) -1) >> (64 - sptl));		
+	uint64 startPointMask = ( (uint64) -1 ) >> ( 64 - sptl );
 	uint32 startPointShift = eptl;
-	uint64 endPointMask = (((uint64) -1) >> (64 - eptl));
+	uint64 endPointMask = ( (uint64) -1 ) >> ( 64 - eptl );
 /*
- 	uint64 checkPointMask = (( (uint64) -1 ) >> (64 - sptl - eptl) );
+ 	uint64 checkPointMask = ( (uint64) -1 ) >> (64 - sptl - eptl);
 	uint32 checkPointShift = eptl + sptl;
 */
 
@@ -774,8 +774,7 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 
 						*/
 						
-						if ( writer != NULL )
-							writer->addDataChain( &chainrow );
+						writer->addDataChain( &chainrow );
 
 						uint64 prefix = pChain[i].nIndexE >> eptl;
 
@@ -855,12 +854,9 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 				writer->setPrefixCount( indexes.size() );
 			}
 
-			unsigned int lastPrefix = 0;
+			unsigned int lastPrefix = indexes[0].prefix;
 			for(uint32 i = 0; i < indexes.size(); i++)
 			{
-				if(i == 0)
-					lastPrefix = indexes[0].prefix;
-
 				// Checks how big a distance there is between the current and the next prefix. eg cur is 3 and next is 10 = 7.
 				unsigned int diffSize = indexes[i].prefix - lastPrefix; 
 				if(i > 0 && diffSize > 1)
