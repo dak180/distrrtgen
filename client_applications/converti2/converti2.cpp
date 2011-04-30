@@ -759,6 +759,14 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 						distribution[GetMaxBits(pChain[i].nIndexS)-1]++;
 					else
 					{
+						if ( GetMaxBits(pChain[i].nIndexS) > sptl )
+						{
+							std::cout << "WARNING! This SP exceeds sptl setting: "
+								<< pChain[i].nIndexS << std::endl;
+							std::cout << "Aborting..." << std::endl;
+							exit(1);
+						}
+
 						// Mask off the bits that won't be in an index somewhere...
 						chainrow = pChain[i].nIndexE & endPointMask;
 
