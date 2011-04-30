@@ -42,6 +42,7 @@ class RTI2Reader : BaseRTReader
 private:
 	std::ifstream fin;
 	uint32 chainPosition;
+	uint8 indexOffset;
 	RTI20_File in;
 	RTI20_File_Header header;
 	RTI20_Index index;

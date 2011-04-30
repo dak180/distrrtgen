@@ -37,6 +37,7 @@ RTI2Reader::RTI2Reader( std::string filename )
 	int ret;
 	uint8 characterSetFlags;
 	chainPosition = 0;
+	indexOffset = 0;
 
 	fin.open( filename.c_str(), std::ios_base::binary | std::ios_base::in );
 
@@ -520,49 +521,35 @@ int RTI2Reader::readChains(unsigned int &numChains, RainbowChain *pData)
 */
 
 	uint64 chainrow = 0;
-	uint32 j;
+	uint32 i=1;
 
 	// Fast forward to current position
 	// XXX for chainPosition != 0 use a binary search
 	// XXX get rid of this whole monstronsity for a nice pointer
 	
-	/*
-	for( uint32 i = 0; i < index.prefixIndex.size(); i++ )
+	for( i = 1; i < index.prefixIndex.size(); i++ )
 	{
+		if ( i == 1 && index.prefixIndex[i] > 0 && chainPosition == 0 )
+		{
+			break;
+		}
 
+		if ( ( chainPosition + readChains ) > index.prefixIndex[i] )
+		{
+			i++;
+			break;
+		}
+	}
 
-
-	}*/
-
-	for( uint32 i = 0; i < index.prefixIndex.size(); i++ )
+	for( ; i < index.prefixIndex.size(); i++ )
 	{
-		/*
-		printf( "i: %d\n", i );
-		printf( "chainPosition: %d\n", chainPosition );
-		printf( "readChains: %d\n", readChains );
-		*/
-
 		// we found the matching index
-		/*
-		if (  (chainPosition + readChains ) > ( index.prefixIndex[i] + index.firstPrefix ) )
+		if (  (chainPosition + readChains ) > index.prefixIndex[i] )
 			continue;
-		*/
-
-		j = 0;
-
+		
 		while ( (chainPosition + readChains ) < index.prefixIndex[i] )
 		{
-			chainrow = *((uint64*) ( data + ( ( index.prefixIndex[i-1] + j ) * chainSizeBytes ) ));
-			/*
-			printf( "chainrow: 0x%016llX\n", chainrow );
-			printf( "i: %d\n", i );
-			printf( "j: %d\n", j );
-			printf( "offset: %d\n", ( index.prefixIndex[i-1] + j ) );
-			printf( "chainPosition: %d\n", chainPosition );
-			printf( "readChains: %d\n", readChains );
-
-			exit( 100 );
-			*/
+			chainrow = *((uint64*) ( data + ( ( index.prefixIndex[i-1] + indexOffset ) * chainSizeBytes ) ));
 
 			// ending point prefix
 			pData[readChains].nIndexE = ( index.firstPrefix + i - 1 ) << header.endPointBits;
@@ -572,7 +559,7 @@ int RTI2Reader::readChains(unsigned int &numChains, RainbowChain *pData)
 			pData[readChains].nIndexS = ((chainrow >> startPointShift) & startPointMask) + header.minimumStartPoint;
 
 			readChains++;
-			j++;
+			indexOffset++;
 
 			if ( readChains == numChains || readChains == chainsleft )
 				break;
@@ -580,6 +567,8 @@ int RTI2Reader::readChains(unsigned int &numChains, RainbowChain *pData)
 
 		if ( readChains == numChains )
 			break;
+
+		indexOffset = 0;
 	}
 
 	if ( readChains != numChains )
