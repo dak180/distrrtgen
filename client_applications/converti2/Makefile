@@ -28,7 +28,7 @@ CFLAGS = -Wall -ansi $(INCLUDES) $(OPTIMIZATION) -c $(DEBUG)
 LFLAGS = -Wall -ansi $(INCLUDES) $(OPTIMIZATION) $(DEBUG)
 LIBS = 
 OBJS = BaseRTReader.o BaseRTWriter.o MemoryPool.o Public.o RTI2Common.o \
-	RTI2Reader.o RTIReader.o RTReader.o RTI2Writer.o
+	RTIReader.o RTReader.o RTI2Writer.o
 COMMON_API_PATH = ../../common/rt_api
 WARNALL = -Wextra -Wunused-macros -Wunsafe-loop-optimizations -Wundef \
 	-Woverlength-strings -Wdisabled-optimization -Wformat-extra-args \
@@ -75,9 +75,6 @@ Public.o: $(COMMON_API_PATH)/Public.h $(COMMON_API_PATH)/Public.cpp
 
 RTI2Common.o: $(COMMON_API_PATH)/RTI2Common.h
 	$(CXX) $(CFLAGS) $(COMMON_API_PATH)/RTI2Common.cpp
-
-RTI2Reader.o: $(COMMON_API_PATH)/RTI2Reader.h $(COMMON_API_PATH)/RTI2Reader.cpp
-	$(CXX) $(CFLAGS) $(COMMON_API_PATH)/RTI2Reader.cpp
 
 RTIReader.o: $(COMMON_API_PATH)/RTIReader.h $(COMMON_API_PATH)/RTIReader.cpp
 	$(CXX) $(CFLAGS) $(COMMON_API_PATH)/RTIReader.cpp
