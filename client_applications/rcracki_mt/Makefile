@@ -126,6 +126,9 @@ release:
 
 rebuild: clean all
 
+static: DEBUG += -static -static-libgcc
+static: all
+
 strip:
 	$(STRIP) rcracki_mt
 
