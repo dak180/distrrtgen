@@ -3,7 +3,7 @@
  * RainbowCrack
  *
  * Copyright 2009, 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
- * Copyright 2009, 2010, 2011 James Nobis <frt@quelrod.net>
+ * Copyright 2009, 2010, 2011 James Nobis <quel@quelrod.net>
  *
  * This file is part of rcracki_mt.
  *
@@ -27,11 +27,10 @@
 #ifdef _WIN32
 	#include <conio.h>
 #endif
-//#include "openssl/md4.h"
 #include <time.h>
 #include "signal.h"
 #include "Public.h"
-#include "md4.h"
+#include "fast_md4.h"
 
 using namespace std;
 
@@ -41,7 +40,7 @@ public:
 	LM2NTLMcorrector();
 
 private:
-	map<unsigned char, map<int, unsigned char> > m_mapChar;
+	std::map<unsigned char, std::map<int, unsigned char> > m_mapChar;
 	uint64 progressCurrentCombination;
 	uint64 totalCurrentCombination;
 	uint64 counterOverall;
@@ -53,10 +52,10 @@ private:
 	clock_t previousClock;
 	unsigned char currentCharmap[16][128];
 	bool aborting;
-	string sBinary;
+	std::string sBinary;
 
 private:
-	bool checkNTLMPassword(unsigned char* pLMPassword, int nLMPasswordLen, string& sNTLMPassword);
+	bool checkNTLMPassword(unsigned char* pLMPassword, int nLMPasswordLen, std::string& sNTLMPassword);
 	bool startCorrecting(string sLMPassword, string& sNTLMPassword, unsigned char* pLMPassword);
 	void printString(unsigned char* muteThis, int length);
 	void setupCombinationAtPositions(int length, unsigned char* pMuteMe, unsigned char* pTempMute, int* jAtPos, bool* fullAtPos, int* sizeAtPos);

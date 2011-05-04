@@ -5,7 +5,7 @@
  * Copyright (C) Zhu Shuanglei <shuanglei@hotmail.com>
  * Copyright Martin Westergaard Jørgensen <martinwj2005@gmail.com>
  * Copyright 2009, 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
- * Copyright 2009, 2010, 2011 James Nobis <frt@quelrod.net>
+ * Copyright 2009, 2010, 2011 James Nobis <quel@quelrod.net>
  * Copyright 2010 uroskn
  *
  * This file is part of rcracki_mt.
@@ -39,6 +39,22 @@
 #endif
 #include <pthread.h>
 
+#pragma pack(1)
+union RTIrcrackiIndexChain
+{
+	uint64 nPrefix; //5
+	struct
+	{
+		unsigned char foo[5];
+		unsigned int nFirstChain; //4
+		unsigned short nChainCount; //2
+	};
+	//unsigned short nChainCount; (maybe union with nPrefix, 1 byte spoiled, no pack(1) needed)
+};
+#pragma pack()
+
+// you can't use pack(0) - it makes VC++ angry
+
 class CCrackEngine
 {
 public:
@@ -51,10 +67,10 @@ private:
 	uint64 maxMem;
 	bool writeOutput;
 	bool resumeSession;
-	string outputFile;
-	string sSessionPathName;
-	string sProgressPathName;
-	string sPrecalcPathName;
+	std::string outputFile;
+	std::string sSessionPathName;
+	std::string sProgressPathName;
+	std::string sPrecalcPathName;
 	//string sPrecalcIndexPathName;
 	bool debug;
 	bool keepPrecalcFiles;
@@ -70,29 +86,29 @@ private:
 
 private:
 	void ResetStatistics();
-	RainbowChain *BinarySearch(RainbowChain *pChain, int nChainCountRead, uint64 nIndex, IndexChain *pIndex, int nIndexSize, int nIndexStart);
+	RainbowChain *BinarySearch(RainbowChain *pChain, int nChainCountRead, uint64 nIndex, RTIrcrackiIndexChain *pIndex, int nIndexSize, int nIndexStart);
 	int BinarySearchOld(RainbowChainO* pChain, int nRainbowChainCount, uint64 nIndex);
 	void GetChainIndexRangeWithSameEndpoint(RainbowChainO* pChain,
 										    int nRainbowChainCount,
 										    int nChainIndex,
 										    int& nChainIndexFrom,
 										    int& nChainIndexTo);
-	void SearchTableChunk(RainbowChain* pChain, int nRainbowChainLen, int nRainbowChainCount, CHashSet& hs, IndexChain *pIndex, int nIndexSize, int nChainStart);
+	void SearchTableChunk(RainbowChain* pChain, int nRainbowChainLen, int nRainbowChainCount, CHashSet& hs, RTIrcrackiIndexChain *pIndex, int nIndexSize, int nChainStart);
 	void SearchTableChunkOld(RainbowChainO* pChain, int nRainbowChainLen, int nRainbowChainCount, CHashSet& hs);
 	//bool CheckAlarm(RainbowChain* pChain, int nGuessedPos, unsigned char* pHash, CHashSet& hs);
 	//bool CheckAlarmOld(RainbowChainO* pChain, int nGuessedPos, unsigned char* pHash, CHashSet& hs);
 
 public:
-	void SearchRainbowTable(string sPathName, CHashSet& hs);
-	void Run(vector<string> vPathName, CHashSet& hs, int i_maxThreads, uint64 i_maxMem, bool resume, bool bDebug);
+	void SearchRainbowTable(std::string pathName, CHashSet& hs);
+	void Run(std::vector<std::string> vPathName, CHashSet& hs, int i_maxThreads, uint64 i_maxMem, bool resume, bool bDebug);
 	float GetStatTotalDiskAccessTime();
 	float GetStatTotalCryptanalysisTime();
 	float GetStatTotalPrecalculationTime();
 	uint64   GetStatTotalChainWalkStep();
 	int   GetStatTotalFalseAlarm();
 	uint64   GetStatTotalChainWalkStepDueToFalseAlarm();
-	void setOutputFile(string sPathName);
-	void setSession(string sSessionPathName, string sProgressPathName, string sPrecalcPathName, bool keepPrecalc);
+	void setOutputFile(std::string pathName);
+	void setSession(std::string sSessionPathName, std::string sProgressPathName, std::string sPrecalcPathName, bool keepPrecalc);
 };
 
 #endif

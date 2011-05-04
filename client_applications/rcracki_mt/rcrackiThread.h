@@ -3,7 +3,7 @@
  * RainbowCrack
  *
  * Copyright 2009, 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
- * Copyright 2009, 2010, 2011 James Nobis <frt@quelrod.net>
+ * Copyright 2009, 2010, 2011 James Nobis <quel@quelrod.net>
  *
  * This file is part of rcracki_mt.
  *
@@ -38,23 +38,23 @@ private:
 	int t_nPos;
 	int t_nRainbowChainLen;
 	CChainWalkContext t_cwc;
-	vector<uint64> t_vStartPosIndexE;
+	std::vector<uint64> t_vStartPosIndexE;
 	int t_ID;
 	int t_count;
 	uint64* t_pStartPosIndexE;
 	int t_nChainWalkStep;
 	bool falseAlarmChecker;
 	bool falseAlarmCheckerO;
-	vector<RainbowChain *> t_pChainsFound;
-	vector<RainbowChainO *> t_pChainsFoundO;
-	vector<int> t_nGuessedPoss;
+	std::vector<RainbowChain *> t_pChainsFound;
+	std::vector<RainbowChainO *> t_pChainsFoundO;
+	std::vector<int> t_nGuessedPoss;
 	unsigned char* t_pHash;
 	bool foundHash;
 	int t_nChainWalkStepDueToFalseAlarm;
 	int t_nFalseAlarm;
-	string t_Hash;
-	string t_Plain;
-	string t_Binary;
+	std::string t_Hash;
+	std::string t_Plain;
+	std::string t_Binary;
 
 public:
 	rcrackiThread(unsigned char* TargetHash, int thread_id, int nRainbowChainLen, int thread_count, uint64* pStartPosIndexE);
@@ -73,9 +73,9 @@ public:
 	void AddAlarmCheckO(RainbowChainO* pChain, int nGuessedPos);
 	int GetChainWalkStepDueToFalseAlarm();
 	int GetnFalseAlarm();
-	string GetHash();
-	string GetPlain();
-	string GetBinary();
+	std::string GetHash();
+	std::string GetPlain();
+	std::string GetBinary();
 
 private:
 	void rcrackiThreadEntryPoint();

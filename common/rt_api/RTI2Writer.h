@@ -78,7 +78,7 @@ public:
 
 	void Dump();
 
-	int writeChains(uint32 &numChains, RainbowChain *pData);
+	int writeChains(uint32 &numChains, RainbowChainO *pData);
 	int writeHeader();
 	int writeData();
 	int writeIndex();

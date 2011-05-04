@@ -47,7 +47,6 @@ private:
 	RTI20_File_Header header;
 	RTI20_Index index;
 	uint8 *data;
-	uint32 chainSizeBytes;
 	uint32 chainCount;
 	std::vector<SubKeySpace> subKeySpaces;
 	std::vector<uint32> checkPointPositions;
@@ -56,10 +55,10 @@ private:
 
 public:
 	RTI2Reader( std::string filename );
-	~RTI2Reader(void);
+	~RTI2Reader();
 
 	uint32 getChainsLeft();
-	int readChains(uint32 &numChains, RainbowChain *pData);
+	int readChains(uint32 &numChains, RainbowChainO *pData);
 	void setMinimumStartPoint();
 
 	void Dump();

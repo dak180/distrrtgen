@@ -32,6 +32,9 @@ distrrtgen:
 distrrtgen_cuda:
 	cd boinc_software/boinc_client_apps/distrrtgen_cuda && make $(TARGET)
 
+distrrtgen_validator:
+	cd boinc_software/boinc_server_apps/distrrtgen_validator && make $(TARGET)
+
 rcracki_mt:
 	cd client_applications/rcracki_mt && make $(TARGET)
 
@@ -48,11 +51,11 @@ rtperfectp:
 	cd server_applications/rtperfectp && make $(TARGET)
 
 clean: TARGET=clean
-clean: converti2 distrrtgen distrrtgen_cuda rcracki_mt rti2rto \
-	rtperfecter0.0 rtperfecti rtperfectp
+clean: converti2 distrrtgen distrrtgen_cuda distrrtgen_validator rcracki_mt \
+	rti2rto rtperfecter0.0 rtperfecti rtperfectp
 
 distclean: TARGET=distclean
-distclean: distrrtgen distrrtgen_cuda
+distclean: distrrtgen distrrtgen_cuda distrrtgen_validator
 
 rebuild: TARGET=clean
 rebuild: converti2 distrrtgen distrrtgen_cuda rcracki_mt rti2rto \

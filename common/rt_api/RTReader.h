@@ -42,7 +42,7 @@ public:
 	~RTReader() { };
 
 	uint32 getChainsLeft();
-	int readChains(uint32 &numChains, RainbowChain *pData);
+	int readChains(uint32 &numChains, RainbowChainO *pData);
 	void setMinimumStartPoint();
 };
 

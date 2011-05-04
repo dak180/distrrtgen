@@ -5,7 +5,7 @@
  * Copyright (C) Zhu Shuanglei <shuanglei@hotmail.com>
  * Copyright Martin Westergaard Jørgensen <martinwj2005@gmail.com>
  * Copyright 2009, 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
- * Copyright 2009, 2010, 2011 James Nobis <frt@quelrod.net>
+ * Copyright 2009, 2010, 2011 James Nobis <quel@quelrod.net>
  *
  * This file is part of freerainbowtables.
  *
@@ -42,33 +42,30 @@ public:
 	virtual ~CChainWalkSet();
 
 private:
-	string m_sHashRoutineName;		// Discard all if not match
-	string m_sPlainCharsetName;		// Discard all if not match
+	std::string m_sHashRoutineName;		// Discard all if not match
+	std::string m_sPlainCharsetName;		// Discard all if not match
 	int    m_nPlainLenMin;			// Discard all if not match
 	int    m_nPlainLenMax;			// Discard all if not match
 	int    m_nRainbowTableIndex;	// Discard all if not match
 	int    m_nRainbowChainLen;		// Discard all if not match
-	list<ChainWalk> m_lChainWalk;
+	std::list<ChainWalk> m_lChainWalk;
 	bool   debug;
-	string sPrecalcPathName;
+	std::string sPrecalcPathName;
 	int    preCalcPart;
-	vector<string> vPrecalcFiles;
+	std::vector<std::string> vPrecalcFiles;
 
 private:
 	void DiscardAll();
 	bool FindInFile(uint64* pIndexE, unsigned char* pHash, int nHashLen);
-	string CheckOrRotatePreCalcFile();
+	std::string CheckOrRotatePreCalcFile();
 	void updateUsedPrecalcFiles();
 
 public:
-	uint64* RequestWalk(unsigned char* pHash, int nHashLen,
-						string sHashRoutineName,
-						string sPlainCharsetName, int nPlainLenMin, int nPlainLenMax, 
-						int nRainbowTableIndex, 
-						int nRainbowChainLen,
-						bool& fNewlyGenerated,
-						bool setDebug,
-						string sPrecalc);
+	uint64* RequestWalk( unsigned char* pHash, int nHashLen
+		, std::string sHashRoutineName, std::string sPlainCharsetName
+		, int nPlainLenMin, int nPlainLenMax, int nRainbowTableIndex
+		, int nRainbowChainLen, bool& fNewlyGenerated, bool setDebug
+		, std::string sPrecalc );
 	void DiscardWalk(uint64* pIndexE);
 	void StoreToFile(uint64* pIndexE, unsigned char* pHash, int nHashLen);
 	void removePrecalcFiles();

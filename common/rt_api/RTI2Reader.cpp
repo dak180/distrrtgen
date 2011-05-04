@@ -376,13 +376,15 @@ RTI2Reader::RTI2Reader( std::string filename )
 	}
 }
 
-RTI2Reader::~RTI2Reader(void)
+RTI2Reader::~RTI2Reader()
 {
-	fin.close();
-	delete [] data;
+	if ( fin.good() )
+		fin.close();
+
+	if ( data != NULL )
+		delete [] data;
+
 	data = NULL;
-//	if(m_pIndex != NULL) delete m_pIndex;
-//	if(dataFile != NULL) fclose(dataFile);
 }
 
 int RTI2Reader::readRTI2String( std::ifstream &fin, void *str, uint32 charSize )
@@ -507,7 +509,7 @@ void RTI2Reader::Dump()
 	// XXX data
 }
 
-int RTI2Reader::readChains(unsigned int &numChains, RainbowChain *pData)
+int RTI2Reader::readChains(unsigned int &numChains, RainbowChainO *pData)
 {
 	unsigned int readChains = 0;
 	unsigned int chainsleft = getChainsLeft();

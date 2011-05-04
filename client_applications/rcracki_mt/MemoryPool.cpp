@@ -5,7 +5,7 @@
  * Copyright (C) Zhu Shuanglei <shuanglei@hotmail.com>
  * Copyright Martin Westergaard Jørgensen <martinwj2005@gmail.com>
  * Copyright 2009, 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
- * Copyright 2009, 2010, 2011 James Nobis <frt@quelrod.net>
+ * Copyright 2009, 2010, 2011 James Nobis <quel@quelrod.net>
  * Copyright 2010 uroskn
  *
  * This file is part of rcracki_mt.
@@ -88,11 +88,11 @@ unsigned char* CMemoryPool::Allocate(unsigned int nFileLen, uint64& nAllocatedSi
 
 	// Allocate new memory
 	//printf("allocating %u bytes memory\n", nTargetSize);
-	m_pMem = new (nothrow) unsigned char[nTargetSize];
+	m_pMem = new (std::nothrow) unsigned char[nTargetSize];
 	while (m_pMem == NULL && nTargetSize >= 32 * 1024 * 1024 )
 	{
 		nTargetSize -= 16 * 1024 * 1024;
-		m_pMem = new (nothrow) unsigned char[nTargetSize];
+		m_pMem = new (std::nothrow) unsigned char[nTargetSize];
 	}
 
 	if (m_pMem != NULL)

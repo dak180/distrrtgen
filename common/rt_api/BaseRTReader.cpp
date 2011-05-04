@@ -37,6 +37,11 @@ uint32 BaseRTReader::getChainLength()
 	return chainLength;
 }
 
+uint32 BaseRTReader::getChainSizeBytes()
+{
+	return chainSizeBytes;
+}
+
 uint64 BaseRTReader::getMinimumStartPoint()
 {
 	return minimumStartPoint;
@@ -55,6 +60,11 @@ std::string BaseRTReader::getSalt()
 void BaseRTReader::setChainLength( uint32 chainLength )
 {
 	this->chainLength = chainLength;
+}
+
+void BaseRTReader::setChainSizeBytes( uint32 chainSizeBytes )
+{
+	this->chainSizeBytes = chainSizeBytes;
 }
 
 void BaseRTReader::setFilename( std::string filename )

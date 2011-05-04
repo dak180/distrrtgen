@@ -25,6 +25,7 @@
 
 RTReader::RTReader( std::string filename )
 {
+	setChainSizeBytes( 16 );
 	setFilename( filename );
 	dataFile = fopen(filename.c_str(), "rb");
 }
@@ -34,7 +35,7 @@ uint32 RTReader::getChainsLeft()
 	return (GetFileLen( getFilename() ) / 16) - chainPosition;
 }
 
-int RTReader::readChains(uint32 &numChains, RainbowChain *pData)
+int RTReader::readChains(uint32 &numChains, RainbowChainO *pData)
 {
 	unsigned int numRead = fread(pData, 1, 16 * numChains, dataFile);
 	numChains = numRead / 16;

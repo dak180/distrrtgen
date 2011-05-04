@@ -25,6 +25,8 @@
 
 RTIReader::RTIReader( std::string filename )
 {
+	setChainSizeBytes( 8 );
+
 	setFilename( filename );
 
 	m_pIndex = NULL;
@@ -118,10 +120,10 @@ uint32 RTIReader::getChainsLeft()
 	return (GetFileLen( getFilename() ) / 8) - chainPosition;
 }
 
-int RTIReader::readChains(uint32 &numChains, RainbowChain *pData)
+int RTIReader::readChains(uint32 &numChains, RainbowChainO *pData)
 {	
 	// We HAVE to reset the data to 0x00's or we will get in trouble
-	memset(pData, 0x00, sizeof(RainbowChain) * numChains);
+	memset(pData, 0x00, sizeof(RainbowChainO) * numChains);
 	unsigned int readChains = 0;
 	unsigned int chainsleft = getChainsLeft();
 

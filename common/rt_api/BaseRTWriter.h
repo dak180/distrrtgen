@@ -67,8 +67,8 @@ public:
 	virtual int setSubKeySpaces( std::vector<SubKeySpace> tmpSubKeySpaces );
 	virtual void setTableIndex( uint32 tableIndex ) = 0;
 
-   virtual int writeHeader();
-	virtual int writeChains(uint32 &numChains, RainbowChain *pData) = 0;
+	virtual int writeHeader();
+	virtual int writeChains(uint32 &numChains, RainbowChainO *pData) = 0;
 	virtual int writeData();
 	virtual int writeIndex();
 	

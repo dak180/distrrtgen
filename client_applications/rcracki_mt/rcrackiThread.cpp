@@ -3,7 +3,7 @@
  * RainbowCrack
  *
  * Copyright 2009, 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
- * Copyright 2009, 2010, 2011 James Nobis <frt@quelrod.net>
+ * Copyright 2009, 2010, 2011 James Nobis <quel@quelrod.net>
  *
  * This file is part of rcracki_mt.
  *
@@ -232,17 +232,17 @@ int rcrackiThread::GetnFalseAlarm()
 	return t_nFalseAlarm;
 }
 
-string rcrackiThread::GetHash()
+std::string rcrackiThread::GetHash()
 {
 	return t_Hash;
 }
 
-string rcrackiThread::GetPlain()
+std::string rcrackiThread::GetPlain()
 {
 	return t_Plain;
 }
 
-string rcrackiThread::GetBinary()
+std::string rcrackiThread::GetBinary()
 {
 	return t_Binary;
 }

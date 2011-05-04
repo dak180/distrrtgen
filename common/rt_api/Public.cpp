@@ -41,6 +41,9 @@
 #endif
 
 #include <sys/stat.h>
+#include <map>
+#include <iterator>
+#include <iostream>
 
 #ifdef BOINC
 	#include "filesys.h"
@@ -48,6 +51,10 @@
 #endif
 
 #include "Public.h"
+
+#ifdef _WIN32
+	#include <windows.h>
+#endif
 
 #if defined(_WIN32) && !defined(__GNUC__)
 	#include <windows.h>
@@ -129,6 +136,37 @@
 #endif
 
 //////////////////////////////////////////////////////////////////////
+
+enum RTfileFormatValue { RT
+	, RTI
+	, RTI2
+};
+
+static std::map<std::string, RTfileFormatValue> mapRTFileFormatValue;
+
+static void initializeRTfileFormatMap()
+{
+	mapRTFileFormatValue["RT"] = RT;
+	mapRTFileFormatValue["RTI"] = RTI;
+	mapRTFileFormatValue["RTI2"] = RTI2;
+}
+
+uint8 getRTfileFormatId( std::string RTfileFormatName )
+{
+	initializeRTfileFormatMap();
+	std::map<std::string, RTfileFormatValue>::iterator iter;
+
+	iter = mapRTFileFormatValue.find( RTfileFormatName );
+
+	if ( iter == mapRTFileFormatValue.end() )
+	{
+		std::cout << "RT file format " << RTfileFormatName << " is not supported"
+			<< std::endl;
+		exit( 1 );
+	}
+
+	return iter->second;
+}
 
 timeval sub_timeofday( timeval tv2, timeval tv )
 {
@@ -514,8 +552,9 @@ void ParseHash( std::string sHash, unsigned char* pHash, int& nHashLen )
 
 void Logo()
 {
-	printf("RainbowCrack (improved) 2.0 - Making a Faster Cryptanalytic Time-Memory Trade-Off\n");
+	printf("RainbowCrack (improved, multi-threaded) 2.0 - Making a Faster Cryptanalytic Time-Memory Trade-Off\n");
 	printf("by Martin Westergaard <martinwj2005@gmail.com>\n");
+	printf("multi-threaded and enhanced by neinbrucke\n");
 	printf("http://www.freerainbowtables.com/\n");
 	printf("original code by Zhu Shuanglei <shuanglei@hotmail.com>\n");
 	printf("http://www.antsight.com/zsl/rainbowcrack/\n\n");

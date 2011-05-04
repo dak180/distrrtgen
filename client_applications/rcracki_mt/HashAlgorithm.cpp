@@ -5,7 +5,7 @@
  * Copyright (C) Zhu Shuanglei <shuanglei@hotmail.com>
  * Copyright 2009, 2010, 2011 Martin Westergaard Jørgensen <martinwj2005@gmail.com>
  * Copyright 2009, 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
- * Copyright 2009, 2010, 2011 James Nobis <frt@quelrod.net>
+ * Copyright 2009, 2010, 2011 James Nobis <quel@quelrod.net>
  *
  * This file is part of rcracki_mt.
  *
@@ -31,11 +31,11 @@
 
 #include <openssl/des.h>
 //#include <openssl/md2.h>
-#include <openssl/md4.h>
+//#include <openssl/md4.h>
 #include <openssl/sha.h>
 //#include <openssl/ripemd.h>
 #include "fast_md5.h"
-#include "md4.h"
+#include "fast_md4.h"
 //#include "sha1.h"
 #if defined(_WIN32) && !defined(__GNUC__)
 	#pragma comment(lib, "libeay32.lib")
@@ -165,6 +165,7 @@ void HashNTLMCHALL(unsigned char* pPlain, int nPlainLen, unsigned char* pHash)
 	des_ecb_encrypt((des_cblock*)spoofed_challange, (des_cblock*)&pHash[16], ks, DES_ENCRYPT);
 }
 
+/*
 void HashORACLE(unsigned char* pPlain, int nPlainLen, unsigned char* pHash)
 {
 	char ToEncrypt[256];
@@ -209,6 +210,7 @@ void HashORACLE(unsigned char* pPlain, int nPlainLen, unsigned char* pHash)
 	DES_ncbc_encrypt((unsigned char*) ToEncrypt, (unsigned char*) temp, i, &ks2, &iv2, DES_ENCRYPT);
 	memcpy (pHash,iv2,8);
 }
+*/
 
 void HashNTLM(unsigned char* pPlain, int nPlainLen, unsigned char* pHash)
 {
@@ -272,6 +274,7 @@ void HashRIPEMD160(unsigned char* pPlain, int nPlainLen, unsigned char* pHash)
 }
 */
 
+/*
 void HashMSCACHE(unsigned char *pPlain, int nPlainLen, unsigned char* pHash)
 {
 	char unicode_pwd[256];
@@ -319,7 +322,7 @@ void HashMSCACHE(unsigned char *pPlain, int nPlainLen, unsigned char* pHash)
 	MD4(buf, MSCACHE_HASH_SIZE + nSaltLength, pHash); 
 	free(buf);
 	*/
-}
+//}
 
 //*********************************************************************************
 // Code for MySQL password hashing
@@ -337,7 +340,7 @@ inline void mysql_hash_password_323(unsigned long *result, const char *password)
 		nr2+=(nr2 << 8) ^ nr;
 		add+=tmp;
 	}
-	result[0]=nr & (((unsigned long) 1L << 31) -1L); /* Don't use sign bit (str2int) */;
+	result[0]=nr & (((unsigned long) 1L << 31) -1L); // Don't use sign bit (str2int)
 	result[1]=nr2 & (((unsigned long) 1L << 31) -1L);
 	return;
 }
@@ -384,6 +387,7 @@ void _crypt_to64(char *s, unsigned long v, int n)
 	}
 }
 
+/*
 void HashPIX(unsigned char* pPlain, int nPlainLen, unsigned char* pHash)
 {
 	char temp[MD5_DIGEST_LENGTH+1];
@@ -405,6 +409,7 @@ void HashPIX(unsigned char* pPlain, int nPlainLen, unsigned char* pHash)
 
 	free (pass);
 }
+*/
 
 #if !defined(_WIN32) || defined(__GNUC__)
 char *strupr(char *s1)

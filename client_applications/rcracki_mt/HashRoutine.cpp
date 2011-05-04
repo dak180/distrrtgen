@@ -5,7 +5,7 @@
  * Copyright (C) Zhu Shuanglei <shuanglei@hotmail.com>
  * Copyright Martin Westergaard Jørgensen <martinwj2005@gmail.com>
  * Copyright 2009, 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
- * Copyright 2009, 2010, 2011 James Nobis <frt@quelrod.net>
+ * Copyright 2009, 2010, 2011 James Nobis <quel@quelrod.net>
  *
  * This file is part of rcracki_mt.
  *
@@ -47,30 +47,30 @@ CHashRoutine::CHashRoutine()
 //	AddHashRoutine("ripemd160", HashRIPEMD160, 20);
 	AddHashRoutine("mysql323", HashMySQL323, 8);
 	AddHashRoutine("mysqlsha1", HashMySQLSHA1, 20);
-	AddHashRoutine("ciscopix", HashPIX, 16);
-	AddHashRoutine("mscache", HashMSCACHE, 16);
+//	AddHashRoutine("ciscopix", HashPIX, 16);
+//	AddHashRoutine("mscache", HashMSCACHE, 16);
 	AddHashRoutine("halflmchall", HashHALFLMCHALL, 8);
 
 	// Added from mao
 	AddHashRoutine("lmchall", HashLMCHALL, 24);
 	AddHashRoutine("ntlmchall", HashNTLMCHALL, 24);
-	AddHashRoutine("oracle", HashORACLE, 8);
+//	AddHashRoutine("oracle", HashORACLE, 8);
 }
 
 CHashRoutine::~CHashRoutine()
 {
 }
 
-void CHashRoutine::AddHashRoutine(string sHashRoutineName, HASHROUTINE pHashRoutine, int nHashLen)
+void CHashRoutine::AddHashRoutine( std::string sHashRoutineName, HASHROUTINE pHashRoutine, int nHashLen )
 {
 	vHashRoutineName.push_back(sHashRoutineName);
 	vHashRoutine.push_back(pHashRoutine);
 	vHashLen.push_back(nHashLen);
 }
 
-string CHashRoutine::GetAllHashRoutineName()
+std::string CHashRoutine::GetAllHashRoutineName()
 {
-	string sRet;
+	std::string sRet;
 	uint32 i;
 	for (i = 0; i < vHashRoutineName.size(); i++)
 		sRet += vHashRoutineName[i] + " ";
@@ -78,7 +78,7 @@ string CHashRoutine::GetAllHashRoutineName()
 	return sRet;
 }
 
-void CHashRoutine::GetHashRoutine(string sHashRoutineName, HASHROUTINE& pHashRoutine, int& nHashLen)
+void CHashRoutine::GetHashRoutine( std::string sHashRoutineName, HASHROUTINE& pHashRoutine, int& nHashLen )
 {
 	uint32 i;
 	for (i = 0; i < vHashRoutineName.size(); i++)

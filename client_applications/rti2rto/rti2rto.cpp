@@ -135,18 +135,18 @@ void ConvertRainbowTable( std::string pathName, std::string resultFileName, std:
 	// XXX for debug
 	//reader->Dump();
 
-	uint64 size = reader->getChainsLeft() * sizeof(RainbowChain);
+	uint64 size = reader->getChainsLeft() * sizeof(RainbowChainO);
 #ifdef _MEMORYDEBUG
 	printf("Starting allocation of %i bytes\n", size);
 #endif
-	RainbowChain* pChain = (RainbowChain*)mp.Allocate(size, nAllocatedSize);
+	RainbowChainO* pChain = (RainbowChainO*)mp.Allocate(size, nAllocatedSize);
 #ifdef _MEMORYDEBUG
 	printf("Finished. Got %i bytes\n", nAllocatedSize);
 #endif
 	if (pChain != NULL)
 	{
-		nAllocatedSize = nAllocatedSize / sizeof(RainbowChain) * sizeof(RainbowChain);		// Round to boundary
-		unsigned int nChains = nAllocatedSize / sizeof(RainbowChain);
+		nAllocatedSize = nAllocatedSize / sizeof(RainbowChainO) * sizeof(RainbowChainO);		// Round to boundary
+		unsigned int nChains = nAllocatedSize / sizeof(RainbowChainO);
 		while(reader->getChainsLeft() > 0)
 		{
 #ifdef _MEMORYDEBUG

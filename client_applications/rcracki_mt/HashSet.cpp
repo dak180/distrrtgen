@@ -5,7 +5,7 @@
  * Copyright (C) Zhu Shuanglei <shuanglei@hotmail.com>
  * Copyright Martin Westergaard Jørgensen <martinwj2005@gmail.com>
  * Copyright 2009, 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
- * Copyright 2009, 2010, 2011 James Nobis <frt@quelrod.net>
+ * Copyright 2009, 2010, 2011 James Nobis <quel@quelrod.net>
  *
  * This file is part of rcracki_mt.
  *
@@ -37,7 +37,7 @@ CHashSet::~CHashSet()
 {
 }
 
-void CHashSet::AddHash(string sHash)
+void CHashSet::AddHash(std::string sHash)
 {
 	if (sHash == "aad3b435b51404ee")
 		return;
@@ -57,15 +57,15 @@ void CHashSet::AddHash(string sHash)
 	m_vBinary.push_back("");
 }
 
-string CHashSet::GetHashInfo(int i)
+std::string CHashSet::GetHashInfo(int i)
 {
-	string found;
+	std::string found;
 	if (m_vFound[i])
 		found = "1";
 	else
 		found = "0";
 
-	string buffer = m_vHash[i] + ":" + found + ":" + m_vPlain[i] + ":" + m_vBinary[i];
+	std::string buffer = m_vHash[i] + ":" + found + ":" + m_vPlain[i] + ":" + m_vBinary[i];
 
 	return buffer;
 }
@@ -95,7 +95,7 @@ bool CHashSet::AnyHashLeftWithLen(int nLen)
 	return false;
 }
 
-void CHashSet::GetLeftHashWithLen(vector<string>& vHash, int nLen)
+void CHashSet::GetLeftHashWithLen(std::vector<std::string>& vHash, int nLen)
 {
 	vHash.clear();
 
@@ -108,7 +108,7 @@ void CHashSet::GetLeftHashWithLen(vector<string>& vHash, int nLen)
 	}
 }
 
-void CHashSet::AddHashInfo(string sHash, bool found, string sPlain, string sBinary)
+void CHashSet::AddHashInfo(std::string sHash, bool found, std::string sPlain, std::string sBinary)
 {
 	uint32 i;
 	for (i = 0; i < m_vHash.size(); i++)
@@ -123,7 +123,7 @@ void CHashSet::AddHashInfo(string sHash, bool found, string sPlain, string sBina
 	m_vBinary.push_back(sBinary);
 }
 
-void CHashSet::SetPlain(string sHash, string sPlain, string sBinary)
+void CHashSet::SetPlain(std::string sHash, std::string sPlain, std::string sBinary)
 {
 	uint32 i;
 	for (i = 0; i < m_vHash.size(); i++)
@@ -138,7 +138,7 @@ void CHashSet::SetPlain(string sHash, string sPlain, string sBinary)
 	}
 }
 
-bool CHashSet::GetPlain(string sHash, string& sPlain, string& sBinary)
+bool CHashSet::GetPlain(std::string sHash, std::string& sPlain, std::string& sBinary)
 {
 	if (sHash == "aad3b435b51404ee")
 	{

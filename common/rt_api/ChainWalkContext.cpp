@@ -38,11 +38,10 @@
 std::string CChainWalkContext::m_sHashRoutineName;
 HASHROUTINE CChainWalkContext::m_pHashRoutine;
 int CChainWalkContext::m_nHashLen;
+uint8 CChainWalkContext::RTfileFormatId;
 int CChainWalkContext::m_nPlainLenMinTotal = 0;
 int CChainWalkContext::m_nPlainLenMaxTotal = 0;
 int CChainWalkContext::m_nHybridCharset = 0;
-bool CChainWalkContext::isOldRtFormat = false;
-bool CChainWalkContext::isRti2RtFormat = false;
 std::vector<stCharset> CChainWalkContext::m_vCharset;
 uint64 CChainWalkContext::m_nPlainSpaceUpToX[MAX_PLAIN_LEN];
 uint64 CChainWalkContext::m_nPlainSpaceTotal;
@@ -308,15 +307,15 @@ bool CChainWalkContext::SetupWithPathName( std::string sPathName, int& nRainbowC
 	}
 	if (sPathName.substr(sPathName.size() - 5) == ".rti2")
 	{
-		isRti2RtFormat = true;
+		RTfileFormatId = getRTfileFormatId( "RTI2" );
 	}
 	else if (sPathName.substr(sPathName.size() - 4) == ".rti")
 	{
-		isOldRtFormat = false;
+		RTfileFormatId = getRTfileFormatId( "RTI" );
 	}
 	else if (sPathName.substr(sPathName.size() - 3) == ".rt")
 	{
-		isOldRtFormat = true;
+		RTfileFormatId = getRTfileFormatId( "RT" );
 	}
 	else
 	{
@@ -481,13 +480,7 @@ void CChainWalkContext::Dump()
 	printf("reduce offset: %s\n", uint64tostr(m_nReduceOffset).c_str());
 	printf("\n");
 }
-/*
-void CChainWalkContext::GenerateRandomIndex()
-{
-	RAND_bytes((unsigned char*)&m_nIndex, 8);
-	m_nIndex = m_nIndex % m_nPlainSpaceTotal;
-}
-*/
+
 void CChainWalkContext::SetIndex(uint64 nIndex)
 {
 	m_nIndex = nIndex;
@@ -745,12 +738,7 @@ bool CChainWalkContext::CheckHash(unsigned char* pHash)
 	return false;
 }
 
-bool CChainWalkContext::isOldFormat()
+uint8 CChainWalkContext::getRTfileFormat()
 {
-	return isOldRtFormat;
-}
-
-bool CChainWalkContext::isRti2Format()
-{
-	return isRti2RtFormat;
+	return RTfileFormatId;
 }

@@ -62,7 +62,7 @@ LIBS = -lboinc_api -lboinc -lpthread -lssl libstdc++.a \
 	$(COMMON_LIB_DIR)/libssl.a $(COMMON_LIB_DIR)/libpthread.a
 
 OBJS = ChainWalkContext.o des_enc.o des_setkey.o distrrtgen.o ecb_enc.o \
-	HashAlgorithm.o HashRoutine.o md4.o md5.o Public.o
+	HashAlgorithm.o HashRoutine.o fast_md4.o fast_md5.o Public.o
 
 OSNAME = $(shell uname -s)
 
@@ -111,7 +111,7 @@ ecb_enc.o: $(COMMON_API_PATH)/ecb_enc.c $(COMMON_API_PATH)/des_locl.h \
 
 HashAlgorithm.o: $(COMMON_API_PATH)/HashAlgorithm.h \
 	$(COMMON_API_PATH)/HashAlgorithm.cpp $(COMMON_API_PATH)/Public.h \
-	$(COMMON_API_PATH)/md4.h $(COMMON_API_PATH)/md5.h
+	$(COMMON_API_PATH)/fast_md4.h $(COMMON_API_PATH)/fast_md5.h
 	$(CXX) $(CXXFLAGS) $(COMMON_API_PATH)/HashAlgorithm.cpp
 
 HashRoutine.o: $(COMMON_API_PATH)/HashRoutine.h \
@@ -119,13 +119,13 @@ HashRoutine.o: $(COMMON_API_PATH)/HashRoutine.h \
 	$(COMMON_API_PATH)/HashAlgorithm.h
 	$(CXX) $(CXXFLAGS) $(COMMON_API_PATH)/HashRoutine.cpp
 
-md4.o: $(COMMON_API_PATH)/md4.h $(COMMON_API_PATH)/md4.cpp \
+fast_md4.o: $(COMMON_API_PATH)/fast_md4.h $(COMMON_API_PATH)/fast_md4.cpp \
 	$(COMMON_API_PATH)/global.h
-	$(CXX) $(CXXFLAGS) $(COMMON_API_PATH)/md4.cpp
+	$(CXX) $(CXXFLAGS) $(COMMON_API_PATH)/fast_md4.cpp
 
-md5.o: $(COMMON_API_PATH)/md5.h $(COMMON_API_PATH)/md5.cpp \
+fast_md5.o: $(COMMON_API_PATH)/fast_md5.h $(COMMON_API_PATH)/fast_md5.cpp \
 	$(COMMON_API_PATH)/global.h
-	$(CXX) $(CXXFLAGS) $(COMMON_API_PATH)/md5.cpp
+	$(CXX) $(CXXFLAGS) $(COMMON_API_PATH)/fast_md5.cpp
 
 Public.o: $(COMMON_API_PATH)/Public.h $(COMMON_API_PATH)/Public.cpp \
 	$(COMMON_API_PATH)/global.h

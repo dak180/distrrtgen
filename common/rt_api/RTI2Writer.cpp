@@ -167,7 +167,7 @@ void RTI2Writer::Dump()
 
 }
 
-int RTI2Writer::writeChains(unsigned int &numChains, RainbowChain *pData)
+int RTI2Writer::writeChains(unsigned int &numChains, RainbowChainO *pData)
 {
 	return 0;
 }

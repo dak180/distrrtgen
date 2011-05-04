@@ -35,10 +35,21 @@
 
 #include "global.h"
 
-struct RainbowChain
+struct RainbowChainO
 {
 	uint64 nIndexS;
 	uint64 nIndexE;
+};
+
+union RainbowChain
+{
+	uint64 nIndexS;
+	struct
+	{
+		unsigned short foo[3];
+		unsigned short nIndexE;
+	};
+	//int nCheckPoint;
 };
 
 struct RainbowChainCP
@@ -54,6 +65,21 @@ struct IndexChain
 	uint32 nFirstChain;
 	uint32 nChainCount;
 };
+
+/* rcracki_mt IndexChain
+#pragma pack(1)
+union IndexChain
+{
+	uint64 nPrefix; //5
+	struct
+	{
+		unsigned char foo[5];
+		unsigned int nFirstChain; //4
+		unsigned short nChainCount; //2
+	};
+	//unsigned short nChainCount; (maybe union with nPrefix, 1 byte spoiled, no pack(1) needed)
+};
+*/
 
 struct IndexRow
 {
@@ -99,6 +125,7 @@ timeval sub_timeofday( timeval tv2, timeval tv );
 long GetFileLen(FILE* file);
 long GetFileLen(char* file);
 long GetFileLen( std::string file );
+uint8 getRTfileFormatId( std::string RTfileFormatName );
 std::string TrimString( std::string s );
 bool boinc_ReadLinesFromFile( std::string sPathName, std::vector<std::string>& vLine );
 bool ReadLinesFromFile( std::string sPathName, std::vector<std::string>& vLine);

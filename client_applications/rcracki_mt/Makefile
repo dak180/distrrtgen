@@ -3,7 +3,7 @@
 #
 # Copyright Martin Westergaard Jørgensen <martinwj2005@gmail.com>
 # Copyright 2009, 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
-# Copyright 2009, 2010, 2011 James Nobis <frt@quelrod.net>
+# Copyright 2009, 2010, 2011 James Nobis <quel@quelrod.net>
 #
 # This file is part of rcracki_mt.
 #
@@ -27,10 +27,12 @@ CC = g++
 #  -mtune=native doesn't work on OSX either
 #  add -mtune=native to OPTIMIZATION for better performance (if it works)
 OPTIMIZATION = -O3
-CFLAGS = -Wall -ansi $(OPTIMIZATION) -c $(DEBUG)
-LFLAGS = -Wall -ansi -filt $(OPTIMIZATION) $(DEBUG)
+INCLUDES = -I../../common/rt_api
+CFLAGS = -Wall -ansi $(INCLUDES) $(OPTIMIZATION) -c $(DEBUG)
+LFLAGS = -Wall -ansi -filt $(INCLUDES) $(OPTIMIZATION) $(DEBUG)
 LIBS = -lcrypto -lpthread
-OBJS = BaseRTReader.o ChainWalkContext.o ChainWalkSet.o CrackEngine.o fast_md5.o HashAlgorithm.o HashRoutine.o HashSet.o lm2ntlm.o md4.o MemoryPool.o Public.o RainbowCrack.o rcrackiThread.o RTI2Reader.o
+OBJS = BaseRTReader.o ChainWalkContext.o ChainWalkSet.o CrackEngine.o fast_md5.o HashAlgorithm.o HashRoutine.o HashSet.o lm2ntlm.o fast_md4.o MemoryPool.o Public.o RainbowCrack.o rcrackiThread.o RTReader.o RTIReader.o RTI2Reader.o
+COMMON_API_PATH = ../../common/rt_api
 #sha1.o
 WARNALL = -Wextra -Wunused-macros -Wunsafe-loop-optimizations -Wundef -Woverlength-strings -Wdisabled-optimization -Wformat-extra-args -Wformat-security -Winline
 
@@ -45,13 +47,16 @@ LIBS_NetBSD = -ldes
 
 LIBS += ${LIBS_$(OSNAME)}
 
+RELEASE_DIR = rcracki_mt
+
 all: rcracki_mt strip
 
 rcracki_mt: $(OBJS)
 	$(CC) $(LFLAGS) $(OBJS) $(LIBS) -o rcracki_mt
 
 clean:
-	rm -f *.o *.gcno *.gcda *.gcov rcracki_mt
+	rm -f core *.o *.gcno *.gcda *.gcov rcracki_mt rcracki.session \
+		rcracki.progress  rcracki.precalc.0 rcracki.precalc.0.index
 
 debug: DEBUG += -DDEBUG -g
 debug: rcracki_mt
@@ -105,6 +110,20 @@ install:
 	install -d $(BIN)
 	install --group=root --owner=root --mode=755 rcracki_mt $(BIN)
 
+release:
+	mkdir $(RELEASE_DIR)
+	cp $(COMMON_API_PATH)/BaseRTReader.* $(COMMON_API_PATH)/ChainWalkContext.* \
+		$(COMMON_API_PATH)/ChainWalkSet.* CrackEngine.* \
+		$(COMMON_API_PATH)/fast_md5.* \
+		$(COMMON_API_PATH)/HashAlgorithm.h HashAlgorithm.cpp HashRoutine.cpp \
+		$(COMMON_API_PATH)/HashRoutine.h HashSet.* $(COMMON_API_PATH)/global.h \
+		lm2ntlm.* $(COMMON_API_PATH)/fast_md4.* MemoryPool.* \
+		$(COMMON_API_PATH)/Public.* RainbowCrack.* rcrackiThread.* \
+		$(COMMON_API_PATH)/RTI2Common.* \
+		$(COMMON_API_PATH)/RT*Reader.* sha1.* ChangeLog.txt COPYING \
+		INSTALLING README.txt TODO rcracki_mt.ini $(RELEASE_DIR)/
+	cat Makefile | sed 's/..\/..\/common\/rt_api/./' > $(RELEASE_DIR)/Makefile
+
 rebuild: clean all
 
 strip:
@@ -113,51 +132,77 @@ strip:
 uninstall:
 	rm -f $(BIN)/rcracki_mt
 
-BaseRTReader.o: BaseRTReader.h BaseRTReader.cpp
-	 $(CC) $(CFLAGS) BaseRTReader.cpp
+BaseRTReader.o: $(COMMON_API_PATH)/BaseRTReader.h \
+	$(COMMON_API_PATH)/BaseRTReader.cpp
+	$(CC) $(CFLAGS) $(COMMON_API_PATH)/BaseRTReader.cpp
 
-ChainWalkContext.o: ChainWalkContext.h ChainWalkContext.cpp HashRoutine.h Public.h
-	 $(CC) $(CFLAGS) ChainWalkContext.cpp
+ChainWalkContext.o: $(COMMON_API_PATH)/ChainWalkContext.h \
+	$(COMMON_API_PATH)/ChainWalkContext.cpp $(COMMON_API_PATH)/HashRoutine.h \
+	$(COMMON_API_PATH)/Public.h
+	$(CC) $(CFLAGS) $(COMMON_API_PATH)/ChainWalkContext.cpp
 
-ChainWalkSet.o: Public.h ChainWalkSet.h ChainWalkSet.cpp
-	 $(CC) $(CFLAGS) ChainWalkSet.cpp
+ChainWalkSet.o: $(COMMON_API_PATH)/Public.h $(COMMON_API_PATH)/ChainWalkSet.h \
+	$(COMMON_API_PATH)/ChainWalkSet.cpp
+	$(CC) $(CFLAGS) $(COMMON_API_PATH)/ChainWalkSet.cpp
 
-CrackEngine.o: CrackEngine.h CrackEngine.cpp Public.h HashSet.h ChainWalkContext.h MemoryPool.h ChainWalkSet.h rcrackiThread.h RTI2Reader.h
-	 $(CC) $(CFLAGS) CrackEngine.cpp
+CrackEngine.o: $(COMMON_API_PATH)/Public.h HashSet.h \
+	$(COMMON_API_PATH)/ChainWalkContext.h MemoryPool.h \
+	$(COMMON_API_PATH)/ChainWalkSet.h rcrackiThread.h \
+	$(COMMON_API_PATH)/RTReader.h $(COMMON_API_PATH)/RTIReader.h \
+	$(COMMON_API_PATH)/RTI2Reader.h CrackEngine.h CrackEngine.cpp
+	$(CC) $(CFLAGS) CrackEngine.cpp
 
-fast_md5.o: fast_md5.h fast_md5.cpp global.h
-	 $(CC) $(CFLAGS) fast_md5.cpp
+fast_md5.o: $(COMMON_API_PATH)/fast_md5.h $(COMMON_API_PATH)/fast_md5.cpp \
+	$(COMMON_API_PATH)/global.h
+	$(CC) $(CFLAGS) $(COMMON_API_PATH)/fast_md5.cpp
 
-#HashAlgorithm.o: HashAlgorithm.h HashAlgorithm.cpp Public.h fast_md5.h md4.h sha1.h
-HashAlgorithm.o: HashAlgorithm.h HashAlgorithm.cpp Public.h fast_md5.h md4.h
-	 $(CC) $(CFLAGS) HashAlgorithm.cpp
+#HashAlgorithm.o: $(COMMON_API_PATH)/HashAlgorithm.h HashAlgorithm.cpp \
+	$(COMMON_API_PATH)/Public.h $(COMMON_API_PATH)/fast_md5.h \
+	$(COMMON_API_PATH)/fast_md4.h sha1.h
+HashAlgorithm.o: $(COMMON_API_PATH)/HashAlgorithm.h HashAlgorithm.cpp \
+	$(COMMON_API_PATH)/Public.h $(COMMON_API_PATH)/fast_md5.h \
+	$(COMMON_API_PATH)/fast_md4.h
+	$(CC) $(CFLAGS) HashAlgorithm.cpp
 
-HashRoutine.o: HashRoutine.h HashRoutine.cpp global.h HashAlgorithm.h
-	 $(CC) $(CFLAGS) HashRoutine.cpp
+HashRoutine.o: $(COMMON_API_PATH)/HashRoutine.h HashRoutine.cpp \
+	$(COMMON_API_PATH)/global.h $(COMMON_API_PATH)/HashAlgorithm.h
+	$(CC) $(CFLAGS) HashRoutine.cpp
 
-HashSet.o: HashSet.h HashSet.cpp Public.h
-	 $(CC) $(CFLAGS) HashSet.cpp
+HashSet.o: HashSet.h HashSet.cpp $(COMMON_API_PATH)/Public.h
+	$(CC) $(CFLAGS) HashSet.cpp
 
-lm2ntlm.o: lm2ntlm.h lm2ntlm.cpp Public.h md4.h
-	 $(CC) $(CFLAGS) lm2ntlm.cpp
+lm2ntlm.o: lm2ntlm.h lm2ntlm.cpp $(COMMON_API_PATH)/Public.h \
+	$(COMMON_API_PATH)/fast_md4.h
+	$(CC) $(CFLAGS) lm2ntlm.cpp
 
-md4.o: md4.h md4.cpp global.h
-	 $(CC) $(CFLAGS) md4.cpp
+fast_md4.o: $(COMMON_API_PATH)/fast_md4.h $(COMMON_API_PATH)/fast_md4.cpp \
+	$(COMMON_API_PATH)/global.h
+	$(CC) $(CFLAGS) $(COMMON_API_PATH)/fast_md4.cpp
 
-MemoryPool.o: MemoryPool.h MemoryPool.cpp Public.h global.h
-	 $(CC) $(CFLAGS) MemoryPool.cpp
+MemoryPool.o: MemoryPool.h MemoryPool.cpp $(COMMON_API_PATH)/Public.h \
+	$(COMMON_API_PATH)/global.h
+	$(CC) $(CFLAGS) MemoryPool.cpp
 
-Public.o: Public.h Public.cpp global.h
-	 $(CC) $(CFLAGS) Public.cpp
+Public.o: $(COMMON_API_PATH)/Public.h $(COMMON_API_PATH)/Public.cpp \
+	$(COMMON_API_PATH)/global.h
+	$(CC) $(CFLAGS) $(COMMON_API_PATH)/Public.cpp
 
 RainbowCrack.o: RainbowCrack.cpp CrackEngine.h lm2ntlm.h
-	 $(CC) $(CFLAGS) RainbowCrack.cpp
+	$(CC) $(CFLAGS) RainbowCrack.cpp
 
-rcrackiThread.o: rcrackiThread.h rcrackiThread.cpp ChainWalkContext.h Public.h HashSet.h
-	 $(CC) $(CFLAGS) rcrackiThread.cpp
+rcrackiThread.o: rcrackiThread.h rcrackiThread.cpp \
+	$(COMMON_API_PATH)/ChainWalkContext.h $(COMMON_API_PATH)/Public.h HashSet.h
+	$(CC) $(CFLAGS) rcrackiThread.cpp
 
-RTI2Reader.o: RTI2Reader.h RTI2Reader.cpp BaseRTReader.h
-	$(CC) $(CFLAGS) RTI2Reader.cpp
+RTReader.o: $(COMMON_API_PATH)/RTReader.h $(COMMON_API_PATH)/RTReader.cpp
+	$(CC) $(CFLAGS) $(COMMON_API_PATH)/RTReader.cpp
 
-#sha1.o: sha1.h sha1.cpp global.h
+RTIReader.o: $(COMMON_API_PATH)/RTIReader.h $(COMMON_API_PATH)/RTIReader.cpp
+	$(CC) $(CFLAGS) $(COMMON_API_PATH)/RTIReader.cpp
+
+RTI2Reader.o: $(COMMON_API_PATH)/RTI2Reader.h \
+	$(COMMON_API_PATH)/RTI2Reader.cpp $(COMMON_API_PATH)/BaseRTReader.h
+	$(CC) $(CFLAGS) $(COMMON_API_PATH)/RTI2Reader.cpp
+
+#sha1.o: sha1.h sha1.cpp $(COMMON_API_PATH)/global.h
 #	 $(CC) $(CFLAGS) sha1.cpp

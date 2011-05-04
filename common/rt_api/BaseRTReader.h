@@ -38,26 +38,29 @@ protected:
 	FILE *dataFile;
 	uint32 chainLength;
 	uint32 chainPosition;
+	uint32 chainSizeBytes;
 	uint64 minimumStartPoint;
 	std::string filename;
 	std::string salt;
+	
+	virtual void setChainSizeBytes( uint32 chainSizeBytes );
+	virtual void setChainLength( uint32 chainLength );
+	virtual void setFilename( std::string filename );
+	virtual void setSalt( std::string salt );
 
 public:
 	BaseRTReader();
 	virtual ~BaseRTReader() { };
 
 	virtual uint32 getChainsLeft() = 0;
-	virtual int readChains(uint32 &numChains, RainbowChain *pData) = 0;
+	virtual int readChains(uint32 &numChains, RainbowChainO *pData) = 0;
 	virtual void setMinimumStartPoint() = 0;
 
 	virtual uint32 getChainLength();
+	virtual uint32 getChainSizeBytes();
 	virtual std::string getFilename();
 	virtual std::string getSalt();
 	virtual uint64 getMinimumStartPoint();
-
-	virtual void setChainLength( uint32 chainLength );
-	virtual void setFilename( std::string filename );
-	virtual void setSalt( std::string salt );
 
 	virtual void Dump();
 };

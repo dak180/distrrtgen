@@ -31,8 +31,8 @@
 #include <string.h>
 
 //#include <openssl/md2.h>
-#include "md4.h"
-#include "md5.h"
+#include "fast_md4.h"
+#include "fast_md5.h"
 #include "des.h"
 //#include "sha1.h"
 
@@ -242,16 +242,16 @@ void HashMD4(unsigned char* pPlain, int nPlainLen, unsigned char* pHash)
 
 void HashMD5(unsigned char* pPlain, int nPlainLen, unsigned char* pHash)
 {
-	MD5_NEW(pPlain, nPlainLen, pHash);
+	fast_MD5(pPlain, nPlainLen, pHash);
 }
 void HashDoubleMD5(unsigned char* pPlain, int nPlainLen, unsigned char* pHash)
 {
-	MD5_NEW(pPlain, nPlainLen, pHash);
+	fast_MD5(pPlain, nPlainLen, pHash);
 
 	unsigned char hash[MD5_DIGEST_LENGTH];
 	memcpy(hash, pHash, MD5_DIGEST_LENGTH);
 	
-	MD5_NEW(hash, MD5_DIGEST_LENGTH, pHash);
+	fast_MD5(hash, MD5_DIGEST_LENGTH, pHash);
 }
 
 /*
@@ -263,6 +263,7 @@ void HashSHA1(unsigned char* pPlain, int nPlainLen, unsigned char* pHash)
 	SHA1_Final(pHash, &ctx);
 }
 
+/*
 void HashRIPEMD160(unsigned char* pPlain, int nPlainLen, unsigned char* pHash)
 {
 	RIPEMD160_CTX ctx;
@@ -272,7 +273,9 @@ void HashRIPEMD160(unsigned char* pPlain, int nPlainLen, unsigned char* pHash)
 
 	//RIPEMD160(pPlain, nPlainLen, pHash);
 }
+*/
 
+/*
 void HashMSCACHE(unsigned char *pPlain, int nPlainLen, unsigned char* pHash)
 {
 	char unicode_pwd[256];
@@ -385,6 +388,7 @@ void _crypt_to64(char *s, unsigned long v, int n)
 		v >>= 6;
 	}
 }
+
 /*
 void HashPIX(unsigned char* pPlain, int nPlainLen, unsigned char* pHash)
 {
@@ -394,7 +398,7 @@ void HashPIX(unsigned char* pPlain, int nPlainLen, unsigned char* pHash)
 
 	memcpy (pass,pPlain,nPlainLen);
 
-	MD5_NEW((unsigned char *) pass, MD5_DIGEST_LENGTH, final);
+	fast_NEW((unsigned char *) pass, MD5_DIGEST_LENGTH, final);
 
 	char* p = (char*) temp;
 	_crypt_to64(p,*(unsigned long*) (final+0),4); p += 4;
@@ -408,6 +412,7 @@ void HashPIX(unsigned char* pPlain, int nPlainLen, unsigned char* pHash)
 	free (pass);
 }
 */
+
 #if !defined(_WIN32) || defined(__GNUC__)
 char *strupr(char *s1)
 {

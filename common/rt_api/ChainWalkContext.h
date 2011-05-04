@@ -4,7 +4,7 @@
  *
  * Copyright (C) Zhu Shuanglei <shuanglei@hotmail.com>
  * Copyright 2009, 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
- * Copyright 2009, 2010, 2011 James Nobis <frt@quelrod.net>
+ * Copyright 2009, 2010, 2011 James Nobis <quel@quelrod.net>
  * Copyright 2008, 2009, 2010, 2011 Steve Thomas (Sc00bz)
  *
  * This file is part of freerainbowtables.
@@ -52,8 +52,8 @@ public:
 	static std::string m_sHashRoutineName;	
 	static HASHROUTINE m_pHashRoutine;							// Configuration
 	static int m_nHashLen;										// Configuration
-	static bool isOldRtFormat;
-	static bool isRti2RtFormat;
+	static uint8 RTfileFormatId;
+
 	static std::vector<stCharset> m_vCharset;
 	static int m_nPlainLenMinTotal, m_nPlainLenMaxTotal;
 	static uint64 m_nPlainSpaceUpToX[MAX_PLAIN_LEN];		// Performance consideration
@@ -87,8 +87,7 @@ public:
 	static uint64 GetPlainSpaceTotal();
 	static int GetRainbowTableIndex();
 	static void Dump();
-	static bool isOldFormat();
-	static bool isRti2Format();
+	static uint8 getRTfileFormat();
 
 	void SetIndex(uint64 nIndex);
 	void SetHash(unsigned char* pHash);		// The length should be m_nHashLen

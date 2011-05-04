@@ -51,13 +51,13 @@ void CChainWalkSet::DiscardAll()
 {
 	//printf("debug: discarding all walk...\n");
 
-	list<ChainWalk>::iterator it;
+	std::list<ChainWalk>::iterator it;
 	for (it = m_lChainWalk.begin(); it != m_lChainWalk.end(); it++)
 		delete [] it->pIndexE;
 	m_lChainWalk.clear();
 }
 
-string CChainWalkSet::CheckOrRotatePreCalcFile()
+std::string CChainWalkSet::CheckOrRotatePreCalcFile()
 {
 	char sPreCalcFileName[255];
 
@@ -65,7 +65,7 @@ string CChainWalkSet::CheckOrRotatePreCalcFile()
 	for (; preCalcPart < 255; preCalcPart++)
 	{
 		sprintf(sPreCalcFileName, "%s.%d", sPrecalcPathName.c_str(), preCalcPart);
-		string sReturnPreCalcPath(sPreCalcFileName);
+		std::string sReturnPreCalcPath(sPreCalcFileName);
 
 		long fileLen = 0;
 
@@ -88,7 +88,7 @@ string CChainWalkSet::CheckOrRotatePreCalcFile()
 		}
 	}
 
-	return string("");
+	return std::string("");
 }
 
 void CChainWalkSet::updateUsedPrecalcFiles()
@@ -102,7 +102,7 @@ void CChainWalkSet::updateUsedPrecalcFiles()
 	for (i = 0; i < 255; i++)
 	{
 		sprintf(sPreCalcFileName, "%s.%d", sPrecalcPathName.c_str(), i);
-		string sTryPreCalcPath(sPreCalcFileName);
+		std::string sTryPreCalcPath(sPreCalcFileName);
 		FILE* file = fopen(sTryPreCalcPath.c_str(), "rb");
 		if(file!=NULL) {
 			vPrecalcFiles.push_back(sTryPreCalcPath);
@@ -118,8 +118,8 @@ void CChainWalkSet::removePrecalcFiles()
 {
 	if (debug) printf("Debug: Removing precalc files.\n");
 	updateUsedPrecalcFiles();
-	string sCurrentPrecalcPathName = "";
-	string sCurrentPrecalcIndexPathName = "";
+	std::string sCurrentPrecalcPathName = "";
+	std::string sCurrentPrecalcIndexPathName = "";
 	
 	int i;
 	for (i = 0; i < (int)vPrecalcFiles.size(); i++)
@@ -145,10 +145,10 @@ bool CChainWalkSet::FindInFile(uint64* pIndexE, unsigned char* pHash, int nHashL
 	int gotPrecalcOnLine = -1;
 	char precalculationLine[255];
 	sprintf(precalculationLine, "%s_%s#%d-%d_%d_%d:%s\n", m_sHashRoutineName.c_str(), m_sPlainCharsetName.c_str(), m_nPlainLenMin, m_nPlainLenMax, m_nRainbowTableIndex, m_nRainbowChainLen, HexToStr(pHash, nHashLen).c_str() );
-	string precalcString(precalculationLine);
+	std::string precalcString(precalculationLine);
 
-	string sCurrentPrecalcPathName = "";
-	string sCurrentPrecalcIndexPathName = "";
+	std::string sCurrentPrecalcPathName = "";
+	std::string sCurrentPrecalcIndexPathName = "";
 	long unsigned int offset;
 
 	int i;
@@ -159,7 +159,7 @@ bool CChainWalkSet::FindInFile(uint64* pIndexE, unsigned char* pHash, int nHashL
 
 		offset = 0;
 
-		vector<string> precalcLines;
+		std::vector<std::string> precalcLines;
 		if (ReadLinesFromFile(sCurrentPrecalcIndexPathName.c_str(), precalcLines))
 		{
 			int j;
@@ -172,7 +172,7 @@ bool CChainWalkSet::FindInFile(uint64* pIndexE, unsigned char* pHash, int nHashL
 				}
 
 				// Parse
-				vector<string> vPart;
+				std::vector<std::string> vPart;
 				if (SeperateString(precalcLines[j], "___:", vPart))
 				{
 					// add to offset
@@ -218,8 +218,8 @@ void CChainWalkSet::StoreToFile(uint64* pIndexE, unsigned char* pHash, int nHash
 {
 	if (debug) printf("\nDebug: Storing precalc\n");
 	
-	string sCurrentPrecalcPathName = CheckOrRotatePreCalcFile();
-	string sCurrentPrecalcIndexPathName = sCurrentPrecalcPathName + ".index";
+	std::string sCurrentPrecalcPathName = CheckOrRotatePreCalcFile();
+	std::string sCurrentPrecalcIndexPathName = sCurrentPrecalcPathName + ".index";
 
 	FILE* fp = fopen(sCurrentPrecalcPathName.c_str(), "ab");
 	if(fp!=NULL)
@@ -243,14 +243,11 @@ void CChainWalkSet::StoreToFile(uint64* pIndexE, unsigned char* pHash, int nHash
 		printf("Cannot open precalculation file %s\n", sCurrentPrecalcPathName.c_str());
 }
 
-uint64* CChainWalkSet::RequestWalk(unsigned char* pHash, int nHashLen,
-								   string sHashRoutineName,
-								   string sPlainCharsetName, int nPlainLenMin, int nPlainLenMax, 
-								   int nRainbowTableIndex, 
-								   int nRainbowChainLen,
-								   bool& fNewlyGenerated,
-								   bool setDebug,
-								   string sPrecalc)
+uint64* CChainWalkSet::RequestWalk( unsigned char* pHash, int nHashLen
+	, std::string sHashRoutineName, std::string sPlainCharsetName
+	, int nPlainLenMin, int nPlainLenMax, int nRainbowTableIndex
+	, int nRainbowChainLen, bool& fNewlyGenerated, bool setDebug
+	, std::string sPrecalc )
 {
 	debug = setDebug;
 	sPrecalcPathName = sPrecalc;
@@ -286,7 +283,7 @@ uint64* CChainWalkSet::RequestWalk(unsigned char* pHash, int nHashLen,
 		return cw.pIndexE;
 	}
 
-	list<ChainWalk>::iterator it;
+	std::list<ChainWalk>::iterator it;
 	for (it = m_lChainWalk.begin(); it != m_lChainWalk.end(); it++)
 	{
 		if (memcmp(it->Hash, pHash, nHashLen) == 0)
@@ -310,7 +307,7 @@ uint64* CChainWalkSet::RequestWalk(unsigned char* pHash, int nHashLen,
 
 void CChainWalkSet::DiscardWalk(uint64* pIndexE)
 {
-	list<ChainWalk>::iterator it;
+	std::list<ChainWalk>::iterator it;
 	for (it = m_lChainWalk.begin(); it != m_lChainWalk.end(); it++)
 	{
 		if (it->pIndexE == pIndexE)

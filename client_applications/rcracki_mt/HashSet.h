@@ -5,7 +5,7 @@
  * Copyright (C) Zhu Shuanglei <shuanglei@hotmail.com>
  * Copyright Martin Westergaard Jørgensen <martinwj2005@gmail.com>
  * Copyright 2009, 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
- * Copyright 2009, 2010, 2011 James Nobis <frt@quelrod.net>
+ * Copyright 2009, 2010, 2011 James Nobis <quel@quelrod.net>
  *
  * This file is part of rcracki_mt.
  *
@@ -35,25 +35,25 @@ public:
 	virtual ~CHashSet();
 
 private:
-	vector<string> m_vHash;
-	vector<bool>   m_vFound;
-	vector<string> m_vPlain;
-	vector<string> m_vBinary;
+	std::vector<std::string> m_vHash;
+	std::vector<bool>   m_vFound;
+	std::vector<std::string> m_vPlain;
+	std::vector<std::string> m_vBinary;
 
 public:
-	void AddHash(string sHash);		// lowercase, len % 2 == 0, MIN_HASH_LEN * 2 <= len <= MAX_HASH_LEN * 2
+	void AddHash(std::string sHash);		// lowercase, len % 2 == 0, MIN_HASH_LEN * 2 <= len <= MAX_HASH_LEN * 2
 	bool AnyhashLeft();
 	bool AnyHashLeftWithLen(int nLen);
-	void GetLeftHashWithLen(vector<string>& vHash, int nLen);
+	void GetLeftHashWithLen(std::vector<std::string>& vHash, int nLen);
 	
-	void SetPlain(string sHash, string sPlain, string sBinary);
-	bool GetPlain(string sHash, string& sPlain, string& sBinary);
+	void SetPlain(std::string sHash, std::string sPlain, std::string sBinary);
+	bool GetPlain(std::string sHash, std::string& sPlain, std::string& sBinary);
 
 	int GetStatHashFound();
 	int GetStatHashTotal();
 
-	string GetHashInfo(int i);
-	void AddHashInfo(string sHash, bool found, string sPlain, string sBinary);
+	std::string GetHashInfo(int i);
+	void AddHashInfo(std::string sHash, bool found, std::string sPlain, std::string sBinary);
 };
 
 #endif

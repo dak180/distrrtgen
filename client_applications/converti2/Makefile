@@ -76,11 +76,11 @@ Public.o: $(COMMON_API_PATH)/Public.h $(COMMON_API_PATH)/Public.cpp
 RTI2Common.o: $(COMMON_API_PATH)/RTI2Common.h
 	$(CXX) $(CFLAGS) $(COMMON_API_PATH)/RTI2Common.cpp
 
-RTIReader.o: $(COMMON_API_PATH)/RTIReader.h $(COMMON_API_PATH)/RTIReader.cpp
-	$(CXX) $(CFLAGS) $(COMMON_API_PATH)/RTIReader.cpp
-
 RTReader.o: $(COMMON_API_PATH)/RTReader.h $(COMMON_API_PATH)/RTReader.cpp
 	$(CXX) $(CFLAGS) $(COMMON_API_PATH)/RTReader.cpp
+
+RTIReader.o: $(COMMON_API_PATH)/RTIReader.h $(COMMON_API_PATH)/RTIReader.cpp
+	$(CXX) $(CFLAGS) $(COMMON_API_PATH)/RTIReader.cpp
 
 RTI2Writer.o: $(COMMON_API_PATH)/RTI2Writer.h \
 	$(COMMON_API_PATH)/RTI2Writer.cpp $(COMMON_API_PATH)/RTI2Common.h \

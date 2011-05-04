@@ -717,19 +717,21 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 	{
 		// File length check
 
-		int size = reader->getChainsLeft() * sizeof(RainbowChain);
+		int size = reader->getChainsLeft() * sizeof(RainbowChainO);
 		static CMemoryPool mp;
 		uint64 nAllocatedSize;
-		RainbowChain* pChain = (RainbowChain*)mp.Allocate(size, nAllocatedSize);			
-		uint32 chainSize = (uint32)ceil((float)(sptl + eptl + checkPointBits) / 8) * 8; 
+		RainbowChainO* pChain = (RainbowChainO*)mp.Allocate(size, nAllocatedSize);			
+		//uint32 chainSize = (sptl + eptl + checkPointBits + 7) >> 3; 
+		uint32 chainSize = (uint32)ceil((float)(sptl + eptl + checkPointBits) / 8) * 8;
+
 		if ( writer != NULL )
 			writer->setChainSize( chainSize );
 
 		if (pChain != NULL)
 		{
-			nAllocatedSize = nAllocatedSize / sizeof(RainbowChain) * sizeof(RainbowChain);
+			nAllocatedSize = nAllocatedSize / sizeof(RainbowChainO) * sizeof(RainbowChainO);
 			// XXX safe for now...fix to use uint64 throughout
-			unsigned int nChains = (uint32) nAllocatedSize / sizeof(RainbowChain);
+			unsigned int nChains = (uint32) nAllocatedSize / sizeof(RainbowChainO);
 			uint64 curPrefix = 0, prefixStart = 0, prefix = 0, chainrow = 0;
 			std::vector<IndexRow> indexes;
 			unsigned int chainsLeft;
