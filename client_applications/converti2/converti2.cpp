@@ -872,6 +872,7 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 				if(i > 0 && diffSize > 1)
 				{
 					// then write the distance amount of 00's
+					/* 
 					if(diffSize > 1000)
 					{
 						std::cout << "WARNING! The distance to the next prefix is "
@@ -879,6 +880,7 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 						std::cout << "Aborting..." << std::endl;
 						exit(1);
 					}
+					*/
 
 					/*
 						for(uint32 j = 1; j < diffSize; j++)
