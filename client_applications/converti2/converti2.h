@@ -70,7 +70,7 @@ public:
 
 	int GetMaxBits( uint64 highvalue );
 
-#if defined(_WIN32) && !defined(__GNUC__)
+#ifdef _WIN32
 	void GetTableList( std::string sWildCharPathName );
 #else
 	void GetTableList();
