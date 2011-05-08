@@ -46,6 +46,8 @@ public:
 	uint32 getChainsLeft();
 	int readChains(uint32 &numChains, RainbowChainO *pData);
 	void setMinimumStartPoint();
+
+	void Dump();
 };
 
 #endif

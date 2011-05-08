@@ -22,6 +22,7 @@
  */
 
 #include "RTIReader.h"
+#include <iostream>
 
 RTIReader::RTIReader( std::string filename )
 {
@@ -46,8 +47,9 @@ RTIReader::RTIReader( std::string filename )
 	long nIndexFileLen = GetFileLen( sIndex );
 	long nFileLen = GetFileLen( filename );
 
-	unsigned int nTotalChainCount = nFileLen / 8;
-	if (nFileLen % 8 != 0)
+	unsigned int nTotalChainCount = nFileLen / getChainSizeBytes();
+
+	if (nFileLen % getChainSizeBytes() != 0)
 		printf("file length mismatch (%lu bytes)\n", nFileLen);
 	else
 	{
@@ -180,4 +182,17 @@ RTIReader::~RTIReader()
 
 	if( dataFile != NULL )
 		fclose(dataFile);
+}
+
+void RTIReader::Dump()
+{
+	/*
+	 m_nIndexSize
+	 IndexChain *m_pIndex
+	*/
+
+	std::cout << "minimumStartPoint: " << getMinimumStartPoint() << std::endl;
+
+
+
 }
