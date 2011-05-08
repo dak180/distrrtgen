@@ -191,7 +191,7 @@ void RTIReader::Dump()
 	 IndexChain *m_pIndex
 	*/
 
-	std::cout << "minimumStartPoint: " << getMinimumStartPoint() << std::endl;
+	//std::cout << "minimumStartPoint: " << getMinimumStartPoint() << std::endl;
 
 
 
