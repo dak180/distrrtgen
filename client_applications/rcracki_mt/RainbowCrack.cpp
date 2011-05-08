@@ -56,12 +56,12 @@
 //////////////////////////////////////////////////////////////////////
 
 #ifdef _WIN32
-void GetTableList(string sWildCharPathName, vector<string>& vPathName)
+void GetTableList( std::string sWildCharPathName, std::vector<std::string>& vPathName)
 {
 	//vPathName.clear();
 
-	string sPath;
-	string::size_type n = sWildCharPathName.find_last_of('\\');
+	std::string sPath;
+	std::string::size_type n = sWildCharPathName.find_last_of('\\');
 
 	if ( n == (sWildCharPathName.size() - 1) )
 	{
@@ -69,7 +69,7 @@ void GetTableList(string sWildCharPathName, vector<string>& vPathName)
 		n = sWildCharPathName.find_last_of('\\');
 	}
 
-	if (n != string::npos)
+	if (n != std::string::npos)
 		sPath = sWildCharPathName.substr(0, n + 1);
 
 	_finddata_t fd;
@@ -79,33 +79,33 @@ void GetTableList(string sWildCharPathName, vector<string>& vPathName)
 	{
 		do
 		{
-			string sName = fd.name;
+			std::string sName = fd.name;
 			if (sName.size()>3) {
 				if (sName.substr(sName.size()-3, 3) == ".rt" && !(fd.attrib & _A_SUBDIR))
 				{
-					string sPathName = sPath + sName;
+					std::string sPathName = sPath + sName;
 					vPathName.push_back(sPathName);
 				}
 			}
 			if (sName.size()>4) {
 				if (sName.substr(sName.size()-4, 4) == ".rti" && !(fd.attrib & _A_SUBDIR))
 				{
-					string sPathName = sPath + sName;
+					std::string sPathName = sPath + sName;
 					vPathName.push_back(sPathName);
 				}
 			}
 			if (sName.size()>5) {
 				if (sName.substr(sName.size()-5, 5) == ".rti2" && !(fd.attrib & _A_SUBDIR))
 				{
-					string sPathName = sPath + sName;
+					std::string sPathName = sPath + sName;
 					vPathName.push_back(sPathName);
 				}
 			}
 
 			if (sName != "." && sName != ".." && (fd.attrib & _A_SUBDIR))
 			{
-				string sPath_sub = sPath + sName + '\\';
-				string sWildCharPathName_sub = sPath_sub + '*';
+				std::string sPath_sub = sPath + sName + '\\';
+				std::string sWildCharPathName_sub = sPath_sub + '*';
 				GetTableList(sWildCharPathName_sub, vPathName);
 			}
 
