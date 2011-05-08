@@ -27,6 +27,7 @@
 	#include <io.h>
 #else
 	#include <unistd.h>
+	#include <dirent.h>
 #endif
 
 #include <sys/types.h>
@@ -44,23 +45,24 @@ void Usage()
 	printf("http://www.freerainbowtables.com\n\n");
 
 	printf("usage: rti2rto rainbow_table_pathname\n");
+	printf("-v show debug information\n");
+	printf("\n");
 	printf("rainbow_table_pathname: pathname of the rainbow table(s), wildchar(*, ?) supported\n");
 	printf("\n");
 	printf("example: rti2rto *.rti\n");
 	printf("         rti2rto md5_*.rti\n");
 }
 #ifdef _WIN32
-void GetTableList( std::string sWildCharPathName, std::vector<std::string>& vPathName)
+void GetTableList( std::string wildCharPathName, std::vector<std::string>& pathNames )
 {
-	vPathName.clear();
-
 	std::string sPath;
-	int n = sWildCharPathName.find_last_of('\\');
-	if (n != -1)
-		sPath = sWildCharPathName.substr(0, n + 1);
+	std::string::size_type n = wildCharPathName.find_last_of('\\');
+
+	if ( n != std::string::npos )
+		sPath = wildCharPathName.substr(0, n + 1);
 
 	_finddata_t fd;
-	long handle = _findfirst(sWildCharPathName.c_str(), &fd);
+	long handle = _findfirst( wildCharPathName.c_str(), &fd);
 	if (handle != -1)
 	{
 		do
@@ -69,7 +71,7 @@ void GetTableList( std::string sWildCharPathName, std::vector<std::string>& vPat
 			if (sName != "." && sName != ".." && !(fd.attrib & _A_SUBDIR))
 			{
 				std::string pathName = sPath + sName;
-				vPathName.push_back(pathName);
+				pathNames.push_back(pathName);
 			}
 		} while (_findnext(handle, &fd) == 0);
 
@@ -77,27 +79,42 @@ void GetTableList( std::string sWildCharPathName, std::vector<std::string>& vPat
 	}
 }
 #else
-void GetTableList(int argc, char* argv[], std::vector<std::string>& vPathName)
+void GetTableList( std::string wildCharPathName, std::vector<std::string>& pathNames )
 {
-	vPathName.clear();
-
-	int i;
-	for (i = 1; i < argc; i++)
+	struct stat buf;
+	if ( lstat( wildCharPathName.c_str(), &buf ) == 0 )
 	{
-		std::string pathName = argv[i];
-		struct stat buf;
-		if (lstat(pathName.c_str(), &buf) == 0)
+		if ( S_ISDIR(buf.st_mode) )
 		{
-			if (S_ISREG(buf.st_mode))
-				vPathName.push_back(pathName);
+			DIR *dir = opendir( wildCharPathName.c_str() );
 
+			if ( dir )
+			{
+				struct dirent *dirEntry = NULL;
+				while ( ( dirEntry = readdir( dir ) ) != NULL )
+				{
+					std::string filename = "";
+					filename += (*dirEntry).d_name;
+
+					if ( filename != "." && filename != ".." )
+					{
+						std::string new_filename = wildCharPathName + '/' + filename;
+						GetTableList( new_filename, pathNames );
+					}
+				}
+			}
+
+			closedir( dir );
+		}
+		else if ( S_ISREG(buf.st_mode) )
+		{
+			pathNames.push_back( wildCharPathName );
 		}
 	}
 }
 #endif
 
-// ConvertRainbowTable(vPathName[i], resultFile, sType);
-void ConvertRainbowTable( std::string pathName, std::string resultFileName, std::string sType )
+void ConvertRainbowTable( std::string pathName, std::string resultFileName, std::string sType, bool debug )
 {
 #ifdef _WIN32
 	std::string::size_type nIndex = pathName.find_last_of('\\');
@@ -132,8 +149,8 @@ void ConvertRainbowTable( std::string pathName, std::string resultFileName, std:
 		return ;
 	}
 
-	// XXX for debug
-	//reader->Dump();
+	if ( debug )
+		reader->Dump();
 
 	uint64 size = reader->getChainsLeft() * sizeof(RainbowChainO);
 #ifdef _MEMORYDEBUG
@@ -168,55 +185,60 @@ void ConvertRainbowTable( std::string pathName, std::string resultFileName, std:
 }
 int main(int argc, char* argv[])
 {
-#ifdef _WIN32
-	if (argc != 2)
-	{
-		Usage();
-		
-		return 0;
-	}
-	std::string sWildCharPathName = argv[1];
-	std::vector<std::string> vPathName;
-	GetTableList(sWildCharPathName, vPathName);
-#else
+	bool debug = false;
+
 	if (argc < 2)
 	{
 		Usage();
 		return 0;
 	}
-	for(int i = 0; i < argc; i++)
+	
+	std::vector<std::string> pathNames;
+
+	// Parse command line args
+	int i;
+	for( i = 1; i < argc; i++ )
 	{
-		printf("%i: %s\n", i, argv[i]);
+		std::string cla = argv[i];
+
+		if ( cla == "-v" )
+			debug = true;
+		else
+			GetTableList( cla, pathNames );
 	}
-	// vPathName
-	std::vector<std::string> vPathName;
-	GetTableList(argc, argv, vPathName);
-#endif
-	if (vPathName.size() == 0)
+
+	if ( debug )
+	{
+		for( int i = 0; i < argc; i++ )
+			printf("%i: %s\n", i, argv[i]);
+	}
+
+	if ( pathNames.size() == 0 )
 	{
 		printf("no rainbow table found\n");
 		return 0;
 	}
-	for (uint32 i = 0; i < vPathName.size(); i++)
+
+	for ( uint32 i = 0; i < pathNames.size(); i++ )
 	{
 		std::string resultFile, sType;
 			
-		if(vPathName[i].substr(vPathName[i].length() - 4, vPathName[i].length()) == "rti2")
+		if( pathNames[i].substr( pathNames[i].length() - 4, pathNames[i].length()) == "rti2")
 		{
-			resultFile = vPathName[i].substr(0, vPathName[i].length() - 2); // Resulting file is .rt, not .rti2
+			resultFile = pathNames[i].substr(0, pathNames[i].length() - 2); // Resulting file is .rt, not .rti2
 			sType = "RTI2";
 		}
-		else if(vPathName[i].substr(vPathName[i].length() - 3, vPathName[i].length()) == "rti")
+		else if( pathNames[i].substr( pathNames[i].length() - 3, pathNames[i].length()) == "rti")
 		{
-			resultFile = vPathName[i].substr(0, vPathName[i].length() - 1); // Resulting file is .rt, not .rti
+			resultFile = pathNames[i].substr( 0, pathNames[i].length() - 1 ); // Resulting file is .rt, not .rti
 			sType = "RTI";
 		}
 		else 
 		{
-			printf("File %s is not a RTI or a RTI2 file", vPathName[i].c_str());
+			printf("File %s is not a RTI or a RTI2 file", pathNames[i].c_str() );
 			continue;
 		}
-		ConvertRainbowTable(vPathName[i], resultFile, sType);
+		ConvertRainbowTable( pathNames[i], resultFile, sType, debug );
 		printf("\n");
 	}
 	return 0;
