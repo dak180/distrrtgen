@@ -29,6 +29,7 @@ LFLAGS = -Wall -ansi $(INCLUDES) $(OPTIMIZATION) $(DEBUG)
 LIBS = 
 OBJS = BaseRTReader.o BaseRTWriter.o MemoryPool.o Public.o RTI2Common.o \
 	RTIReader.o RTReader.o RTI2Writer.o
+BINARY_NAME=converti2
 COMMON_API_PATH = ../../common/rt_api
 WARNALL = -Wextra -Wunused-macros -Wunsafe-loop-optimizations -Wundef \
 	-Woverlength-strings -Wdisabled-optimization -Wformat-extra-args \
@@ -37,10 +38,10 @@ WARNALL = -Wextra -Wunused-macros -Wunsafe-loop-optimizations -Wundef \
 all: converti2
 
 converti2: $(OBJS)
-	$(CXX) $(LFLAGS) $(OBJS) $(LIBS) converti2.cpp -o converti2
+	$(CXX) $(LFLAGS) $(OBJS) $(LIBS) converti2.cpp -o $(BINARY_NAME)
 
 clean:
-	rm -f *.o converti2 core
+	rm -f *.o converti2 converti2.exe core
 
 debug: DEBUG += -DDEBUG -g
 debug: all
@@ -58,7 +59,7 @@ static: all
 
 win32: CXX=i586-mingw32msvc-g++
 win32: CC=i586-mingw32msvc-gcc
-win32: LIBS += -L/usr/lib/gcc/i586-mingw32msvc/4.2.1-sjlj/lib
+win32: BINARY_NAME=converti2.exe
 win32: all
 
 BaseRTReader.o: $(COMMON_API_PATH)/Public.h $(COMMON_API_PATH)/BaseRTReader.h
