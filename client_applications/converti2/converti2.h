@@ -63,18 +63,14 @@ private:
 	int checkPointBits;
 	std::string pathName;
 	std::vector<unsigned int> cppositions;
-	std::vector<std::string> vPathName;
+	std::vector<std::string> pathNames;
 
 public:
 	Converti2( int argc, char** argv );
 
 	int GetMaxBits( uint64 highvalue );
 
-#ifdef _WIN32
-	void GetTableList( std::string sWildCharPathName );
-#else
-	void GetTableList();
-#endif
+	void GetTableList( std::string wildCharPathName, std::vector<std::string>& pathNames );
 
 	int sharedSetup();
 

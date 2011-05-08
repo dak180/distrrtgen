@@ -23,6 +23,11 @@
 
 #include "converti2.h"
 
+#ifndef _WIN32
+	#include <unistd.h>
+	#include <dirent.h>
+#endif
+
 Converti2::Converti2( int argc, char** argv )
 {
 	sptl = 40;
@@ -242,17 +247,16 @@ int Converti2::GetMaxBits(uint64 highvalue)
 }
 
 #ifdef _WIN32
-void Converti2::GetTableList( std::string sWildCharPathName)
+void Converti2::GetTableList( std::string wildCharPathName, std::vector<std::string>& pathNames )
 {
-	vPathName.clear();
-
 	std::string path;
-	std::string::size_type n = sWildCharPathName.find_last_of('\\');
+	std::string::size_type n = wildCharPathName.find_last_of('\\');
+
 	if ( n != std::string::npos )
-		path = sWildCharPathName.substr(0, n + 1);
+		path = wildCharPathName.substr(0, n + 1);
 
 	_finddata_t fd;
-	long handle = _findfirst(sWildCharPathName.c_str(), &fd);
+	long handle = _findfirst( wildCharPathName.c_str(), &fd );
 	if (handle != -1)
 	{
 		do	{
@@ -260,7 +264,7 @@ void Converti2::GetTableList( std::string sWildCharPathName)
 			if (name != "." && name != ".." && !(fd.attrib & _A_SUBDIR))
 			{
 				pathName = path + name;
-				vPathName.push_back(pathName);
+				pathNames.push_back(pathName);
 			}
 		} while (_findnext(handle, &fd) == 0);
 
@@ -268,19 +272,36 @@ void Converti2::GetTableList( std::string sWildCharPathName)
 	}
 }
 #else
-void Converti2::GetTableList()
+void Converti2::GetTableList( std::string wildCharPathName, std::vector<std::string>& pathNames )
 {
-	vPathName.clear();
-
-	int i;
-	for (i = 1; i < argc; i++)
+	struct stat buf;
+	if ( lstat( wildCharPathName.c_str(), &buf ) == 0 )
 	{
-		pathName = argv[i];
-		struct stat buf;
-		if (lstat(pathName.c_str(), &buf) == 0)
+		if ( S_ISDIR(buf.st_mode) )
 		{
-			if (S_ISREG(buf.st_mode))
-				vPathName.push_back(pathName);
+			DIR *dir = opendir( wildCharPathName.c_str() );
+
+			if ( dir )
+			{
+				struct dirent *dirEntry = NULL;
+				while ( ( dirEntry = readdir( dir ) ) != NULL )
+				{
+					std::string filename = "";
+					filename += (*dirEntry).d_name;
+
+					if ( filename != "." && filename != ".." )
+					{
+						std::string new_filename = wildCharPathName + '/' + filename;
+						GetTableList( new_filename, pathNames );
+					}
+				}
+			}
+
+			closedir( dir );
+		}
+		else if ( S_ISREG(buf.st_mode) )
+		{
+			pathNames.push_back( wildCharPathName );
 		}
 	}
 }
@@ -288,113 +309,105 @@ void Converti2::GetTableList()
 
 int Converti2::sharedSetup()
 {
-	if(argc > 2)
+	for (; argi < argc; argi++)
 	{
-		for (; argi < argc; argi++)
+		if(strcmp(argv[argi], "-d") == 0 && (argsUsed & 0x8) == 0)
 		{
-			if(strcmp(argv[argi], "-d") == 0 && (argsUsed & 0x8) == 0)
+			// Enable verbose mode
+			argsUsed |= 0x8;				
+			showDistribution = true;
+		}			
+		else if (strncmp(argv[argi], "-sptl=", 6) == 0 && (argsUsed & 0x1) == 0)
+		{
+			// Maximum index for starting point
+			argsUsed |= 0x1;
+			sptl = 0;
+			for (i = 6; argv[argi][i] >= '0' && argv[argi][i] <= '9'; i++)
 			{
-				// Enable verbose mode
-				argsUsed |= 0x8;				
-				showDistribution = true;
+				sptl *= 10;
+				sptl += ((int) argv[argi][i]) - 0x30;
+			}
+
+			if (argv[argi][i] != '\0')
+			{
+				printf("Error: Invalid number.\n\n");
+				usage();
+				exit( 1 );
+			}
+
+			if (i > 23)
+			{
+				// i - 3 > 20				
+				printf("Error: Number is too large.\n\n");
+				usage();
+				exit( 1 );
 			}			
-			else if (strncmp(argv[argi], "-sptl=", 6) == 0 && (argsUsed & 0x1) == 0)
+		}
+		else if (strncmp(argv[argi], "-eptl=", 6) == 0 && (argsUsed & 0x2) == 0)
+		{
+			// Maximum index for ending points
+			argsUsed |= 0x2;
+			eptl = 0;
+			for (i = 6; argv[argi][i] >= '0' && argv[argi][i] <= '9'; i++)
 			{
-				// Maximum index for starting point
-				argsUsed |= 0x1;
-				sptl = 0;
-				for (i = 6; argv[argi][i] >= '0' && argv[argi][i] <= '9'; i++)
-				{
-					sptl *= 10;
-					sptl += ((int) argv[argi][i]) - 0x30;
-				}
-
-				if (argv[argi][i] != '\0')
-				{
-					printf("Error: Invalid number.\n\n");
-					usage();
-					exit( 1 );
-				}
-
-				if (i > 23)
-				{
-					// i - 3 > 20				
-					printf("Error: Number is too large.\n\n");
-					usage();
-					exit( 1 );
-				}			
+				eptl *= 10;
+				eptl += ((int) argv[argi][i]) - 0x30;
 			}
-
-			else if (strncmp(argv[argi], "-eptl=", 6) == 0 && (argsUsed & 0x2) == 0)
+			if (argv[argi][i] != '\0')
 			{
-				// Maximum index for ending points
-				argsUsed |= 0x2;
-				eptl = 0;
-				for (i = 6; argv[argi][i] >= '0' && argv[argi][i] <= '9'; i++)
-				{
-					eptl *= 10;
-					eptl += ((int) argv[argi][i]) - 0x30;
-				}
-				if (argv[argi][i] != '\0')
-				{
-					printf("Error: Invalid number.\n\n");
-					usage();
-					exit( 1 );
-				}
-				if (i > 23)
-				{
-					// i - 3 > 20				
-					printf("Error: Number is too large.\n\n");
-					usage();
-					exit( 1 );
-				}			
+				printf("Error: Invalid number.\n\n");
+				usage();
+				exit( 1 );
 			}
-			else if(strncmp(argv[argi], "-usecp=", 7) == 0 && (argsUsed & 0x4) == 0)
+			if (i > 23)
 			{
-				argsUsed |= 0x4;
-				hasCheckPoints = 1;
-				checkPointBits = 0;
-				unsigned int cppos = 0;
-				for(i = 7; argv[argi][i] != ' ' && argv[argi][i] != '\n' && argv[argi][i] != 0;)
+				// i - 3 > 20				
+				printf("Error: Number is too large.\n\n");
+				usage();
+				exit( 1 );
+			}			
+		}
+		else if(strncmp(argv[argi], "-usecp=", 7) == 0 && (argsUsed & 0x4) == 0)
+		{
+			argsUsed |= 0x4;
+			hasCheckPoints = 1;
+			checkPointBits = 0;
+			unsigned int cppos = 0;
+			for(i = 7; argv[argi][i] != ' ' && argv[argi][i] != '\n' && argv[argi][i] != 0;)
+			{
+				if(cppositions.size() > 0) i++;
+				for (; argv[argi][i] >= '0' && argv[argi][i] <= '9'; i++)
 				{
-					if(cppositions.size() > 0) i++;
-					for (; argv[argi][i] >= '0' && argv[argi][i] <= '9'; i++)
-					{
-						cppos *= 10;
-						cppos += ((int) argv[argi][i]) - 0x30;
-					}
+					cppos *= 10;
+					cppos += ((int) argv[argi][i]) - 0x30;
+				}
 
-					cppositions.push_back(cppos);
-					checkPointBits++;
-					cppos = 0;
-				}
-				if (argv[argi][i] != '\0')
-				{
-					printf("Error: Invalid number.\n\n");
-					usage();
-					return 1;
-				}
-				if ( checkPointBits > 16)
-				{ // i - 3 > 20
-					printf("Error: Number is too large.\n\n");
-					usage();
-					exit( 1 );
-				}				
-				else
-				{
-					printf("Using %i bits of the checkpoints\n", checkPointBits );
-				}
+				cppositions.push_back(cppos);
+				checkPointBits++;
+				cppos = 0;
 			}
-		}		
-	}
+			if (argv[argi][i] != '\0')
+			{
+				printf("Error: Invalid number.\n\n");
+				usage();
+				return 1;
+			}
+			if ( checkPointBits > 16)
+			{ // i - 3 > 20
+				printf("Error: Number is too large.\n\n");
+				usage();
+				exit( 1 );
+			}				
+			else
+			{
+				printf("Using %i bits of the checkpoints\n", checkPointBits );
+			}
+		}
+		else
+			GetTableList( argv[argi], pathNames );
+	}		
 
-#ifdef _WIN32
-	std::string sWildCharPathName = argv[1];
-	GetTableList(sWildCharPathName);
-#else
-	GetTableList();
-#endif
-	if (vPathName.size() == 0)
+	if (pathNames.size() == 0)
 	{
 		printf("no rainbow table found\n");
 		return EXIT_FAILURE;
@@ -413,22 +426,22 @@ void Converti2::convertRainbowTables()
 {
 	std::string resultFile;
 
-	for (uint32 i = 0; i < vPathName.size(); i++)
+	for (uint32 i = 0; i < pathNames.size(); i++)
 	{
-		std::string::size_type n = vPathName[i].find_last_of('\\');
+		std::string::size_type n = pathNames[i].find_last_of('\\');
 		if ( n != std::string::npos )
 		{
-			if(vPathName[i].substr(vPathName[i].length() - 3, vPathName[i].length()) == "rti")
-				resultFile = vPathName[i].substr(n+1, vPathName[i].length()) + "2";				
+			if(pathNames[i].substr(pathNames[i].length() - 3, pathNames[i].length()) == "rti")
+				resultFile = pathNames[i].substr(n+1, pathNames[i].length()) + "2";				
 			else
-				resultFile = vPathName[i].substr(n+1, vPathName[i].length()) + "i2";
+				resultFile = pathNames[i].substr(n+1, pathNames[i].length()) + "i2";
 		}
 		else
 		{
-			if(vPathName[i].substr(vPathName[i].length() - 3, vPathName[i].length()) == "rti")
-				resultFile = vPathName[i] + "2";
+			if(pathNames[i].substr(pathNames[i].length() - 3, pathNames[i].length()) == "rti")
+				resultFile = pathNames[i] + "2";
 			else
-				resultFile = vPathName[i] + "i2"; // Resulting file is .rt, not .rti
+				resultFile = pathNames[i] + "i2"; // Resulting file is .rt, not .rti
 		}
 
 		if( checkPointBits == 0 && !shouldShowDistribution() )
@@ -442,8 +455,8 @@ void Converti2::convertRainbowTables()
 			exit(1);
 		}
 
-		pathName = vPathName[i];
-		convertRainbowTable( resultFile, vPathName.size() );
+		pathName = pathNames[i];
+		convertRainbowTable( resultFile, pathNames.size() );
 	}
 }
 
@@ -934,7 +947,7 @@ int main(int argc, char** argv)
 {
 	Converti2 *converti2;
 
-	if (argc == 1)
+	if (argc < 2)
 	{
 		usage();		
 		return 0;
