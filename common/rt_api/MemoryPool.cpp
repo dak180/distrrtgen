@@ -48,7 +48,7 @@ CMemoryPool::CMemoryPool()
 	 * this limit is a bit harsh but added due to poor usage in:
 	 * rti2rto, converti2, RTI2Writer/RTI2Reader, and others
 	*/
-#if defined(_WIN32) && !defined(__GNUC__) && !defined(_WIN64)
+#if defined(_WIN32) && !defined(_WIN64)
 	m_nMemMax = 1024 * 1024 * 512;
 #endif
 }
