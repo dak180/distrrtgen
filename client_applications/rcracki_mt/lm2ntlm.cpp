@@ -41,19 +41,19 @@ LM2NTLMcorrector::LM2NTLMcorrector()
 
 }
 
-string LM2NTLMcorrector::getBinary()
+std::string LM2NTLMcorrector::getBinary()
 {
 	return sBinary;
 }
 
-bool LM2NTLMcorrector::LMPasswordCorrectUnicode(string hexPassword, unsigned char* pNTLMHash, string& sNTLMPassword) //, unsigned char* pLMPassword
+bool LM2NTLMcorrector::LMPasswordCorrectUnicode( std::string hexPassword, unsigned char* pNTLMHash, std::string& sNTLMPassword ) //, unsigned char* pLMPassword
 {
-	string sPlain = "";
+	std::string sPlain = "";
 
 	uint32 i;
 	for (i = 0; i < hexPassword.size() / 2; i++)
 	{
-		string sSub = hexPassword.substr(i * 2, 2);
+		std::string sSub = hexPassword.substr(i * 2, 2);
 		int nValue;
 		sscanf(sSub.c_str(), "%02x", &nValue);
 		sPlain += (unsigned char)nValue;
@@ -100,7 +100,7 @@ bool LM2NTLMcorrector::LMPasswordCorrectUnicode(string hexPassword, unsigned cha
 	}
 }
 
-bool LM2NTLMcorrector::startCorrecting(string sLMPassword, string& sNTLMPassword, unsigned char* pLMPassword)
+bool LM2NTLMcorrector::startCorrecting( std::string sLMPassword, std::string& sNTLMPassword, unsigned char* pLMPassword )
 {
 	if (sLMPassword.size() == 0)
 	{
@@ -108,7 +108,7 @@ bool LM2NTLMcorrector::startCorrecting(string sLMPassword, string& sNTLMPassword
 		return true;
 	}
 
-	string muteMe = sLMPassword;
+	std::string muteMe = sLMPassword;
 	int length = muteMe.size();
 
 	unsigned char* pMuteMe = new unsigned char[length];
@@ -246,7 +246,7 @@ void LM2NTLMcorrector::setupCombinationAtPositions(int length, unsigned char* pM
 }
 
 // go check all permutations for this combination
-bool LM2NTLMcorrector::checkPermutations(int length, unsigned char* pTempMute, int* jAtPos, int* sizeAtPos, unsigned char* pLMPassword, string& sNTLMPassword)
+bool LM2NTLMcorrector::checkPermutations( int length, unsigned char* pTempMute, int* jAtPos, int* sizeAtPos, unsigned char* pLMPassword, std::string& sNTLMPassword )
 {
 	int pos = length - 1;
 
@@ -350,7 +350,7 @@ bool LM2NTLMcorrector::checkPermutations(int length, unsigned char* pTempMute, i
 }
 
 // check password, maybe integrate this function in checkPermutations() for performance reasons.
-bool LM2NTLMcorrector::checkNTLMPassword(unsigned char* pLMPassword, int nLMPasswordLen, string& sNTLMPassword)
+bool LM2NTLMcorrector::checkNTLMPassword( unsigned char* pLMPassword, int nLMPasswordLen, std::string& sNTLMPassword )
 {
 	unsigned char md[MD4_DIGEST_LENGTH];
 
@@ -424,9 +424,9 @@ int LM2NTLMcorrector::factorial (int num)
 }
 
 // convert some bytes into a string
-string LM2NTLMcorrector::ByteToStr(const unsigned char* pData, int nLen)
+std::string LM2NTLMcorrector::ByteToStr(const unsigned char* pData, int nLen)
 {
-	string sRet = "";
+	std::string sRet = "";
 	int i;
 	for (i = 0; i < nLen/2; i++)
 	{

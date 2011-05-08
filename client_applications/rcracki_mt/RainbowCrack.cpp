@@ -56,7 +56,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #ifdef _WIN32
-void GetTableList( std::string sWildCharPathName, std::vector<std::string>& vPathName)
+void GetTableList( std::string sWildCharPathName, std::vector<std::string>& vPathName )
 {
 	//vPathName.clear();
 
@@ -117,7 +117,7 @@ void GetTableList( std::string sWildCharPathName, std::vector<std::string>& vPat
 }
 #else
 //void GetTableList(int argc, char* argv[], vector<string>& vPathName)
-void GetTableList(string sWildCharPathName, vector<string>& vPathName)
+void GetTableList( std::string sWildCharPathName, std::vector<std::string>& vPathName )
 {
 	//vPathName.clear();
 
@@ -132,11 +132,11 @@ void GetTableList(string sWildCharPathName, vector<string>& vPathName)
 				struct dirent *pDir=NULL;
 				while((pDir = readdir(dir)) != NULL)
 				{
-					string filename = "";
+					std::string filename = "";
 					filename += (*pDir).d_name;
 					if (filename != "." && filename != "..")
 					{
-						string new_filename = sWildCharPathName + '/' + filename;
+						std::string new_filename = sWildCharPathName + '/' + filename;
 						GetTableList(new_filename, vPathName);
 					}
 				}
@@ -173,9 +173,9 @@ void GetTableList(string sWildCharPathName, vector<string>& vPathName)
 }
 #endif
 
-bool NormalizeHash(string& sHash)
+bool NormalizeHash(std::string& sHash)
 {
-	string sNormalizedHash = sHash;
+	std::string sNormalizedHash = sHash;
 
 	if (   sNormalizedHash.size() % 2 != 0
 		|| sNormalizedHash.size() < MIN_HASH_LEN * 2
@@ -202,20 +202,20 @@ bool NormalizeHash(string& sHash)
 	return true;
 }
 
-void LoadLMHashFromPwdumpFile(string sPathName, vector<string>& vUserName, vector<string>& vLMHash, vector<string>& vNTLMHash)
+void LoadLMHashFromPwdumpFile( std::string sPathName, std::vector<std::string>& vUserName, std::vector<std::string>& vLMHash, std::vector<std::string>& vNTLMHash )
 {
-	vector<string> vLine;
+	std::vector<std::string> vLine;
 	if (ReadLinesFromFile(sPathName, vLine))
 	{
 		uint32 i;
 		for (i = 0; i < vLine.size(); i++)
 		{
-			vector<string> vPart;
+			std::vector<std::string> vPart;
 			if (SeperateString(vLine[i], "::::", vPart))
 			{
-				string sUserName = vPart[0];
-				string sLMHash   = vPart[2];
-				string sNTLMHash = vPart[3];
+				std::string sUserName = vPart[0];
+				std::string sLMHash   = vPart[2];
+				std::string sNTLMHash = vPart[3];
 
 				if (sLMHash.size() == 32 && sNTLMHash.size() == 32)
 				{
@@ -236,20 +236,20 @@ void LoadLMHashFromPwdumpFile(string sPathName, vector<string>& vUserName, vecto
 }
 
 // 2009-01-04 - james.dickson - Added this so we can load hashes from cain .LST files.
-void LoadLMHashFromCainLSTFile(string sPathName, vector<string>& vUserName, vector<string>& vLMHash, vector<string>& vNTLMHash)
+void LoadLMHashFromCainLSTFile( std::string sPathName, std::vector<std::string>& vUserName, std::vector<std::string>& vLMHash, std::vector<std::string>& vNTLMHash )
 {
-	vector<string> vLine;
+	std::vector<std::string> vLine;
 	if (ReadLinesFromFile(sPathName, vLine))
 	{
 		uint32 i;
 		for (i = 0; i < vLine.size(); i++)
 		{
-			vector<string> vPart;
+			std::vector<std::string> vPart;
 			if (SeperateString(vLine[i], "\t\t\t\t\t\t", vPart))
 			{
-				string sUserName = vPart[0];
-				string sLMHash   = vPart[4];
-				string sNTLMHash = vPart[5];
+				std::string sUserName = vPart[0];
+				std::string sLMHash   = vPart[4];
+				std::string sNTLMHash = vPart[5];
 
 				if (sLMHash.size() == 32 && sNTLMHash.size() == 32)
 				{
@@ -270,7 +270,7 @@ void LoadLMHashFromCainLSTFile(string sPathName, vector<string>& vUserName, vect
 }
 
 bool NTLMPasswordSeek(unsigned char* pLMPassword, int nLMPasswordLen, int nLMPasswordNext,
-					  unsigned char* pNTLMHash, string& sNTLMPassword)
+					  unsigned char* pNTLMHash, std::string& sNTLMPassword)
 {
 	if (nLMPasswordNext == nLMPasswordLen)
 	{
@@ -304,7 +304,7 @@ bool NTLMPasswordSeek(unsigned char* pLMPassword, int nLMPasswordLen, int nLMPas
 	return false;
 }
 
-bool LMPasswordCorrectCase(string sLMPassword, unsigned char* pNTLMHash, string& sNTLMPassword)
+bool LMPasswordCorrectCase( std::string sLMPassword, unsigned char* pNTLMHash, std::string& sNTLMPassword )
 {
 	if (sLMPassword.size() == 0)
 	{
@@ -367,30 +367,30 @@ int main(int argc, char* argv[])
 		return 0;
 	}
 
-	vector<string> vPathName;
-	vector<string> vDefaultRainbowTablePath;
-	string sWildCharPathName			= "";
-	string sInputType						= "";
-	string sInput							= "";
-	string outputFile						= "";
-	string sApplicationPath				= "";
-	string sIniPathName					= "rcracki_mt.ini";
+	std::vector<std::string> vPathName;
+	std::vector<std::string> vDefaultRainbowTablePath;
+	std::string sWildCharPathName			= "";
+	std::string sInputType						= "";
+	std::string sInput							= "";
+	std::string outputFile						= "";
+	std::string sApplicationPath				= "";
+	std::string sIniPathName					= "rcracki_mt.ini";
 	bool writeOutput						= false;
-	string sSessionPathName				= "rcracki.session";
-	string sProgressPathName			= "rcracki.progress";
-	string sPrecalcPathName				= "rcracki.precalc";
+	std::string sSessionPathName				= "rcracki.session";
+	std::string sProgressPathName			= "rcracki.progress";
+	std::string sPrecalcPathName				= "rcracki.precalc";
 	bool resumeSession					= false;
 	bool useDefaultRainbowTablePath	= false;
 	bool debug								= false;
 	bool keepPrecalcFiles				= false;
-	string sAlgorithm						= "";
+	std::string sAlgorithm						= "";
 	int maxThreads							= 1;
 	uint64 maxMem							= 0;
 	CHashSet hs;
 
 	// Read defaults from ini file;
 	bool readFromIni = false;
-	vector<string> vLine;
+	std::vector<std::string> vLine;
 	if (ReadLinesFromFile(sIniPathName, vLine)) {
 		readFromIni = true;
 	}
@@ -404,11 +404,11 @@ int main(int argc, char* argv[])
 		{
 			if (vLine[i].substr(0,1) != "#")
 			{
-				vector<string> vPart;
+				std::vector<std::string> vPart;
 				if (SeperateString(vLine[i], "=", vPart))
 				{
-					string sOption = vPart[0];
-					string sValue  = vPart[1];
+					std::string sOption = vPart[0];
+					std::string sValue  = vPart[1];
 					
 					if (sOption == "Threads") {
 						maxThreads = atoi(sValue.c_str());
@@ -457,7 +457,7 @@ int main(int argc, char* argv[])
 	int i;
 	for (i = 1; i < argc; i++)
 	{
-		string cla = argv[i];
+		std::string cla = argv[i];
 		if (cla == "-h") {
 			sInputType = cla;
 			i++;
@@ -537,17 +537,17 @@ int main(int argc, char* argv[])
 	if (resumeSession)
 	{
 		vPathName.clear();
-		vector<string> sSessionData;
+		std::vector<std::string> sSessionData;
 		if (ReadLinesFromFile(sSessionPathName.c_str(), sSessionData))
 		{
 			uint32 i;
 			for (i = 0; i < sSessionData.size(); i++)
 			{
-				vector<string> vPart;
+				std::vector<std::string> vPart;
 				if (SeperateString(sSessionData[i], "=", vPart))
 				{
-					string sOption = vPart[0];
-					string sValue  = vPart[1];
+					std::string sOption = vPart[0];
+					std::string sValue  = vPart[1];
 					
 					if (sOption == "sPathName") {
 						vPathName.push_back(sValue);
@@ -584,11 +584,11 @@ int main(int argc, char* argv[])
 		uint32 i;
 		for (i = 0; i < vDefaultRainbowTablePath.size(); i++)
 		{
-			vector<string> vPart;
+			std::vector<std::string> vPart;
 			if (SeperateString(vDefaultRainbowTablePath[i], ".=", vPart))
 			{
-				string lineAlgorithm = vPart[1];
-				string linePath = vPart[2];
+				std::string lineAlgorithm = vPart[1];
+				std::string linePath = vPart[2];
 
 				if (lineAlgorithm == sAlgorithm)
 					GetTableList(linePath, vPathName);
@@ -608,15 +608,15 @@ int main(int argc, char* argv[])
 		(unsigned long)vPathName.size());
 
 	bool fCrackerType;			// true: hash cracker, false: lm cracker
-	vector<string> vHash;		// hash cracker
-	vector<string> vUserName;	// lm cracker
-	vector<string> vLMHash;		// lm cracker
-	vector<string> vNTLMHash;	// lm cracker
+	std::vector<std::string> vHash;		// hash cracker
+	std::vector<std::string> vUserName;	// lm cracker
+	std::vector<std::string> vLMHash;		// lm cracker
+	std::vector<std::string> vNTLMHash;	// lm cracker
 	if (sInputType == "-h")
 	{
 		fCrackerType = true;
 
-		string sHash = sInput;
+		std::string sHash = sInput;
 		if (NormalizeHash(sHash))
 			vHash.push_back(sHash);
 		else
@@ -626,14 +626,14 @@ int main(int argc, char* argv[])
 	{
 		fCrackerType = true;
 
-		string sPathName = sInput;
-		vector<string> vLine;
+		std::string sPathName = sInput;
+		std::vector<std::string> vLine;
 		if (ReadLinesFromFile(sPathName, vLine))
 		{
 			uint32 i;
 			for (i = 0; i < vLine.size(); i++)
 			{
-				string sHash = vLine[i];
+				std::string sHash = vLine[i];
 				if (NormalizeHash(sHash))
 					vHash.push_back(sHash);
 				else
@@ -647,14 +647,14 @@ int main(int argc, char* argv[])
 	{
 		fCrackerType = false;
 
-		string sPathName = sInput;
+		std::string sPathName = sInput;
 		LoadLMHashFromPwdumpFile(sPathName, vUserName, vLMHash, vNTLMHash);
 	}
 	else if (sInputType == "-c")
 	{
 		// 2009-01-04 - james.dickson - Added this for cain-files.
 		fCrackerType = false;
-		string sPathName = sInput;
+		std::string sPathName = sInput;
 		LoadLMHashFromCainLSTFile(sPathName, vUserName, vLMHash, vNTLMHash);
 	}
 	else
@@ -693,25 +693,25 @@ int main(int argc, char* argv[])
 	// Load found hashes from session file
 	if (resumeSession)
 	{
-		vector<string> sSessionData;
+		std::vector<std::string> sSessionData;
 		if (ReadLinesFromFile(sSessionPathName.c_str(), sSessionData))
 		{
 			uint32 i;
 			for (i = 0; i < sSessionData.size(); i++)
 			{
-				vector<string> vPart;
+				std::vector<std::string> vPart;
 				if (SeperateString(sSessionData[i], "=", vPart))
 				{
-					string sOption = vPart[0];
-					string sValue  = vPart[1];
+					std::string sOption = vPart[0];
+					std::string sValue  = vPart[1];
 					
 					if (sOption == "sHash") {
-						vector<string> vPartHash;
+						std::vector<std::string> vPartHash;
 						if (SeperateString(sValue, "::", vPartHash))
 						{
-							string sHash = vPartHash[0];
-							string sBinary = vPartHash[1];
-							string sPlain = vPartHash[2];
+							std::string sHash = vPartHash[0];
+							std::string sBinary = vPartHash[1];
+							std::string sPlain = vPartHash[2];
 							
 							hs.SetPlain(sHash, sPlain, sBinary);
 						}
@@ -724,7 +724,7 @@ int main(int argc, char* argv[])
 	{
 	// (Over)write session data if we are not resuming
 		FILE* file = fopen(sSessionPathName.c_str(), "w");
-		string buffer = "";
+		std::string buffer = "";
 
 		if (file!=NULL)
 		{
@@ -790,7 +790,7 @@ int main(int argc, char* argv[])
 		uint32 i;
 		for (i = 0; i < vHash.size(); i++)
 		{
-			string sPlain, sBinary;
+			std::string sPlain, sBinary;
 			if (!hs.GetPlain(vHash[i], sPlain, sBinary))
 			{
 				sPlain  = "<notfound>";
@@ -805,7 +805,7 @@ int main(int argc, char* argv[])
 		uint32 i;
 		for (i = 0; i < vLMHash.size(); i++)
 		{
-			string sPlain1, sBinary1;
+			std::string sPlain1, sBinary1;
 			bool fPart1Found = hs.GetPlain(vLMHash[i].substr(0, 16), sPlain1, sBinary1);
 			if (!fPart1Found)
 			{
@@ -813,7 +813,7 @@ int main(int argc, char* argv[])
 				sBinary1 = "<notfound>";
 			}
 
-			string sPlain2, sBinary2;
+			std::string sPlain2, sBinary2;
 			bool fPart2Found = hs.GetPlain(vLMHash[i].substr(16, 16), sPlain2, sBinary2);
 			if (!fPart2Found)
 			{
@@ -821,8 +821,8 @@ int main(int argc, char* argv[])
 				sBinary2 = "<notfound>";
 			}
 
-			string sPlain = sPlain1 + sPlain2;
-			string sBinary = sBinary1 + sBinary2;
+			std::string sPlain = sPlain1 + sPlain2;
+			std::string sBinary = sBinary1 + sBinary2;
 
 			// Correct case
 			if (fPart1Found && fPart2Found)
@@ -832,7 +832,7 @@ int main(int argc, char* argv[])
 				ParseHash(vNTLMHash[i], NTLMHash, nHashLen);
 				if (nHashLen != 16)
 					printf("debug: nHashLen mismatch\n");
-				string sNTLMPassword;
+				std::string sNTLMPassword;
 				if (LMPasswordCorrectCase(sPlain, NTLMHash, sNTLMPassword))
 				{
 					sPlain = sNTLMPassword;

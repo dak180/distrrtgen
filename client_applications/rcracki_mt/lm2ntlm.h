@@ -32,8 +32,6 @@
 #include "Public.h"
 #include "fast_md4.h"
 
-using namespace std;
-
 class LM2NTLMcorrector
 {
 public:
@@ -56,24 +54,24 @@ private:
 
 private:
 	bool checkNTLMPassword(unsigned char* pLMPassword, int nLMPasswordLen, std::string& sNTLMPassword);
-	bool startCorrecting(string sLMPassword, string& sNTLMPassword, unsigned char* pLMPassword);
+	bool startCorrecting(std::string sLMPassword, std::string& sNTLMPassword, unsigned char* pLMPassword);
 	void printString(unsigned char* muteThis, int length);
 	void setupCombinationAtPositions(int length, unsigned char* pMuteMe, unsigned char* pTempMute, int* jAtPos, bool* fullAtPos, int* sizeAtPos);
-	bool checkPermutations(int length, unsigned char* pTempMute, int* jAtPos, int* sizeAtPos, unsigned char* pLMPassword, string& sNTLMPassword);
+	bool checkPermutations(int length, unsigned char* pTempMute, int* jAtPos, int* sizeAtPos, unsigned char* pLMPassword, std::string& sNTLMPassword);
 
 	int calculateTotalCombinations(int length, int setSize);
 	int factorial (int num);
 
-	bool parseHexPassword(string hexPassword, string& sPlain);
-	bool NormalizeHexString(string& sHash);
-	void ParseHash(string sHash, unsigned char* pHash, int& nHashLen);
-	string ByteToStr(const unsigned char* pData, int nLen);
+	bool parseHexPassword(std::string hexPassword, std::string& sPlain);
+	bool NormalizeHexString(std::string& sHash);
+	void ParseHash(std::string sHash, unsigned char* pHash, int& nHashLen);
+	std::string ByteToStr(const unsigned char* pData, int nLen);
 	void addToMapW(unsigned char key, unsigned char value1, unsigned char value2);
 	void fillMapW();
 	void checkAbort();
 	void writeEndStats();
 public:
-	bool LMPasswordCorrectUnicode(string hexPassword, unsigned char* NTLMHash, string& sNTLMPassword);
-	string getBinary();
+	bool LMPasswordCorrectUnicode(std::string hexPassword, unsigned char* NTLMHash, std::string& sNTLMPassword);
+	std::string getBinary();
 };
 
