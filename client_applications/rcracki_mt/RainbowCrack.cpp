@@ -43,11 +43,12 @@
 #ifdef _WIN32
 	#include <io.h>
 #else
-	#include <sys/types.h>
-	#include <sys/stat.h>
 	#include <unistd.h>
 	#include <dirent.h>
 #endif
+
+#include <sys/types.h>
+#include <sys/stat.h>
 
 #if defined(_WIN32) && !defined(__GNUC__)
 	#pragma comment(lib, "libeay32.lib")
@@ -58,8 +59,6 @@
 #ifdef _WIN32
 void GetTableList( std::string sWildCharPathName, std::vector<std::string>& vPathName )
 {
-	//vPathName.clear();
-
 	std::string sPath;
 	std::string::size_type n = sWildCharPathName.find_last_of('\\');
 
@@ -119,8 +118,6 @@ void GetTableList( std::string sWildCharPathName, std::vector<std::string>& vPat
 //void GetTableList(int argc, char* argv[], vector<string>& vPathName)
 void GetTableList( std::string sWildCharPathName, std::vector<std::string>& vPathName )
 {
-	//vPathName.clear();
-
 	struct stat buf;
 	if (lstat(sWildCharPathName.c_str(), &buf) == 0)
 	{
