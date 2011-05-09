@@ -478,7 +478,7 @@ void Converti2::convertRainbowTables()
 			std::string::size_type firstSplit
 				= resultFile.find_first_of('_',lastX);
 
-			#ifdef _WIN32
+			#if defined(_WIN32) && !defined(__GNUC__)
 				uint64 chains = _atoi64( resultFile.substr( lastX + 1, firstSplit - lastX - 1).c_str() );
 			#else
 				uint64 chains = atoll( resultFile.substr( lastX + 1, firstSplit - lastX - 1 ).c_str() );
