@@ -38,7 +38,7 @@
 #include "RTI2Reader.h"
 #include "RTIReader.h"
 
-void Usage()
+void usage()
 {
 	printf("rti2rto - Indexed to Original rainbow table converter\n");
 	printf("by Martin Westergaard <martinwj2005@gmail.com>\n");
@@ -46,6 +46,7 @@ void Usage()
 
 	printf("usage: rti2rto rainbow_table_pathname\n");
 	printf("-v show debug information\n");
+	printf("-drop_last_n_chains=N - use only when you know you must\n");
 	printf("\n");
 	printf("rainbow_table_pathname: pathname of the rainbow table(s), wildchar(*, ?) supported\n");
 	printf("\n");
@@ -114,7 +115,7 @@ void GetTableList( std::string wildCharPathName, std::vector<std::string>& pathN
 }
 #endif
 
-void ConvertRainbowTable( std::string pathName, std::string resultFileName, std::string sType, bool debug )
+void ConvertRainbowTable( std::string pathName, std::string resultFileName, std::string sType, bool debug, uint32 dropLastNchains )
 {
 #ifdef _WIN32
 	std::string::size_type nIndex = pathName.find_last_of('\\');
@@ -153,6 +154,9 @@ void ConvertRainbowTable( std::string pathName, std::string resultFileName, std:
 		reader->Dump();
 
 	uint64 size = reader->getChainsLeft() * sizeof(RainbowChainO);
+
+	size -= sizeof(RainbowChainO) * dropLastNchains;
+
 #ifdef _MEMORYDEBUG
 	printf("Starting allocation of %i bytes\n", size);
 #endif
@@ -164,7 +168,7 @@ void ConvertRainbowTable( std::string pathName, std::string resultFileName, std:
 	{
 		nAllocatedSize = nAllocatedSize / sizeof(RainbowChainO) * sizeof(RainbowChainO);		// Round to boundary
 		unsigned int nChains = nAllocatedSize / sizeof(RainbowChainO);
-		while(reader->getChainsLeft() > 0)
+		while( reader->getChainsLeft() > 0 && reader->getChainsLeft() > dropLastNchains )
 		{
 #ifdef _MEMORYDEBUG
 			printf("Grabbing %i chains from file\n", nChains);
@@ -180,16 +184,19 @@ void ConvertRainbowTable( std::string pathName, std::string resultFileName, std:
 		}
 	}
 	fclose(fResult);
+
 	if(reader != NULL)
 		delete reader;
 }
+
 int main(int argc, char* argv[])
 {
 	bool debug = false;
+	uint32 dropLastNchains = 0;
 
 	if (argc < 2)
 	{
-		Usage();
+		usage();
 		return 0;
 	}
 	
@@ -199,12 +206,27 @@ int main(int argc, char* argv[])
 	int i;
 	for( i = 1; i < argc; i++ )
 	{
-		std::string cla = argv[i];
-
-		if ( cla == "-v" )
+		if ( strncmp( argv[i], "-v", 2 ) == 0 )
 			debug = true;
+		else if ( strncmp( argv[i], "-drop_last_n_chains=", 20 ) == 0 )
+		{
+			uint32 j;
+
+			for ( j = 20; argv[i][j] >= '0' && argv[i][j] <= '9'; j++ )
+			{
+				dropLastNchains *= 10;
+				dropLastNchains += ((int) argv[i][j] ) - 0x30;
+			}
+
+			if ( argv[i][j] != '\0' )
+			{
+				printf("Error: Invalid drop_last_n_chains number.\n\n");
+				usage();
+				exit( 1 );
+			}
+		}
 		else
-			GetTableList( cla, pathNames );
+			GetTableList( argv[i], pathNames );
 	}
 
 	if ( debug )
@@ -219,10 +241,10 @@ int main(int argc, char* argv[])
 		return 0;
 	}
 
+	std::string resultFile, sType;
+
 	for ( uint32 i = 0; i < pathNames.size(); i++ )
 	{
-		std::string resultFile, sType;
-			
 		if( pathNames[i].substr( pathNames[i].length() - 4, pathNames[i].length()) == "rti2")
 		{
 			resultFile = pathNames[i].substr(0, pathNames[i].length() - 2); // Resulting file is .rt, not .rti2
@@ -238,7 +260,37 @@ int main(int argc, char* argv[])
 			printf("File %s is not a RTI or a RTI2 file", pathNames[i].c_str() );
 			continue;
 		}
-		ConvertRainbowTable( pathNames[i], resultFile, sType, debug );
+		
+		// XXX this assumes someone is converting either just the last file
+		// *or* doing a whole set which will read the last file first
+		if ( dropLastNchains > 0 && i == 0 )
+		{
+			std::string::size_type lastX = resultFile.find_last_of('x');
+
+			if ( lastX == std::string::npos )
+			{
+				std::cout << "Could not parse the filename to drop the last chains"
+					<< std::endl;
+				exit( -1 );
+			}
+			
+			std::string::size_type firstSplit
+				= resultFile.find_first_of('_',lastX);
+
+			#ifdef _WIN32
+				uint64 chains = _atoi64( resultFile.substr( lastX + 1, firstSplit - lastX - 1).c_str() );
+			#else
+				uint64 chains = atoll( resultFile.substr( lastX + 1, firstSplit - lastX - 1 ).c_str() );
+			#endif
+
+			chains -= dropLastNchains;
+
+			resultFile.replace( lastX + 1, firstSplit - lastX - 1, uint64tostr( chains ) );
+		}
+			
+		ConvertRainbowTable( pathNames[i], resultFile, sType, debug, dropLastNchains );
+		dropLastNchains = 0;
+
 		printf("\n");
 	}
 	return 0;

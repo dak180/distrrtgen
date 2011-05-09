@@ -37,6 +37,7 @@ Converti2::Converti2( int argc, char** argv )
 	argi = 1;
 	argsUsed = 0;
 	checkPointBits = 0;
+	dropLastNchains = 0;
 	this->argc = argc;
 	this->argv = argv;
 }
@@ -313,7 +314,7 @@ int Converti2::sharedSetup()
 	{
 		if(strcmp(argv[argi], "-d") == 0 && (argsUsed & 0x8) == 0)
 		{
-			// Enable verbose mode
+			// Enable bit distribution display
 			argsUsed |= 0x8;				
 			showDistribution = true;
 		}			
@@ -403,6 +404,23 @@ int Converti2::sharedSetup()
 				printf("Using %i bits of the checkpoints\n", checkPointBits );
 			}
 		}
+		else if( strncmp(argv[argi], "-drop_last_n_chains=", 20 ) == 0 )
+		{
+			argsUsed |= 0x16;
+			
+			for (i = 20; argv[argi][i] >= '0' && argv[argi][i] <= '9'; i++)
+			{
+				dropLastNchains *= 10;
+				dropLastNchains += ((int) argv[argi][i]) - 0x30;
+			}
+
+			if (argv[argi][i] != '\0')
+			{
+				printf("Error: Invalid drop_last_n_chains number.\n\n");
+				usage();
+				exit( 1 );
+			}
+		}
 		else
 			GetTableList( argv[argi], pathNames );
 	}		
@@ -444,6 +462,33 @@ void Converti2::convertRainbowTables()
 				resultFile = pathNames[i] + "i2"; // Resulting file is .rt, not .rti
 		}
 
+		// XXX this assumes someone is converting either just the last file
+		// *or* doing a whole set which will read the last file first
+		if ( dropLastNchains && i == 0 )
+		{
+			std::string::size_type lastX = resultFile.find_last_of('x');
+
+			if ( lastX == std::string::npos )
+			{
+				std::cout << "Could not parse the filename to drop the last chains"
+					<< std::endl;
+				exit( -1 );
+			}
+			
+			std::string::size_type firstSplit
+				= resultFile.find_first_of('_',lastX);
+
+			#ifdef _WIN32
+				uint64 chains = _atoi64( resultFile.substr( lastX + 1, firstSplit - lastX - 1).c_str() );
+			#else
+				uint64 chains = atoll( resultFile.substr( lastX + 1, firstSplit - lastX - 1 ).c_str() );
+			#endif
+
+			chains -= dropLastNchains;
+
+			resultFile.replace( lastX + 1, firstSplit - lastX - 1, uint64tostr( chains ) );
+		}
+
 		if( checkPointBits == 0 && !shouldShowDistribution() )
 		{
 			printf("Using %i of 64 bits. sptl: %i, eptl: %i, cp: %i. Chains will be %i bytes in size\n", (sptl + eptl + checkPointBits), sptl, eptl, checkPointBits, ((sptl + eptl + checkPointBits) / 8));
@@ -457,6 +502,7 @@ void Converti2::convertRainbowTables()
 
 		pathName = pathNames[i];
 		convertRainbowTable( resultFile, pathNames.size() );
+		dropLastNchains = 0;
 	}
 }
 
@@ -517,6 +563,8 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 	uint32 rainbowTableIndex = atoi(vPart[2].c_str());
 	uint32 rainbowChainLen = atoi(vPart[3].c_str());
 	uint32 rainbowChainCount = atoi(vPart[4].c_str());
+
+	rainbowChainCount -= dropLastNchains;
 
 	std::vector<std::string> vPart2;
 	// vPart[5] ex distrrtgen[p][i]_00.rti
@@ -731,6 +779,9 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 		// File length check
 
 		int size = reader->getChainsLeft() * sizeof(RainbowChainO);
+
+		size -= sizeof(RainbowChainO) * dropLastNchains;
+
 		static CMemoryPool mp;
 		uint64 nAllocatedSize;
 		RainbowChainO* pChain = (RainbowChainO*)mp.Allocate(size, nAllocatedSize);			
@@ -749,9 +800,9 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 			std::vector<IndexRow> indexes;
 			unsigned int chainsLeft;
 
-			while((chainsLeft = reader->getChainsLeft()) > 0)
+			while( (chainsLeft = reader->getChainsLeft()) > 0 && chainsLeft > dropLastNchains )
 			{
-				printf("%u chains left to read\n", chainsLeft);
+				printf("%u chains left to read\n", chainsLeft - dropLastNchains);
 				//int nReadThisRound;
 				clock_t t1 = clock();
 				printf("reading...\n");
@@ -935,7 +986,8 @@ static void usage()
 	printf("by Martin Westergaard <martinwj2005@gmail.com>\n");
 	printf("http://www.freerainbowtables.com\n\n");
 
-	printf("usage: converti2 rainbow_table_pathname\n");
+	printf("usage: converti2 -sptl=startpt_bits -eptl=endpt_bits rainbow_table_pathname\n");
+	printf("-drop_last_n_chains=N - use only when you know you must\n");
 	printf("rainbow_table_pathname: pathname of the rainbow table(s), wildchar(*, ?) supported\n");
 	printf("\n");
 	printf("example: converti2 *.rt[i]\n");
@@ -954,6 +1006,7 @@ int main(int argc, char** argv)
 	}
 
 	converti2 = new Converti2( argc, argv );
+
 	if ( converti2->sharedSetup() != EXIT_SUCCESS )
 	{
 		printf( "fatal error in sharedSetup()\n" );

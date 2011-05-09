@@ -55,6 +55,7 @@ private:
 	uint8 eptl;
 	bool showDistribution;
 	bool hasCheckPoints;
+	uint32 dropLastNchains;
 	int argc;
 	char** argv;
 	int argi;
