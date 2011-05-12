@@ -568,7 +568,10 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 
 	std::vector<std::string> vPart2;
 	// vPart[5] ex distrrtgen[p][i]_00.rti
-	if ( !SeperateString( vPart[5], "_.", vPart2 ) )
+	// some tables are buggy in their naming:
+	// ntlm_mixalpha-numeric#1-8_2_40000xx7454353_145.rti
+	// ntlm_mixalpha-numeric#1-8_3_40000x53840641_distrrtgen_144.rti
+	if ( !SeperateString( vPart[5], "_.", vPart2 ) && !SeperateString( vPart[5], ".", vPart2 ))
 	{
 		printf( "filename %s not identified\n", pathName.c_str() );
 		exit( 1 );
