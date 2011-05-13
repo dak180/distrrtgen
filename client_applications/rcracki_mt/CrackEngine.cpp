@@ -1339,7 +1339,9 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 			}
 
 		}
-		//fclose(file);
+
+		if ( file != NULL )
+			fclose(file);
 
 		if (debug) printf("Debug: writing progress to %s\n", sProgressPathName.c_str());
 		FILE* file = fopen(sProgressPathName.c_str(), "a");
