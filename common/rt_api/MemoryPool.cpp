@@ -34,23 +34,38 @@ CMemoryPool::CMemoryPool()
 	m_nMemSize = 0;
 
 	unsigned long nAvailPhys = GetAvailPhysMemorySize();
-	if (nAvailPhys < 16 * 1024 * 1024)
-	{
-		nAvailPhys = 512 * 1024 * 1024; // There is atleast 256 mb available (Some Linux distros returns a really low GetAvailPhysMemorySize()
-	}
+
 	if (nAvailPhys < 16 * 1024 * 1024)
 		m_nMemMax = nAvailPhys / 2;					// Leave some memory for CChainWalkSet
 	else
 		m_nMemMax = nAvailPhys - 8 * 1024 * 1024;	// Leave some memory for CChainWalkSet	
+}
 
-	/*
-	 * XXX goal is to restrict memory usage for 32-bit windows
-	 * this limit is a bit harsh but added due to poor usage in:
-	 * rti2rto, converti2, RTI2Writer/RTI2Reader, and others
-	*/
-#if defined(_WIN32) && !defined(_WIN64)
-	m_nMemMax = 1024 * 1024 * 512;
-#endif
+CMemoryPool::CMemoryPool(unsigned int bytesSaved, bool bDebug, uint64 maxMem)
+{
+	m_pMem = NULL;
+	m_nMemSize = 0;
+	debug = bDebug;
+
+	unsigned long nAvailPhys = GetAvailPhysMemorySize();
+
+	if ( debug )
+	{
+		#if defined(_WIN32) && !defined(__GNUC__)
+			printf( "Debug: nAvailPhys: %I64u\n", nAvailPhys );
+		#else
+			printf( "Debug: nAvailPhys: %lu\n", nAvailPhys );
+		#endif
+		printf( "Debug: bytesSaved: %d\n", bytesSaved );
+	}
+
+	if ( maxMem > 0 && maxMem < nAvailPhys )
+		nAvailPhys = maxMem;
+	
+	m_nMemMax = nAvailPhys - bytesSaved;	// Leave memory for CChainWalkSet	
+
+	if (m_nMemMax < 16 * 1024 * 1024)
+		m_nMemMax = 16 * 1024 * 1024;
 }
 
 CMemoryPool::~CMemoryPool()
@@ -98,7 +113,7 @@ unsigned char* CMemoryPool::Allocate(unsigned int nFileLen, uint64& nAllocatedSi
 #endif 
 
 	m_pMem = new (std::nothrow) unsigned char[nTargetSize];
-	while (m_pMem == NULL && nTargetSize >= 512 * 1024 * 1024 )
+	while (m_pMem == NULL && nTargetSize >= 32 * 1024 * 1024 )
 	{
 #ifdef _MEMORYDEBUG
 		printf("failed!\n");

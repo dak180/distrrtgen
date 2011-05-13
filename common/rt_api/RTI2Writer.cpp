@@ -69,7 +69,14 @@ void RTI2Writer::setChainSize( uint32 chainSize )
 
 	// XXX clean this up
 	// (8 - chainSize) to avoid reading past the end of the array
-	dataProc = new uint8[chainSizeBytes * chainCount + 8 - chainSizeBytes];
+	dataProc = new (std::nothrow) uint8[chainSizeBytes * chainCount + 8 - chainSizeBytes];
+	if ( dataProc == NULL )
+	{
+		std::cout << "You do not have enough free memory to run this application"
+			<< std::endl;
+		exit( 2 );
+	}
+
 	dataPos = dataProc;
 }
 

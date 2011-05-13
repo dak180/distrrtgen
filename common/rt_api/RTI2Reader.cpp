@@ -364,8 +364,11 @@ RTI2Reader::RTI2Reader( std::string filename )
 
 	// *** Data ***
 	chainSizeBytes = (header.startPointBits + header.checkPointBits + header.endPointBits + 7) >> 3;
-	data = new uint8[chainSizeBytes * sum + 8 - chainSizeBytes]; // (8 - chainSizeBytes) to avoid "reading past the end of the array" error
 	chainCount = sum;
+
+/*
+ * reads everything at once...doesn't work for memory constrained env
+	data = new uint8[chainSizeBytes * sum + 8 - chainSizeBytes]; // (8 - chainSizeBytes) to avoid "reading past the end of the array" error
 
 	if ( !fin.read( (char*) (data), chainSizeBytes * sum ).good() )
 	{
@@ -374,6 +377,7 @@ RTI2Reader::RTI2Reader( std::string filename )
 		data = NULL;
 		exit( 1 ); // file error
 	}
+*/
 }
 
 RTI2Reader::~RTI2Reader()
@@ -381,10 +385,12 @@ RTI2Reader::~RTI2Reader()
 	if ( fin.good() )
 		fin.close();
 
+/*
 	if ( data != NULL )
 		delete [] data;
 
 	data = NULL;
+*/
 }
 
 int RTI2Reader::readRTI2String( std::ifstream &fin, void *str, uint32 charSize )
@@ -509,6 +515,7 @@ void RTI2Reader::Dump()
 	// XXX data
 }
 
+// convert in memory rti2 to rt reading from the file as needed
 int RTI2Reader::readChains(unsigned int &numChains, RainbowChainO *pData)
 {
 	unsigned int readChains = 0;
@@ -524,6 +531,7 @@ int RTI2Reader::readChains(unsigned int &numChains, RainbowChainO *pData)
 
 	uint64 chainrow = 0;
 	uint32 i=1;
+	uint8 str[chainSizeBytes];
 
 	// Fast forward to current position
 	// XXX for chainPosition != 0 use a binary search
@@ -551,7 +559,14 @@ int RTI2Reader::readChains(unsigned int &numChains, RainbowChainO *pData)
 		
 		while ( (chainPosition + readChains ) < index.prefixIndex[i] )
 		{
-			chainrow = *((uint64*) ( data + ( ( index.prefixIndex[i-1] + indexOffset ) * chainSizeBytes ) ));
+			//chainrow = *((uint64*) ( data + ( ( index.prefixIndex[i-1] + indexOffset ) * chainSizeBytes ) ));
+			if ( !fin.read( (char*) (str), chainSizeBytes ).good() )
+			{
+				std::cerr << "readData fin.read() error" << std::endl;
+				exit( 1 ); // file error
+			}
+
+			chainrow = *((uint64*) str);
 
 			// ending point prefix
 			pData[readChains].nIndexE = ( index.firstPrefix + i - 1 ) << header.endPointBits;

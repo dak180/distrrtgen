@@ -33,6 +33,7 @@ class CMemoryPool
 {
 public:
 	CMemoryPool();
+	CMemoryPool(unsigned int bytesSaved, bool bDebug, uint64 maxMem);
 	virtual ~CMemoryPool();
 
 private:

@@ -117,7 +117,7 @@ release:
 		$(COMMON_API_PATH)/fast_md5.* \
 		$(COMMON_API_PATH)/HashAlgorithm.h HashAlgorithm.cpp HashRoutine.cpp \
 		$(COMMON_API_PATH)/HashRoutine.h HashSet.* $(COMMON_API_PATH)/global.h \
-		lm2ntlm.* $(COMMON_API_PATH)/fast_md4.* MemoryPool.* \
+		lm2ntlm.* $(COMMON_API_PATH)/fast_md4.* $(COMMON_API_PATH)/MemoryPool.* \
 		$(COMMON_API_PATH)/Public.* RainbowCrack.* rcrackiThread.* \
 		$(COMMON_API_PATH)/RTI2Common.* \
 		$(COMMON_API_PATH)/RT*Reader.* sha1.* ChangeLog.txt COPYING \
@@ -149,7 +149,7 @@ ChainWalkSet.o: $(COMMON_API_PATH)/Public.h $(COMMON_API_PATH)/ChainWalkSet.h \
 	$(CC) $(CFLAGS) $(COMMON_API_PATH)/ChainWalkSet.cpp
 
 CrackEngine.o: $(COMMON_API_PATH)/Public.h HashSet.h \
-	$(COMMON_API_PATH)/ChainWalkContext.h MemoryPool.h \
+	$(COMMON_API_PATH)/ChainWalkContext.h $(COMMON_API_PATH)/MemoryPool.h \
 	$(COMMON_API_PATH)/ChainWalkSet.h rcrackiThread.h \
 	$(COMMON_API_PATH)/RTReader.h $(COMMON_API_PATH)/RTIReader.h \
 	$(COMMON_API_PATH)/RTI2Reader.h CrackEngine.h CrackEngine.cpp
@@ -182,9 +182,10 @@ fast_md4.o: $(COMMON_API_PATH)/fast_md4.h $(COMMON_API_PATH)/fast_md4.cpp \
 	$(COMMON_API_PATH)/global.h
 	$(CC) $(CFLAGS) $(COMMON_API_PATH)/fast_md4.cpp
 
-MemoryPool.o: MemoryPool.h MemoryPool.cpp $(COMMON_API_PATH)/Public.h \
+MemoryPool.o: $(COMMON_API_PATH)/MemoryPool.h \
+	$(COMMON_API_PATH)/MemoryPool.cpp $(COMMON_API_PATH)/Public.h \
 	$(COMMON_API_PATH)/global.h
-	$(CC) $(CFLAGS) MemoryPool.cpp
+	$(CC) $(CFLAGS) $(COMMON_API_PATH)/MemoryPool.cpp
 
 Public.o: $(COMMON_API_PATH)/Public.h $(COMMON_API_PATH)/Public.cpp \
 	$(COMMON_API_PATH)/global.h
