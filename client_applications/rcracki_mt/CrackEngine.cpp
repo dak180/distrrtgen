@@ -1148,22 +1148,15 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 						// Already finished?
 						if (!hs.AnyHashLeftWithLen(CChainWalkContext::GetHashLen()))
 							break;
-
-	/*
-	// XXX eliminated by PB - check correctness
-						// finished the current table
-						if( doRti2Format && nDataToRead > (nDataRead / 8) )
-						{
-							delete reader;
-							break;
-						}
-	*/
 					}
 				}
 				else
 					printf("memory allocation fail\n");
 
 				//delete pChain;
+
+				if ( reader != NULL )
+					delete reader;
 			}
 			else
 			{
