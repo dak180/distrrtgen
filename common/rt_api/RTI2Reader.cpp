@@ -531,7 +531,7 @@ int RTI2Reader::readChains(unsigned int &numChains, RainbowChainO *pData)
 
 	uint64 chainrow = 0;
 	uint32 i=1;
-	uint8 str[chainSizeBytes];
+	uint8 *str = new uint8[chainSizeBytes];
 
 	// Fast forward to current position
 	// XXX for chainPosition != 0 use a binary search
@@ -563,6 +563,9 @@ int RTI2Reader::readChains(unsigned int &numChains, RainbowChainO *pData)
 			if ( !fin.read( (char*) (str), chainSizeBytes ).good() )
 			{
 				std::cerr << "readData fin.read() error" << std::endl;
+				if ( str != NULL )
+					delete [] str;
+
 				exit( 1 ); // file error
 			}
 
@@ -593,6 +596,9 @@ int RTI2Reader::readChains(unsigned int &numChains, RainbowChainO *pData)
 
 	chainPosition += readChains;
 	std::cout << "Chain Position is now " << chainPosition << std::endl;
+
+	if ( str != NULL )
+		delete [] str;
 
 	return 0;
 }
