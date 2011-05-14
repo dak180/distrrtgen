@@ -149,7 +149,7 @@ bool CChainWalkSet::FindInFile(uint64* pIndexE, unsigned char* pHash, int nHashL
 
 	std::string sCurrentPrecalcPathName = "";
 	std::string sCurrentPrecalcIndexPathName = "";
-	long unsigned int offset;
+	long unsigned int offset = 0;
 
 	int i;
 	for (i = 0; i < (int)vPrecalcFiles.size() && gotPrecalcOnLine == -1; i++)
