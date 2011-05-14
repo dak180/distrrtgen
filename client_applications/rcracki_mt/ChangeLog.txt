@@ -1,5 +1,15 @@
 [rcracki_mt ChangeLog]
 
+0.6.6 (TBD):
+* RTI2.0 - improved format with header
+* memory leak fixes
+* file descriptor leak fixes
+* OSX (and some other compiler) warnings fixed
+* merged with common/rt_api to remove some of the duplication of files
+* new make release target to make life easier for me in light of the merge
+* cleanup of using namespace std; and other using * constructs
+* move to the use of stat for filename length over the fseek/ftell method
+
 0.6.5.2 (06 Nov 2010, 20:40:05):
 * rti2 fixes part 2
 * UINT4 -> uint32

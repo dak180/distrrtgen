@@ -1333,15 +1333,19 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 					printf("Can't load index\n");
 					return;
 				}
-				fclose(fIndex);
+
+				if ( fIndex != NULL )
+					fclose(fIndex);
 
 				//delete pIndex;
 			}
 
 		}
 
-		if ( file != NULL )
-			fclose(file);
+		// XXX this represents a file descriptor leak but even wrapping this with
+		// a NULL check prior to the close still causes segfaults due to some
+		// thread locking (or lack of locking) issues
+		// fclose(file);
 
 		if (debug) printf("Debug: writing progress to %s\n", sProgressPathName.c_str());
 		FILE* file = fopen(sProgressPathName.c_str(), "a");
