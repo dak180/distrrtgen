@@ -56,6 +56,7 @@ private:
 	bool showDistribution;
 	bool hasCheckPoints;
 	uint32 dropLastNchains;
+	uint32 dropHighSPcount;
 	int argc;
 	char** argv;
 	int argi;

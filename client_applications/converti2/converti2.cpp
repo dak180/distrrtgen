@@ -38,6 +38,7 @@ Converti2::Converti2( int argc, char** argv )
 	argsUsed = 0;
 	checkPointBits = 0;
 	dropLastNchains = 0;
+	dropHighSPcount = 0;
 	this->argc = argc;
 	this->argv = argv;
 }
@@ -244,7 +245,6 @@ int Converti2::GetMaxBits(uint64 highvalue)
 
 #endif
 	return 64;
-
 }
 
 #ifdef _WIN32
@@ -421,6 +421,23 @@ int Converti2::sharedSetup()
 				exit( 1 );
 			}
 		}
+		else if( strncmp(argv[argi], "-drop_high_sp_n_chains=", 23 ) == 0 )
+		{
+			argsUsed |= 0x32;
+			
+			for (i = 23; argv[argi][i] >= '0' && argv[argi][i] <= '9'; i++)
+			{
+				dropHighSPcount *= 10;
+				dropHighSPcount += ((int) argv[argi][i]) - 0x30;
+			}
+
+			if (argv[argi][i] != '\0')
+			{
+				printf("Error: Invalid drop_high_sp_n_chains number.\n\n");
+				usage();
+				exit( 1 );
+			}
+		}
 		else
 			GetTableList( argv[argi], pathNames );
 	}		
@@ -478,6 +495,13 @@ void Converti2::convertRainbowTables()
 			std::string::size_type firstSplit
 				= resultFile.find_first_of('_',lastX);
 
+			if ( firstSplit == std::string::npos )
+			{
+				std::cout << "Could not parse the filename to drop the last chains"
+					<< std::endl;
+				exit( -1 );
+			}
+
 			#if defined(_WIN32) && !defined(__GNUC__)
 				uint64 chains = _atoi64( resultFile.substr( lastX + 1, firstSplit - lastX - 1).c_str() );
 			#else
@@ -503,6 +527,7 @@ void Converti2::convertRainbowTables()
 		pathName = pathNames[i];
 		convertRainbowTable( resultFile, pathNames.size() );
 		dropLastNchains = 0;
+		dropHighSPcount = 0;
 	}
 }
 
@@ -565,6 +590,7 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 	uint32 rainbowChainCount = atoi(vPart[4].c_str());
 
 	rainbowChainCount -= dropLastNchains;
+	rainbowChainCount -= dropHighSPcount;
 
 	std::vector<std::string> vPart2;
 	// vPart[5] ex distrrtgen[p][i]_00.rti
@@ -828,12 +854,27 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 						distribution[GetMaxBits(pChain[i].nIndexS)-1]++;
 					else
 					{
-						if ( GetMaxBits(pChain[i].nIndexS) > sptl )
+						if ( dropLastNchains > 0 && dropLastNchains >= ( chainsLeft - i ) )
 						{
-							std::cout << "WARNING! This SP exceeds sptl setting: "
-								<< pChain[i].nIndexS << std::endl;
-							std::cout << "Aborting..." << std::endl;
-							exit(1);
+							continue;
+						}
+
+						if ( GetMaxBits(pChain[i].nIndexS) > sptl )
+						{ 
+							if ( dropHighSPcount == 0 )
+							{
+								std::cout << "WARNING! The SP " << pChain[i].nIndexS
+									<< " at chain " << i << " exceeds sptl setting" 
+									<< std::endl;
+								std::cout << "Aborting..." << std::endl;
+								exit(1);
+							}
+							else
+							{
+								//dropHighSPcount++;
+								//numProcessedChains++;
+								continue;
+							}
 						}
 
 						// Mask off the bits that won't be in an index somewhere...
@@ -979,6 +1020,39 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 			writer->writeIndex();
 			writer->writeData();
 			delete writer;
+
+			if ( dropHighSPcount > 0 )
+			{
+				std::string::size_type lastX = resultFileName.find_last_of('x');
+
+				if ( lastX == std::string::npos )
+				{
+					std::cout << "Could not parse the filename to drop the high SP chains"
+						<< std::endl;
+					exit( -1 );
+				}
+				
+				std::string::size_type firstSplit
+					= resultFileName.find_first_of('_',lastX);
+
+				if ( firstSplit == std::string::npos )
+				{
+					std::cout << "Could not parse the filename to drop the high SP chains"
+						<< std::endl;
+					exit( -1 );
+				}
+
+				std::string newResultFileName = resultFileName;
+
+				newResultFileName.replace( lastX + 1, firstSplit - lastX - 1, uint64tostr( rainbowChainCount ) );
+
+				if ( rename( resultFileName.c_str(), newResultFileName.c_str() ) != 0 )
+				{
+					std::cout << "Could not parse the filename to drop the high SP chains"
+						<< std::endl;
+					exit( -1 );
+				}
+			}
 		}
 	}
 }
@@ -991,6 +1065,7 @@ static void usage()
 
 	printf("usage: converti2 -sptl=startpt_bits -eptl=endpt_bits rainbow_table_pathname\n");
 	printf("-drop_last_n_chains=N - use only when you know you must\n");
+	printf("-drop_high_sp_n_chains=N - use only when you know you must\n");
 	printf("rainbow_table_pathname: pathname of the rainbow table(s), wildchar(*, ?) supported\n");
 	printf("\n");
 	printf("example: converti2 *.rt[i]\n");
