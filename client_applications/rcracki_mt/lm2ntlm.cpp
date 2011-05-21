@@ -21,10 +21,6 @@
  * along with rcracki_mt.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if defined(_WIN32) && !defined(__GNUC__)
-	#pragma warning(disable : 4786 4267 4018)
-#endif
-
 #include "lm2ntlm.h"
 
 LM2NTLMcorrector::LM2NTLMcorrector()

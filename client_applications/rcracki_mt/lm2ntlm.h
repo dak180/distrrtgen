@@ -21,6 +21,9 @@
  * along with rcracki_mt.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef _LM2NTLM_H
+#define _LM2NTLM_H
+
 #include <stdio.h>
 #include <string>
 #include <map>
@@ -75,3 +78,4 @@ public:
 	std::string getBinary();
 };
 
+#endif

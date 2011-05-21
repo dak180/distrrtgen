@@ -21,9 +21,8 @@
  * along with rcracki_mt.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifdef _WIN32
-	#pragma once
-#endif
+#ifndef _RCRACKITHREAD_H
+#define _RCRACKITHREAD_H
 
 #include "ChainWalkContext.h"
 #include "Public.h"
@@ -83,3 +82,5 @@ private:
 	void CheckAlarm();
 	void CheckAlarmO();
 };
+
+#endif

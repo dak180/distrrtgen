@@ -23,10 +23,6 @@
  * along with rcracki_mt.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if defined(_WIN32) && !defined(__GNUC__)
-	#pragma warning(disable : 4786)
-#endif
-
 #include "HashRoutine.h"
 #include "HashAlgorithm.h"
 
