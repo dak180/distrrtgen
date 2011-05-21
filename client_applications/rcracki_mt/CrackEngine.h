@@ -104,9 +104,9 @@ public:
 	float GetStatTotalDiskAccessTime();
 	float GetStatTotalCryptanalysisTime();
 	float GetStatTotalPrecalculationTime();
-	uint64   GetStatTotalChainWalkStep();
-	int   GetStatTotalFalseAlarm();
-	uint64   GetStatTotalChainWalkStepDueToFalseAlarm();
+	uint64 GetStatTotalChainWalkStep();
+	uint64 GetStatTotalFalseAlarm();
+	uint64 GetStatTotalChainWalkStepDueToFalseAlarm();
 	void setOutputFile(std::string pathName);
 	void setSession(std::string sSessionPathName, std::string sProgressPathName, std::string sPrecalcPathName, bool keepPrecalc);
 };

@@ -24,10 +24,6 @@
  * along with rcracki_mt.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if defined(_WIN32) && !defined(__GNUC__)
-	#pragma warning(disable : 4786 4267 4018)
-#endif
-
 #include "CrackEngine.h"
 #include "RTReader.h"
 #include "RTIReader.h"
@@ -613,9 +609,13 @@ void CCrackEngine::SearchTableChunkOld(RainbowChainO* pChain, int nRainbowChainL
 	threadPool.clear();
 	pthread_attr_destroy(&attr);
 
-	//printf("debug: chain walk step: %d\n", nChainWalkStep);
-	//printf("debug: false alarm: %d\n", nFalseAlarm);
-	//printf("debug: chain walk step due to false alarm: %d\n", nChainWalkStepDueToFalseAlarm);
+	if ( debug )
+	{
+		std::cout << "debug: chain walk step: " << nChainWalkStep << std::endl;
+		std::cout << "debug: false alarm: " << nFalseAlarm << std::endl;
+		std::cout << "debug: chain walk step due to false alarm: "
+			<< nChainWalkStepDueToFalseAlarm << std::endl;
+	}
 
 	m_nTotalChainWalkStep += nChainWalkStep;
 	m_nTotalFalseAlarm += nFalseAlarm;
@@ -940,9 +940,13 @@ void CCrackEngine::SearchTableChunk(RainbowChain* pChain, int nRainbowChainLen, 
 	threadPool.clear();
 	pthread_attr_destroy(&attr);
 
-	//printf("debug: chain walk step: %d\n", nChainWalkStep);
-	//printf("debug: false alarm: %d\n", nFalseAlarm);
-	//printf("debug: chain walk step due to false alarm: %d\n", nChainWalkStepDueToFalseAlarm);
+	if ( debug )
+	{
+		std::cout << "debug: chain walk step: " << nChainWalkStep << std::endl;
+		std::cout << "debug: false alarm: " << nFalseAlarm << std::endl;
+		std::cout << "debug: chain walk step due to false alarm: "
+			<< nChainWalkStepDueToFalseAlarm << std::endl;
+	}
 
 	m_nTotalChainWalkStep += nChainWalkStep;
 	m_nTotalFalseAlarm += nFalseAlarm;
@@ -1005,6 +1009,7 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 	{
 		// File length check
 		uint32 sizeOfChain = 0;
+		bool fVerified = false;
 		long nFileLen = GetFileLen( pathName );
 
 		if ( CChainWalkContext::getRTfileFormat() == getRTfileFormatId("RT") )
@@ -1083,7 +1088,7 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 					// XXX safe for now...fix to use uint64 throughout
 					uint32 nChains = nAllocatedSize / sizeof(RainbowChainO);
 
-					while ( reader->getChainsLeft() > 0 )
+					while ( ftell(file) != nFileLen && reader->getChainsLeft() > 0 )
 					{
 						// Load table chunk
 						if (debug)
@@ -1101,7 +1106,7 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 						m_fTotalDiskAccessTime += fTime;
 
 						// Verify table chunk
-						if ( debug )
+						if ( !fVerified && debug )
 						{
 							printf("verifying the file...\n");
 
@@ -1134,6 +1139,8 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 								printf("this file is not sorted\n");
 								break;
 							}
+
+							fVerified = true;
 						}
 
 						// Search table chunk
@@ -1200,11 +1207,6 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 							while ( ftell(fIndex) != nFileLenIndex )	// Index chunk read loop
 							{
 								// Load index chunk
-#ifdef _WIN32
-								if (debug) printf("Debug: Setting index to 0x00 in memory, %I64u bytes\n", nAllocatedSizeIndex);
-#else
-								if (debug) printf("Debug: Setting index to 0x00 in memory, %llu bytes\n", nAllocatedSizeIndex);
-#endif
 								memset(pIndex, 0x00, nAllocatedSizeIndex);
 								printf("reading index... ");
 								gettimeofday( &tv, NULL );
@@ -1242,7 +1244,6 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 										&& nProcessedChains < nCoveredRainbowTableChains )	// Chunk read loop
 									{
 										// Load table chunk
-										if (debug) printf("Debug: Setting pChain to 0x00 in memory\n");
 										memset(pChain, 0x00, nAllocatedSize);
 										printf("reading table... ");
 										gettimeofday( &tv, NULL );
@@ -1256,7 +1257,7 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 										int nRainbowChainCountRead = nDataRead / sizeOfChain;
 										// Verify table chunk (Too lazy to implement this)
 
-										if ( debug )
+										if ( !fVerified && debug )
 										{
 											printf("verifying the file... ");
 
@@ -1299,6 +1300,7 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 												break;
 											}
 
+											fVerified = true;
 											printf("ok\n");
 										}
 
@@ -1441,7 +1443,7 @@ uint64 CCrackEngine::GetStatTotalChainWalkStep()
 	return m_nTotalChainWalkStep;
 }
 
-int CCrackEngine::GetStatTotalFalseAlarm()
+uint64 CCrackEngine::GetStatTotalFalseAlarm()
 {
 	return m_nTotalFalseAlarm;
 }
