@@ -110,7 +110,7 @@ install:
 	install -d $(BIN)
 	install --group=root --owner=root --mode=755 rcracki_mt $(BIN)
 
-release:
+release: clean
 	mkdir $(RELEASE_DIR)
 	cp $(COMMON_API_PATH)/BaseRTReader.* $(COMMON_API_PATH)/ChainWalkContext.* \
 		$(COMMON_API_PATH)/ChainWalkSet.* CrackEngine.* \
@@ -120,7 +120,7 @@ release:
 		lm2ntlm.* $(COMMON_API_PATH)/fast_md4.* $(COMMON_API_PATH)/MemoryPool.* \
 		$(COMMON_API_PATH)/Public.* RainbowCrack.* rcrackiThread.* \
 		$(COMMON_API_PATH)/RTI2Common.* \
-		$(COMMON_API_PATH)/RT*Reader.* sha1.* ChangeLog.txt COPYING \
+		$(COMMON_API_PATH)/RT*Reader.* sha1.* ChangeLog.txt charset.txt COPYING \
 		INSTALLING README.txt TODO rcracki_mt.ini $(RELEASE_DIR)/
 	cat Makefile | sed 's/..\/..\/common\/rt_api/./' > $(RELEASE_DIR)/Makefile
 
