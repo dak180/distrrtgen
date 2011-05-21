@@ -3,7 +3,7 @@
  * perfect rainbow tables
  *
  * Copyright 2011 Steve Thomas (Sc00bz)
- * Copyright 2011 James Nobis <frt@quelrod.net>
+ * Copyright 2011 James Nobis <quel@quelrod.net>
  *
  * This file is part of freerainbowtables.
  *

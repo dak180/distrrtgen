@@ -5,7 +5,7 @@
  * Copyright (C) Zhu Shuanglei <shuanglei@hotmail.com>
  * Copyright Martin Westergaard Jørgensen <martinwj2005@gmail.com>
  * Copyright 2009, 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
- * Copyright 2009, 2010, 2011 James Nobis <frt@quelrod.net>
+ * Copyright 2009, 2010, 2011 James Nobis <quel@quelrod.net>
  * Copyright 2010 Yngve AAdlandsvik
  * Copyright 2008, 2009, 2010, 2011 Steve Thomas (Sc00bz)
  *
@@ -24,10 +24,6 @@
  * You should have received a copy of the GNU General Public License
  * along with freerainbowtables.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-#if defined(_WIN32) && !defined(__GNUC__)
-	#pragma warning(disable : 4786)
-#endif
 
 #include "ChainWalkContext.h"
 
@@ -100,8 +96,8 @@ bool CChainWalkContext::LoadCharset( std::string sName )
 
 	if ( readCharset )
 	{
-		uint32 i;
-		for (i = 0; i < vLine.size(); i++)
+		int i;
+		for (i = 0; (uint32)i < vLine.size(); i++)
 		{
 			// Filter comment
 			if (vLine[i][0] == '#')
@@ -503,7 +499,7 @@ int CChainWalkContext::normalIndexToPlain(uint64 index, uint64 *plainSpaceUpToX,
 
 	// XXX is this correct to modify the class variable?
 	//m_nPlainLen = a + 1;
-	uint64 plainLen = a + 1;
+	uint32 plainLen = a + 1;
 
 	index -= plainSpaceUpToX[a]; // plainLen - 1 == a
 	// XXX is this correct to modify the class variable?

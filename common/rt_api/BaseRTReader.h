@@ -22,8 +22,8 @@
  * along with freerainbowtables.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __BASERTREADER_H__
-#define __BASERTREADER_H__
+#ifndef _BASERTREADER_H
+#define _BASERTREADER_H
 
 #include "Public.h"
 #include <string>

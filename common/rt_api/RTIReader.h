@@ -21,8 +21,8 @@
  * along with freerainbowtables.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __RTIREADER_H__
-#define __RTIREADER_H__
+#ifndef _RTIREADER_H
+#define _RTIREADER_H
 
 #include <string>
 

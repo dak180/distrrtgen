@@ -21,8 +21,8 @@
  * along with freerainbowtables.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __RTI2READER_H__
-#define __RTI2READER_H__
+#ifndef _RTI2READER_H
+#define _RTI2READER_H
 
 #include "Public.h"
 #include <string>

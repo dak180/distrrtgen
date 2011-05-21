@@ -41,6 +41,9 @@ struct RainbowChainO
 	uint64 nIndexE;
 };
 
+#if defined(_WIN32) && !defined(__GNUC__)
+	#pragma warning(disable: 4201)
+#endif
 union RainbowChain
 {
 	uint64 nIndexS;
@@ -51,6 +54,9 @@ union RainbowChain
 	};
 	//int nCheckPoint;
 };
+#if defined(_WIN32) && !defined(__GNUC__)
+	#pragma warning(default : 4201) 
+#endif
 
 struct RainbowChainCP
 {
