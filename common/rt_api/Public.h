@@ -85,6 +85,7 @@ union IndexChain
 	};
 	//unsigned short nChainCount; (maybe union with nPrefix, 1 byte spoiled, no pack(1) needed)
 };
+#pragma pack()
 */
 
 struct IndexRow
