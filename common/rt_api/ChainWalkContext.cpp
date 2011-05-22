@@ -507,7 +507,7 @@ int CChainWalkContext::normalIndexToPlain(uint64 index, uint64 *plainSpaceUpToX,
 	for ( a = plainLen - 1; a >= 0; a-- )
 	{
 		// XXX this is optimized for 32-bit platforms
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(__GNUC__)
 		if (index < 0x100000000I64)
 			break;
 #else

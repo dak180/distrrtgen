@@ -1076,9 +1076,9 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 				RainbowChainO* pChain = (RainbowChainO*)mp.Allocate( size, nAllocatedSize );
 
 				#if defined(_WIN32) && !defined(__GNUC__)
-					if (debug) printf("Allocated %I64 bytes, filelen %ld\n", nAllocatedSize, nFileLen);
+					if (debug) printf("Allocated %I64 bytes, filelen %I64\n", nAllocatedSize, nFileLen);
 				#else
-					if (debug) printf("Allocated %llu bytes, filelen %ld\n", nAllocatedSize, nFileLen);
+					if (debug) printf("Allocated %llu bytes, filelen %llu\n", nAllocatedSize, nFileLen);
 				#endif
 
 				if (pChain != NULL)
@@ -1160,6 +1160,7 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 				else
 					printf("memory allocation fail\n");
 
+				// XXX
 				//delete pChain;
 
 				if ( reader != NULL )
@@ -1322,8 +1323,10 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 											break;
 									}
 								}
-								else printf("memory allocation failed for rainbow table\n");
+								else
+									printf("memory allocation failed for rainbow table\n");
 
+								// XXX
 								//delete pChain;
 							}
 						}
@@ -1340,14 +1343,11 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 					fclose(fIndex);
 
 				//delete pIndex;
+
+				if ( file != NULL )
+					fclose(file);
 			}
-
 		}
-
-		// XXX this represents a file descriptor leak but even wrapping this with
-		// a NULL check prior to the close still causes segfaults due to some
-		// thread locking (or lack of locking) issues
-		// fclose(file);
 
 		if (debug) printf("Debug: writing progress to %s\n", sProgressPathName.c_str());
 		FILE* file = fopen(sProgressPathName.c_str(), "a");
