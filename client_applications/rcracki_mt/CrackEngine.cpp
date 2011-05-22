@@ -1088,7 +1088,7 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 					// XXX safe for now...fix to use uint64 throughout
 					uint32 nChains = nAllocatedSize / sizeof(RainbowChainO);
 
-					while ( ftell(file) != nFileLen && reader->getChainsLeft() > 0 )
+					while ( reader->getChainsLeft() > 0 )
 					{
 						// Load table chunk
 						if (debug)
