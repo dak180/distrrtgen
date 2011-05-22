@@ -21,8 +21,8 @@
  * along with rcracki_mt.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SHA1_H
-#define SHA1_H
+#ifndef _SHA1_H
+#define _SHA1_H
 
 #include "global.h"
 
@@ -30,4 +30,4 @@
 
 void SHA1_NEW( unsigned char * pData, int length, unsigned char * pDigest);
 
-#endif /* !SHA1_H */
+#endif /* !_SHA1_H */

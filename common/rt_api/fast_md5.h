@@ -32,8 +32,8 @@
  * along with freerainbowtables.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef FAST_MD5_H
-#define FAST_MD5_H
+#ifndef _FAST_MD5_H
+#define _FAST_MD5_H
 
 #include "global.h"
 
@@ -41,4 +41,4 @@
 
 void fast_MD5(unsigned char *pData, int len, unsigned char *pDigest);
 
-#endif // FAST_MD5_H
+#endif // _FAST_MD5_H

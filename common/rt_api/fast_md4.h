@@ -22,8 +22,8 @@
  * along with freerainbowtables.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MD4_H
-#define MD4_H
+#ifndef _FAST_MD4_H
+#define _FAST_MD4_H
 
 #include "global.h"
 
@@ -32,4 +32,4 @@
 //Main function
 void MD4_NEW( unsigned char * buf, int len, unsigned char * pDigest);
 
-#endif /* !MD4_H */
+#endif /* !_FAST_MD4_H */
