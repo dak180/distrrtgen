@@ -1076,9 +1076,9 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 				RainbowChainO* pChain = (RainbowChainO*)mp.Allocate( size, nAllocatedSize );
 
 				#if defined(_WIN32) && !defined(__GNUC__)
-					if (debug) printf("Allocated %I64 bytes, filelen %I64\n", nAllocatedSize, nFileLen);
+					if (debug) printf("Allocated %I64 bytes, filelen %ld\n", nAllocatedSize, nFileLen);
 				#else
-					if (debug) printf("Allocated %llu bytes, filelen %llu\n", nAllocatedSize, nFileLen);
+					if (debug) printf("Allocated %llu bytes, filelen %ld\n", nAllocatedSize, nFileLen);
 				#endif
 
 				if (pChain != NULL)
