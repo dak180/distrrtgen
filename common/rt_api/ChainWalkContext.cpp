@@ -497,13 +497,10 @@ int CChainWalkContext::normalIndexToPlain(uint64 index, uint64 *plainSpaceUpToX,
 			break;
 	}
 
-	// XXX is this correct to modify the class variable?
-	//m_nPlainLen = a + 1;
 	uint32 plainLen = a + 1;
 
 	index -= plainSpaceUpToX[a]; // plainLen - 1 == a
-	// XXX is this correct to modify the class variable?
-	//for ( a = m_nPlainLen - 1; a >= 0; a-- )
+
 	for ( a = plainLen - 1; a >= 0; a-- )
 	{
 		// XXX this is optimized for 32-bit platforms
@@ -530,8 +527,6 @@ int CChainWalkContext::normalIndexToPlain(uint64 index, uint64 *plainSpaceUpToX,
 		index32 /= charSetLen;
 	}
 
-	// XXX is this correct to modify the class variable?
-	//return m_nPlainLen;
 	return plainLen;
 }
 

@@ -32,13 +32,13 @@ RTReader::RTReader( std::string filename )
 
 uint32 RTReader::getChainsLeft()
 {
-	return (GetFileLen( getFilename() ) / 16) - chainPosition;
+	return (GetFileLen( getFilename() ) / chainSizeBytes) - chainPosition;
 }
 
 int RTReader::readChains(uint32 &numChains, RainbowChainO *pData)
 {
-	unsigned int numRead = fread(pData, 1, 16 * numChains, dataFile);
-	numChains = numRead / 16;
+	unsigned int numRead = fread(pData, 1, chainSizeBytes * numChains, dataFile);
+	numChains = numRead / chainSizeBytes;
 	chainPosition += numChains;
 	return 0;
 }

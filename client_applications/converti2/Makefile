@@ -35,6 +35,8 @@ WARNALL = -Wextra -Wunused-macros -Wunsafe-loop-optimizations -Wundef \
 	-Woverlength-strings -Wdisabled-optimization -Wformat-extra-args \
 	-Wformat-security -Winline
 
+RELEASE_DIR = converti2_0.3_beta1_src
+
 all: converti2
 
 converti2: $(OBJS)
@@ -53,6 +55,16 @@ debugall: all
 #m32: all
 
 rebuild: clean all
+
+release: clean
+	mkdir $(RELEASE_DIR)
+	cp $(COMMON_API_PATH)/BaseRTReader.* $(COMMON_API_PATH)/BaseRTWriter.* \
+		$(COMMON_API_PATH)/global.h $(COMMON_API_PATH)/MemoryPool.* \
+		$(COMMON_API_PATH)/Public.* $(COMMON_API_PATH)/RTI2Common.* \
+		$(COMMON_API_PATH)/RTReader.* $(COMMON_API_PATH)/RTIReader.* \
+		$(COMMON_API_PATH)/RTI2Writer.* charset.txt converti2.cpp \
+		converti2.h ../../COPYING $(RELEASE_DIR)/
+	cat Makefile | sed 's/..\/..\/common\/rt_api/./' > $(RELEASE_DIR)/Makefile
 
 static: DEBUG += -static -static-libgcc
 static: all

@@ -34,6 +34,8 @@ WARNALL = -Wextra -Wunused-macros -Wunsafe-loop-optimizations -Wundef \
 	-Woverlength-strings -Wdisabled-optimization -Wformat-extra-args \
 	-Wformat-security -Winline
 
+RELEASE_DIR = rti2rto_0.3_beta1_src
+
 all: rti2rto
 
 rti2rto: $(OBJS)
@@ -62,6 +64,15 @@ static32: all
 win32: CC=i586-mingw32msvc-g++
 win32: BINARY_NAME=rti2rto.exe
 win32: all
+
+release: clean
+	mkdir $(RELEASE_DIR)
+	cp $(COMMON_API_PATH)/BaseRTReader.* $(COMMON_API_PATH)/BaseRTWriter.* \
+		$(COMMON_API_PATH)/global.h $(COMMON_API_PATH)/MemoryPool.* \
+		$(COMMON_API_PATH)/Public.* $(COMMON_API_PATH)/RTI2Common.* \
+		$(COMMON_API_PATH)/RTIReader.* $(COMMON_API_PATH)/RTI2Reader.* \
+		rti2rto.cpp ../../COPYING $(RELEASE_DIR)/
+	cat Makefile | sed 's/..\/..\/common\/rt_api/./' > $(RELEASE_DIR)/Makefile
 
 BaseRTReader.o: $(COMMON_API_PATH)/Public.h $(COMMON_API_PATH)/BaseRTReader.h
 	$(CC) $(CFLAGS) $(COMMON_API_PATH)/BaseRTReader.cpp
