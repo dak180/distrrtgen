@@ -66,7 +66,7 @@ bool LM2NTLMcorrector::LMPasswordCorrectUnicode( std::string hexPassword, unsign
 	
 	setvbuf(stdout, NULL, _IONBF,0);
 
-	startClock = clock();
+	gettimeofday( &tvStart, NULL );
 	previousClock = clock();
 
 #ifndef _WIN32
@@ -292,12 +292,16 @@ bool LM2NTLMcorrector::checkPermutations( int length, unsigned char* pTempMute, 
 
 		if (counter > 10000) // don't check clocks too often
 		{
+			gettimeofday( &tvEnd, NULL );
+	
+			tvFinal = sub_timeofday( tvEnd, tvStart );
+
 			clock_t currentClock = clock();
 			float fTime = 1.0f * (currentClock - previousClock);
 			if (fTime > 1.0f * CLOCKS_PER_SEC)
 			{
 				float progressPercentageCurrentCombination = progressCurrentCombination * 100.0f / totalCurrentCombination;
-				float fTime = 1.0f * (currentClock - startClock) / CLOCKS_PER_SEC;
+				float fTime = 1.0f * tvFinal.tv_sec + 1.0f * tvFinal.tv_usec / 1000000;
 				float currentSpeed = (counterOverall + progressCurrentCombination) / fTime / 1000000;
 
 				//printf("%.2f%% of combination %d/%d (%.2f Mhashes/s)\t\t\t\t\r", progressPercentageCurrentCombination, countCombinations, countTotalCombinations, currentSpeed);
@@ -349,13 +353,6 @@ bool LM2NTLMcorrector::checkNTLMPassword( unsigned char* pLMPassword, int nLMPas
 {
 	unsigned char md[MD4_DIGEST_LENGTH];
 
-	//MD4(pLMPassword, nLMPasswordLen * 2, md);
-	/*
-	MD4_CTX ctx;
-	MD4_Init(&ctx);
-	MD4_Update(&ctx, pLMPassword, nLMPasswordLen * 2);
-	MD4_Final(md, &ctx);*/ 
-
 	MD4_NEW( pLMPassword, nLMPasswordLen * 2, md );
 
 	if (memcmp(md, NTLMHash, MD4_DIGEST_LENGTH) == 0)
@@ -393,13 +390,13 @@ void LM2NTLMcorrector::checkAbort()
 
 void LM2NTLMcorrector::writeEndStats()
 {
-	clock_t endClock = clock();
-	if (endClock - startClock > 0)
-	{
-		float fTime = 1.0f * (endClock - startClock) / CLOCKS_PER_SEC;
-		float speedOverall = counterOverall / fTime / 1000000;
-		printf("\nTried %s passwords in %.2f s (%.2f Mhashes/s)\n", uint64tostr(counterOverall).c_str(), fTime, speedOverall);
-	}
+	gettimeofday( &tvEnd, NULL );
+	
+	tvFinal = sub_timeofday( tvEnd, tvStart );
+
+	float fTime = 1.0f * tvFinal.tv_sec + 1.0f * tvFinal.tv_usec / 1000000;
+	float speedOverall = counterOverall / fTime / 1000000;
+	printf("\nTried %s passwords in %.2f s (%.2f Mhashes/s)\n", uint64tostr(counterOverall).c_str(), fTime, speedOverall);
 
 	printf("\n");
 }

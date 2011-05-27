@@ -30,7 +30,6 @@
 #ifdef _WIN32
 	#include <conio.h>
 #endif
-#include <time.h>
 #include "signal.h"
 #include "Public.h"
 #include "fast_md4.h"
@@ -46,7 +45,7 @@ private:
 	uint64 totalCurrentCombination;
 	uint64 counterOverall;
 	unsigned char NTLMHash[16];
-	clock_t startClock;
+	timeval tvStart, tvEnd, tvFinal;
 	int countCombinations;
 	int countTotalCombinations;
 	int counter;
