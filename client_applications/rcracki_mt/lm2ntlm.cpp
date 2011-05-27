@@ -62,7 +62,6 @@ bool LM2NTLMcorrector::LMPasswordCorrectUnicode( std::string hexPassword, unsign
 	unsigned char* pLMPassword = new unsigned char[tmpLength];
 
 	//printf("Searching for unicode password.\n");
-	printf("Failed case correction, trying unicode correction for: %s\n", sPlain.c_str());
 	//printf("NTLM hash:          %s\n\n", sNTLMHash.c_str());
 	
 	setvbuf(stdout, NULL, _IONBF,0);
@@ -410,12 +409,16 @@ int LM2NTLMcorrector::calculateTotalCombinations(int length, int setSize)
 	return factorial(length) / (factorial(setSize) * factorial(length-setSize));
 }
 
-int LM2NTLMcorrector::factorial (int num)
+uint64 LM2NTLMcorrector::factorial (int num)
 {
-	int result = 1;
-	int i;
-	for (i = 1; i <= num; ++i)
-		result *= i;
+	uint64 result = 1;
+
+	while ( num > 1 )
+	{
+		result *= num;
+		num--;
+	}
+
 	return result;
 }
 

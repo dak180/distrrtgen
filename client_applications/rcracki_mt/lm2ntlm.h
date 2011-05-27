@@ -63,7 +63,7 @@ private:
 	bool checkPermutations(int length, unsigned char* pTempMute, int* jAtPos, int* sizeAtPos, unsigned char* pLMPassword, std::string& sNTLMPassword);
 
 	int calculateTotalCombinations(int length, int setSize);
-	int factorial (int num);
+	uint64 factorial (int num);
 
 	bool parseHexPassword(std::string hexPassword, std::string& sPlain);
 	bool NormalizeHexString(std::string& sHash);

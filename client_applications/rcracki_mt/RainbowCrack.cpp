@@ -837,6 +837,7 @@ int main(int argc, char* argv[])
 				else
 				{
 					printf("%-14s\t%s\thex:%s\n", vUserName[i].c_str(), sPlain.c_str(), sBinary.c_str());
+					printf("Failed case correction, trying unicode correction for: %s\n", sPlain.c_str());
 					LM2NTLMcorrector corrector;
 					if (corrector.LMPasswordCorrectUnicode(sBinary, NTLMHash, sNTLMPassword))
 					{
