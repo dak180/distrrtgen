@@ -828,6 +828,11 @@ int main(int argc, char* argv[])
 				{
 					sPlain = sNTLMPassword;
 					sBinary = HexToStr((const unsigned char*)sNTLMPassword.c_str(), sNTLMPassword.size());
+					if (writeOutput)
+					{
+						if (!writeResultLineToFile(outputFile, vNTLMHash[i].c_str(), sPlain.c_str(), sBinary.c_str()))
+							printf("Couldn't write final result to file!\n");
+					}
 				}
 				else
 				{
