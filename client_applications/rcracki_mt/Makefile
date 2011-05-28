@@ -47,7 +47,7 @@ LIBS_NetBSD = -ldes
 
 LIBS += ${LIBS_$(OSNAME)}
 
-RELEASE_DIR = rcracki_mt_0.6.6_beta3_src
+RELEASE_DIR = rcracki_mt_0.6.6_beta4_src
 
 all: rcracki_mt strip
 
