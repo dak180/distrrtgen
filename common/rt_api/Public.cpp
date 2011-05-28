@@ -37,9 +37,10 @@
 #endif
 
 #include <sys/stat.h>
-#include <map>
-#include <iterator>
+#include <algorithm>
 #include <iostream>
+#include <iterator>
+#include <map>
 
 #ifdef BOINC
 	#include "filesys.h"
@@ -259,9 +260,15 @@ bool GetHybridCharsets( std::string sCharset, std::vector<tCharset>& vCharset )
 	std::string::size_type nEnd = sCharset.rfind(')');
 	std::string::size_type nStart = sCharset.rfind('(');
 	std::string sChar = sCharset.substr(nStart + 1, nEnd - nStart - 1);
+	std::string commas = "";
+
+	int commaCount = std::count( sChar.begin(), sChar.end(), ',' );
+
+	for ( int i = 0; i < commaCount; i++ )
+		commas += ",";
 
 	std::vector<std::string> vParts;
-	SeperateString(sChar, ",", vParts);
+	SeperateString(sChar, commas, vParts);
 
 	for(uint32 i = 0; i < vParts.size(); i++)
 	{

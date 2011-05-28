@@ -258,9 +258,12 @@ bool CChainWalkContext::SetPlainCharset( std::string sCharsetName, int nPlainLen
 		}
 
 		m_vCharset[j].m_nPlainSpaceTotal = m_vCharset[j].m_nPlainSpaceUpToX[i-1];
+
+		if ( m_nPlainSpaceTotal == 0 )
+			m_nPlainSpaceTotal = m_vCharset[j].m_nPlainSpaceTotal;
+		else
+			m_nPlainSpaceTotal *= m_vCharset[j].m_nPlainSpaceTotal;
 	}
-	// m_nPlainSpaceTotal
-	m_nPlainSpaceTotal = m_nPlainSpaceUpToX[m_nPlainLenMaxTotal];
 
 	return true;
 }
@@ -537,7 +540,7 @@ void CChainWalkContext::IndexToPlain()
 
 	uint32 numKeySpaces = m_vCharset.size();
 
-	for ( uint32 a = 0; a < numKeySpaces - 1; a-- )
+	for ( uint32 a = 0; a < numKeySpaces - 1; a++ )
 	{
 		m_vCharset[a].m_nIndexX = indexTmp % m_vCharset[a].m_nPlainSpaceTotal;
 		indexTmp /= m_vCharset[a].m_nPlainSpaceTotal;
