@@ -5,6 +5,10 @@
 * memory leak fixes
 * file descriptor leak fixes
 * OSX (and some other compiler) warnings fixed
+* sourceforge bug #2926357
+	fix factorial for permutation display for unicode correction
+	move from clock() to gettimeofday()
+* fix sourceforge bug #2875013, output ntlm case correction to -o file
 * merged with common/rt_api to remove some of the duplication of files
 * new make release target to make life easier for me in light of the merge
 * cleanup of using namespace std; and other using * constructs

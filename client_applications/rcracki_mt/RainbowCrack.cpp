@@ -850,7 +850,7 @@ int main(int argc, char* argv[])
 						}
 					}
 					else {
-						printf("case correction for password %s failed!\n", sPlain.c_str());
+						printf("unicode correction for password %s failed!\n", sPlain.c_str());
 					}
 				}
 			}
