@@ -71,8 +71,8 @@ LIBS = libstdc++.a -lpthread -lboinc_api -lboinc -lcrypto -lssl -lmysqlclient \
 	$(BOINC_SCHED_DIR)/libsched.a $(BOINC_LIB_DIR)/libboinc.a
 
 OBJS = ChainWalkContext.o des_enc.o des_setkey.o ecb_enc.o \
-	HashAlgorithm.o HashRoutine.o md4.o md5.o MemoryPool.o part_validator.o \
-	Public.o validate_util.o validate_util2.o validator.o
+	fast_md4.o fast_md5.o HashAlgorithm.o HashRoutine.o MemoryPool.o \
+	part_validator.o Public.o validate_util.o validate_util2.o validator.o
 
 CXXFLAGS = -g \
 	-DAPP_GRAPHICS \
@@ -82,6 +82,8 @@ CXXFLAGS = -g \
 	$(OPTIMIZATION)
 
 PROG = distrrtgen_validator
+
+RELEASE_DIR = distrrtgen_validator
 
 all: $(PROG)
 
@@ -99,6 +101,20 @@ distclean:
 	/bin/rm -f $(PROG) *.o libstdc++.a
 
 rebuild: clean all
+
+release: clean
+	mkdir $(RELEASE_DIR)
+	cp $(COMMON_API_PATH)/ChainWalkContext.* $(COMMON_API_PATH)/des.h \
+		$(COMMON_API_PATH)/des_enc.c $(COMMON_API_PATH)/des_locl.h \
+		$(COMMON_API_PATH)/des_setkey.c $(COMMON_API_PATH)/ecb_enc.c \
+		$(COMMON_API_PATH)/HashAlgorithm.* $(COMMON_API_PATH)/HashRoutine.* \
+		$(COMMON_API_PATH)/MemoryPool.* $(COMMON_API_PATH)/global.h \
+		$(COMMON_API_PATH)/fast_md4.* $(COMMON_API_PATH)/fast_md5.* \
+		$(COMMON_API_PATH)/podd.h $(COMMON_API_PATH)/sha1.* \
+		$(COMMON_API_PATH)/Public.* $(COMMON_API_PATH)/sk.h \
+		$(COMMON_API_PATH)/spr.h charset.txt part_validator.* validate_util.* \
+		validator.* validate_util2.* ../../../COPYING $(RELEASE_DIR)/
+	cat Makefile | sed 's/..\/..\/common\/rt_api/./' > $(RELEASE_DIR)/Makefile
 
 ChainWalkContext.o: $(COMMON_API_PATH)/ChainWalkContext.h \
 	ChainWalkContext.cpp $(COMMON_API_PATH)/HashRoutine.h \
@@ -119,7 +135,7 @@ ecb_enc.o: $(COMMON_API_PATH)/ecb_enc.c $(COMMON_API_PATH)/des_locl.h \
 
 HashAlgorithm.o: $(COMMON_API_PATH)/HashAlgorithm.h \
 	$(COMMON_API_PATH)/HashAlgorithm.cpp $(COMMON_API_PATH)/Public.h \
-	$(COMMON_API_PATH)/md4.h $(COMMON_API_PATH)/md5.h
+	$(COMMON_API_PATH)/fast_md4.h $(COMMON_API_PATH)/fast_md5.h
 	$(CXX) $(CXXFLAGS) -c $(COMMON_API_PATH)/HashAlgorithm.cpp
 
 HashRoutine.o: $(COMMON_API_PATH)/HashRoutine.h \
@@ -127,13 +143,13 @@ HashRoutine.o: $(COMMON_API_PATH)/HashRoutine.h \
 	$(COMMON_API_PATH)/HashAlgorithm.h
 	$(CXX) $(CXXFLAGS) -c $(COMMON_API_PATH)/HashRoutine.cpp
 
-md4.o: $(COMMON_API_PATH)/md4.h $(COMMON_API_PATH)/md4.cpp \
+fast_md4.o: $(COMMON_API_PATH)/fast_md4.h $(COMMON_API_PATH)/fast_md4.cpp \
 	$(COMMON_API_PATH)/global.h
-	$(CXX) $(CXXFLAGS) -c $(COMMON_API_PATH)/md4.cpp
+	$(CXX) $(CXXFLAGS) -c $(COMMON_API_PATH)/fast_md4.cpp
 
-md5.o: $(COMMON_API_PATH)/md5.h $(COMMON_API_PATH)/md5.cpp \
+fast_md5.o: $(COMMON_API_PATH)/fast_md5.h $(COMMON_API_PATH)/fast_md5.cpp \
 	$(COMMON_API_PATH)/global.h
-	$(CXX) $(CXXFLAGS) -c $(COMMON_API_PATH)/md5.cpp
+	$(CXX) $(CXXFLAGS) -c $(COMMON_API_PATH)/fast_md5.cpp
 
 MemoryPool.o: $(COMMON_API_PATH)/MemoryPool.h \
 	$(COMMON_API_PATH)/MemoryPool.cpp $(COMMON_API_PATH)/Public.h \
