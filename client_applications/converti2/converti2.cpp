@@ -899,11 +899,17 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 						if ( i == 0 && curPrefix == 0 )
 							curPrefix = prefix;
 
+						/*
+						 * XXX this is probably redundant and can be replaced with
+						 * if ( prefix != curPrefix )
+						 */
 						if ( prefix != curPrefix && (numProcessedChains - prefixStart) > 0)
 						{
 							if(prefix < curPrefix)
 							{
-								printf("**** Error writeChain(): Prefix is smaller than previous prefix. %llu < %llu****\n", prefix, curPrefix);
+								std::cout << "**** Error writeChain(): Prefix is smaller than previous prefix. "
+									<< prefix << " < " << curPrefix << "****"
+									<< std::endl;
 								exit(1);									
 							}
 
@@ -964,8 +970,6 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 			}
 			*/
 
-			//int zero = 0;
-
 			if ( writer != NULL )
 			{
 				writer->setPrefixStart( indexes[0].prefix );
@@ -980,7 +984,7 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 				if(i > 0 && diffSize > 1)
 				{
 					// then write the distance amount of 00's
-					/* 
+
 					if(diffSize > 1000)
 					{
 						std::cout << "WARNING! The distance to the next prefix is "
@@ -988,17 +992,17 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 						std::cout << "Aborting..." << std::endl;
 						exit(1);
 					}
-					*/
 
-					/*
-						for(uint32 j = 1; j < diffSize; j++)
-						fwrite(&zero, 1, m_indexrowsizebytes, pFileIndex);
-					*/
+
+					for(uint32 j = 1; j < diffSize; j++)
+						writer->addIndexChainCount( 0 );
 				}
 
 				if ( indexes[i].numchains > 255 )
 				{
 					std::cerr << "WARNING! A prefix index with more than 255 (1 byte) chains was encountered" << std::endl;
+					std::cerr << "The prefix contains: " << indexes[i].numchains
+						<< " chains" << std::endl;
 					std::cerr << "Aborting..." << std::endl;
 					exit(1);
 				}
