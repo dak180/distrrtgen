@@ -41,6 +41,7 @@ RTI2Writer::RTI2Writer( std::string filename )
 	out.data = NULL;
 	dataProc = NULL;
 	dataPos = NULL;
+	prefixIndexChainCount.clear();
 }
 
 RTI2Writer::~RTI2Writer()
@@ -116,7 +117,7 @@ void RTI2Writer::setPrefixCount( uint32 prefixIndexCount )
 {
 	prefixCount = prefixIndexCount;
 
-	out.index.prefixIndex.reserve( prefixCount );
+	prefixIndexChainCount.reserve( prefixCount );
 }
 
 void RTI2Writer::setPrefixStart( uint64 prefixStart )
@@ -313,6 +314,7 @@ int RTI2Writer::writeData()
 int RTI2Writer::writeIndex()
 {
 	fwrite( &out.index.firstPrefix, 1, sizeof( out.index.firstPrefix ), pFile );
+	prefixCount = prefixIndexChainCount.size();
 	fwrite( &prefixCount, 1, sizeof( prefixCount ), pFile );
 
 	for( uint32 i = 0; i < prefixIndexChainCount.size(); i++)

@@ -37,7 +37,8 @@ RTI2Reader::RTI2Reader( std::string filename )
 	int ret;
 	uint8 characterSetFlags;
 	chainPosition = 0;
-	indexOffset = 0;
+	// XXX for reading straight from data in memory
+	//indexOffset = 0;
 
 	fin.open( filename.c_str(), std::ios_base::binary | std::ios_base::in );
 
@@ -553,12 +554,16 @@ int RTI2Reader::readChains(unsigned int &numChains, RainbowChainO *pData)
 
 	for( ; i < index.prefixIndex.size(); i++ )
 	{
-		// we found the matching index
+		/* XXX this is completely redundant
+		 * try the next index position
+
 		if (  (chainPosition + readChains ) > index.prefixIndex[i] )
 			continue;
+		*/
 		
 		while ( (chainPosition + readChains ) < index.prefixIndex[i] )
 		{
+			// XXX for reading straight from data in memory
 			//chainrow = *((uint64*) ( data + ( ( index.prefixIndex[i-1] + indexOffset ) * chainSizeBytes ) ));
 			if ( !fin.read( (char*) (str), chainSizeBytes ).good() )
 			{
@@ -568,15 +573,16 @@ int RTI2Reader::readChains(unsigned int &numChains, RainbowChainO *pData)
 
 			chainrow = *((uint64*) str);
 
-			// ending point prefix
+			// end point prefix
 			pData[readChains].nIndexE = ( index.firstPrefix + i - 1 ) << header.endPointBits;
-			// ending point suffix
+			// end point suffix
 			pData[readChains].nIndexE |= chainrow & endPointMask;
 
 			pData[readChains].nIndexS = ((chainrow >> startPointShift) & startPointMask) + header.minimumStartPoint;
 
 			readChains++;
-			indexOffset++;
+			// XXX for reading straight from data in memory
+			//indexOffset++;
 
 			if ( readChains == numChains || readChains == chainsleft )
 				break;
@@ -585,7 +591,8 @@ int RTI2Reader::readChains(unsigned int &numChains, RainbowChainO *pData)
 		if ( readChains == numChains )
 			break;
 
-		indexOffset = 0;
+		// XXX for reading straight from data in memory
+		//indexOffset = 0;
 	}
 
 	if ( readChains != numChains )
