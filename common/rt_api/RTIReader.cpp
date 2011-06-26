@@ -156,7 +156,7 @@ int RTIReader::readChains(uint32 &numChains, RainbowChainO *pData)
 
 void RTIReader::setMinimumStartPoint()
 {
-	uint64 tmpStartPoint;
+	uint64 tmpStartPoint = 0;
 	uint16 tmpEndPoint;
 	long originalFilePos = ftell( dataFile );
 
