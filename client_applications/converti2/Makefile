@@ -63,7 +63,7 @@ release: clean
 		$(COMMON_API_PATH)/Public.* $(COMMON_API_PATH)/RTI2Common.* \
 		$(COMMON_API_PATH)/RTReader.* $(COMMON_API_PATH)/RTIReader.* \
 		$(COMMON_API_PATH)/RTI2Writer.* charset.txt converti2.cpp \
-		converti2.h ../../COPYING $(RELEASE_DIR)/
+		converti2.h INSTALLING.txt ../../COPYING $(RELEASE_DIR)/
 	cat Makefile | sed 's/..\/..\/common\/rt_api/./' > $(RELEASE_DIR)/Makefile
 
 static: DEBUG += -static -static-libgcc

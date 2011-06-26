@@ -71,7 +71,7 @@ release: clean
 		$(COMMON_API_PATH)/global.h $(COMMON_API_PATH)/MemoryPool.* \
 		$(COMMON_API_PATH)/Public.* $(COMMON_API_PATH)/RTI2Common.* \
 		$(COMMON_API_PATH)/RTIReader.* $(COMMON_API_PATH)/RTI2Reader.* \
-		rti2rto.cpp ../../COPYING $(RELEASE_DIR)/
+		rti2rto.cpp INSTALLING.txt ../../COPYING $(RELEASE_DIR)/
 	cat Makefile | sed 's/..\/..\/common\/rt_api/./' > $(RELEASE_DIR)/Makefile
 
 BaseRTReader.o: $(COMMON_API_PATH)/Public.h $(COMMON_API_PATH)/BaseRTReader.h

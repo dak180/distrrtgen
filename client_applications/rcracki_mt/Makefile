@@ -121,7 +121,7 @@ release: clean
 		$(COMMON_API_PATH)/Public.* RainbowCrack.* rcrackiThread.* \
 		$(COMMON_API_PATH)/RTI2Common.* \
 		$(COMMON_API_PATH)/RT*Reader.* sha1.* ChangeLog.txt charset.txt COPYING \
-		INSTALLING README.txt TODO rcracki_mt.ini $(RELEASE_DIR)/
+		INSTALLING.txt README.txt TODO rcracki_mt.ini $(RELEASE_DIR)/
 	cat Makefile | sed 's/..\/..\/common\/rt_api/./' > $(RELEASE_DIR)/Makefile
 
 rebuild: clean all
