@@ -176,7 +176,7 @@ extern "C" int CalcChainsOnCUDA(const rcuda::RCudaTask* task, uint64 *resultBuff
 	dim3 numBlocks(grSizeX, grSizeY);
 	cuErr = cudaSuccess;
 
-	for(int idx = 0; idx < task->rainbowChainLen-1 && cuErr == cudaSuccess; idx+=KERN_CHAIN_SIZE) {
+	for(unsigned int idx = 0; idx < task->rainbowChainLen-1 && cuErr == cudaSuccess; idx+=KERN_CHAIN_SIZE) {
 		switch(task->hash) {
 		case rcuda::RHASH_MD5:
 			RTGenMD5Kernel<<<numBlocks, BLOCK_X_SIZE>>>(idx, min(idx+KERN_CHAIN_SIZE, task->rainbowChainLen-1));
@@ -192,6 +192,8 @@ extern "C" int CalcChainsOnCUDA(const rcuda::RCudaTask* task, uint64 *resultBuff
 			break;
 		case rcuda::RHASH_LM:
 			RTGenLMKernel<<<numBlocks, BLOCK_X_SIZE>>>(idx, min(idx+KERN_CHAIN_SIZE, task->rainbowChainLen-1));
+			break;
+		case rcuda::RHASH_UNDEF:
 			break;
 		}
 		cuErr = cudaGetLastError();
