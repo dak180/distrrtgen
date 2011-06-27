@@ -645,11 +645,34 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 		}
 	}
 
-	// XXX implement
 	if ( sCharsetName == "byte" )
 	{
+		tmpSubKeySpace.perPositionCharacterSets.clear();
+
+		tmpSubKeySpace.hybridSets = 0x1;
 		
+		charSet.characterSet1.clear();
+		charSet.characterSet2.clear();
+		charSet.characterSet3.clear();
+		charSet.characterSet4.clear();
+
+		int i;
+		charSet.characterSet1.reserve( 256 );
+
+		for ( i = 0; i <= 255; i++ )
+			charSet.characterSet1[i] = (unsigned char) i;
+		
+		for ( int a = 0; a < nPlainLenMax; a++ )
+		{
+			tmpSubKeySpace.passwordLength.clear();
+			tmpSubKeySpace.passwordLength.push_back( a + 1 );
+			tmpSubKeySpace.charSetFlags.push_back( 1 );
+			tmpSubKeySpace.perPositionCharacterSets.push_back( charSet );
+
+			tmpSubKeySpaces.push_back( tmpSubKeySpace );
+		}
 	}
+	// XXX implement
 	else if ( sCharsetName.substr( 0, 6 ) == "hybrid" )
 	{
 
