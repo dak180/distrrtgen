@@ -1,5 +1,6 @@
 /*
 	Copyright (C) 2008 Steve Thomas <SMT837784@yahoo.com>
+	Copyright (C) 2011 James Nobis <quel@quelrod.net>
 
 	This file is part of RT Perfecter.
 
@@ -205,7 +206,7 @@ void usage(char *runStr)
 	printf("  -i=number\n");
 	printf("    Maximum index for chains.\n\n");
 	printf("  -s=number\n");
-	printf("    Maximum size for output files in MiB [default is 1024, max is 65535].\n\n");
+	printf("    Maximum size for output files in MiB [default is 512, max is 65535].\n\n");
 	printf("  -v\n");
 	printf("    Verbose mode, displays extra info.\n\n");
 	printf("output-file-pattern:\n");
