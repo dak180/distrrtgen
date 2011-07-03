@@ -409,7 +409,7 @@ void CCrackEngine::SearchTableChunkOld(RainbowChainO* pChain, int nRainbowChainL
 		int nHashLen;
 		ParseHash(vHash[nHashIndex], TargetHash, nHashLen);
 		if (nHashLen != CChainWalkContext::GetHashLen())
-			printf("debug: nHashLen mismatch\n");
+			printf("Debug: nHashLen mismatch\n");
 
 		// Request ChainWalk
 		bool fNewlyGenerated;
@@ -424,7 +424,7 @@ void CCrackEngine::SearchTableChunkOld(RainbowChainO* pChain, int nRainbowChainL
 													fNewlyGenerated,
 													debug,
 													sPrecalcPathName);
-//		printf("debug: using %s walk for %s\n", fNewlyGenerated ? "newly generated" : "existing",
+//		printf("Debug: using %s walk for %s\n", fNewlyGenerated ? "newly generated" : "existing",
 //					vHash[nHashIndex].c_str());
 
 		if (fNewlyGenerated)
@@ -482,6 +482,7 @@ void CCrackEngine::SearchTableChunkOld(RainbowChainO* pChain, int nRainbowChainL
 				delete rThread;
 			}
 
+			m_cws.StoreToFile(pStartPosIndexE, TargetHash, nHashLen);
 			gettimeofday( &tv2, NULL );
 			final = sub_timeofday( tv2, tv );
 
@@ -493,13 +494,12 @@ void CCrackEngine::SearchTableChunkOld(RainbowChainO* pChain, int nRainbowChainL
 			printf("%-50s\r", "");
 
 			if ( debug )
-				printf("pre-calculation time: %.2f s\n", fTime);
+				printf("Debug: pre-calculation time: %.2f s\n", fTime);
 		}
 
 		threadPool.clear();
 		pThreads.clear();
 
-		//printf("Checking false alarms for hash %d of %d.\t\t\r", nHashIndex+1, vHash.size());
 		printf("Checking false alarms for hash %lu of %lu.%-20s\r",
 			(unsigned long)nHashIndex+1, (unsigned long)vHash.size(), "");
 
@@ -573,7 +573,6 @@ void CCrackEngine::SearchTableChunkOld(RainbowChainO* pChain, int nRainbowChainL
 			nFalseAlarm += rThread->GetnFalseAlarm();
 
 			if (rThread->FoundHash() && !foundHashInThread) {
-				//printf("\t\t\t\t\t\t\r");
 				printf("%-50s\r", "");
 
 				printf("plaintext of %s is %s\n", rThread->GetHash().c_str(), rThread->GetPlain().c_str());
@@ -603,7 +602,6 @@ void CCrackEngine::SearchTableChunkOld(RainbowChainO* pChain, int nRainbowChainL
 		threadPool.clear();
 	}
 
-	//printf("\t\t\t\t\t\t\t\r");
 	printf("%-50s\r", "");
 	pThreads.clear();
 	threadPool.clear();
@@ -611,9 +609,9 @@ void CCrackEngine::SearchTableChunkOld(RainbowChainO* pChain, int nRainbowChainL
 
 	if ( debug )
 	{
-		std::cout << "debug: chain walk step: " << nChainWalkStep << std::endl;
-		std::cout << "debug: false alarm: " << nFalseAlarm << std::endl;
-		std::cout << "debug: chain walk step due to false alarm: "
+		std::cout << "Debug: chain walk step: " << nChainWalkStep << std::endl;
+		std::cout << "Debug: false alarm: " << nFalseAlarm << std::endl;
+		std::cout << "Debug: chain walk step due to false alarm: "
 			<< nChainWalkStepDueToFalseAlarm << std::endl;
 	}
 
@@ -744,7 +742,7 @@ void CCrackEngine::SearchTableChunk(RainbowChain* pChain, int nRainbowChainLen, 
 		int nHashLen;
 		ParseHash(vHash[nHashIndex], TargetHash, nHashLen);
 		if (nHashLen != CChainWalkContext::GetHashLen())
-			printf("debug: nHashLen mismatch\n");
+			printf("Debug: nHashLen mismatch\n");
 
 		// Request ChainWalk
 		bool fNewlyGenerated;
@@ -759,7 +757,7 @@ void CCrackEngine::SearchTableChunk(RainbowChain* pChain, int nRainbowChainLen, 
 													fNewlyGenerated,
 													debug,
 													sPrecalcPathName);
-//		printf("debug: using %s walk for %s\n", fNewlyGenerated ? "newly generated" : "existing",
+//		printf("Debug: using %s walk for %s\n", fNewlyGenerated ? "newly generated" : "existing",
 //					vHash[nHashIndex].c_str());
 
 		if (fNewlyGenerated)
@@ -826,19 +824,15 @@ void CCrackEngine::SearchTableChunk(RainbowChain* pChain, int nRainbowChainLen, 
 			m_fTotalPrecalculationTime += fTime;
 			m_fTotalCryptanalysisTime -= fTime;
 
-			//printf("\npStartPosIndexE[0]: %s\n", uint64tostr(pStartPosIndexE[0]).c_str());
-			//printf("\npStartPosIndexE[nRainbowChainLen-2]: %s\n", uint64tostr(pStartPosIndexE[nRainbowChainLen-2]).c_str());
-
 			printf("%-50s\r", "");
 
 			if ( debug )
-				printf("pre-calculation time: %.2f s\n", fTime);
+				printf("Debug: pre-calculation time: %.2f s\n", fTime);
 		}
 
 		threadPool.clear();
 		pThreads.clear();
 
-		//printf("Checking false alarms for hash %d of %d.\t\t\r", nHashIndex+1, vHash.size());
 		printf("Checking false alarms for hash %lu of %lu.%-20s\r",
 			(unsigned long)nHashIndex+1, (unsigned long)vHash.size(), "");
 
@@ -904,7 +898,6 @@ void CCrackEngine::SearchTableChunk(RainbowChain* pChain, int nRainbowChainLen, 
 			nFalseAlarm += rThread->GetnFalseAlarm();
 
 			if (rThread->FoundHash() && !foundHashInThread) {
-				//printf("\t\t\t\t\t\t\r");
 				printf("%-50s\r", "");
 
 				printf("plaintext of %s is %s\n", rThread->GetHash().c_str(), rThread->GetPlain().c_str());
@@ -934,7 +927,6 @@ void CCrackEngine::SearchTableChunk(RainbowChain* pChain, int nRainbowChainLen, 
 		threadPool.clear();
 	}
 
-	//printf("\t\t\t\t\t\t\t\r");
 	printf("%-50s\r", "");
 	pThreads.clear();
 	threadPool.clear();
@@ -942,9 +934,9 @@ void CCrackEngine::SearchTableChunk(RainbowChain* pChain, int nRainbowChainLen, 
 
 	if ( debug )
 	{
-		std::cout << "debug: chain walk step: " << nChainWalkStep << std::endl;
-		std::cout << "debug: false alarm: " << nFalseAlarm << std::endl;
-		std::cout << "debug: chain walk step due to false alarm: "
+		std::cout << "Debug: chain walk step: " << nChainWalkStep << std::endl;
+		std::cout << "Debug: false alarm: " << nFalseAlarm << std::endl;
+		std::cout << "Debug: chain walk step due to false alarm: "
 			<< nChainWalkStepDueToFalseAlarm << std::endl;
 	}
 
@@ -1020,336 +1012,341 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 			sizeOfChain = 8;
 		}
 
-		if ( CChainWalkContext::getRTfileFormat() != getRTfileFormatId("RTI2")
-				&& ( (unsigned long)nFileLen % sizeOfChain != 0
-					|| nRainbowChainCount * sizeOfChain != (unsigned long)nFileLen )
+		if ( debug &&
+				( CChainWalkContext::getRTfileFormat() != getRTfileFormatId("RTI2")
+					&&
+					(
+						(unsigned long)nFileLen % sizeOfChain != 0
+						|| nRainbowChainCount * sizeOfChain != (unsigned long)nFileLen
+					)
+				)
 			)
 		{
 			printf("file length mismatch\n");
 			exit( 10 );
 		}
-		else
+
+		//fseek(file, 0, SEEK_SET);
+		timeval tv;
+		timeval tv2;
+		timeval final;
+
+		unsigned int bytesForChainWalkSet = hs.GetStatHashTotal() * (nRainbowChainLen-1) * 8;
+		if (debug) printf("Debug: Saving %u bytes of memory for chainwalkset.\n", bytesForChainWalkSet);
+
+		uint64 nAllocatedSize;
+
+		if ( CChainWalkContext::getRTfileFormat() != getRTfileFormatId("RTI" ))
 		{
-			//fseek(file, 0, SEEK_SET);
-			timeval tv;
-			timeval tv2;
-			timeval final;
+			// XXX fix this up as this verified the file exists and is readable
+			// only RTI is directly reading here instead of using a reader
+			fclose( file );
 
-			unsigned int bytesForChainWalkSet = hs.GetStatHashTotal() * (nRainbowChainLen-1) * 8;
-			if (debug) printf("Debug: Saving %u bytes of memory for chainwalkset.\n", bytesForChainWalkSet);
+			BaseRTReader *reader = NULL;
 
-			uint64 nAllocatedSize;
-
-			if ( CChainWalkContext::getRTfileFormat() != getRTfileFormatId("RTI" ))
+			if ( CChainWalkContext::getRTfileFormat() == getRTfileFormatId("RTI2") )
 			{
-				// XXX fix this up as this verified the file exists and is readable
-				// only RTI is directly reading here instead of using a reader
-				fclose( file );
+				reader = (BaseRTReader*)new RTI2Reader( pathName );
+				sizeOfChain = reader->getChainSizeBytes();
 
-				BaseRTReader *reader = NULL;
-
-				if ( CChainWalkContext::getRTfileFormat() == getRTfileFormatId("RTI2") )
+				if ( debug )
 				{
-					reader = (BaseRTReader*)new RTI2Reader( pathName );
-					sizeOfChain = reader->getChainSizeBytes();
-
-					if ( debug )
-					{
-						std::cout << "Debug: This is a table in .rti2 format."
-							<< std::endl;
-					}
+					std::cout << "Debug: This is a table in .rti2 format."
+						<< std::endl;
 				}
-				else if ( CChainWalkContext::getRTfileFormat() == getRTfileFormatId("RT") )
-				{
-					reader = (BaseRTReader*)new RTReader( pathName );
+			}
+			else if ( CChainWalkContext::getRTfileFormat() == getRTfileFormatId("RT") )
+			{
+				reader = (BaseRTReader*)new RTReader( pathName );
 
-					if ( debug )
-					{
-						std::cout << "Debug: This is a table in .rt format."
-							<< std::endl;
-					}
+				if ( debug )
+				{
+					std::cout << "Debug: This is a table in .rt format."
+						<< std::endl;
 				}
+			}
 
-				static CMemoryPool mp(bytesForChainWalkSet, debug, maxMem);
+			static CMemoryPool mp(bytesForChainWalkSet, debug, maxMem);
 
-				uint64 size = reader->getChainsLeft() * sizeof(RainbowChainO);
-				RainbowChainO* pChain = (RainbowChainO*)mp.Allocate( size, nAllocatedSize );
+			uint64 size = reader->getChainsLeft() * sizeof(RainbowChainO);
+			RainbowChainO* pChain = (RainbowChainO*)mp.Allocate( size, nAllocatedSize );
 
-				#if defined(_WIN32) && !defined(__GNUC__)
-					if (debug) printf("Allocated %I64 bytes, filelen %ld\n", nAllocatedSize, nFileLen);
-				#else
-					if (debug) printf("Allocated %llu bytes, filelen %ld\n", nAllocatedSize, nFileLen);
-				#endif
+			if ( debug )
+			{
+				std::cout << "Debug: Allocated " << nAllocatedSize
+					<< " bytes, filelen " << nFileLen << std::endl;
+			}
 
-				if (pChain != NULL)
+			if (pChain != NULL)
+			{
+				// Round to sizeOfChain boundary
+				nAllocatedSize = nAllocatedSize / sizeof(RainbowChainO) * sizeof(RainbowChainO);
+				// XXX safe for now...fix to use uint64 throughout
+				uint32 nChains = nAllocatedSize / sizeof(RainbowChainO);
+
+				while ( reader->getChainsLeft() > 0 )
 				{
-					// Round to sizeOfChain boundary
-					nAllocatedSize = nAllocatedSize / sizeof(RainbowChainO) * sizeof(RainbowChainO);
-					// XXX safe for now...fix to use uint64 throughout
-					uint32 nChains = nAllocatedSize / sizeof(RainbowChainO);
+					// Load table chunk
+					if ( debug )
+						printf("Debug: reading...\n");
 
-					while ( reader->getChainsLeft() > 0 )
+					gettimeofday( &tv, NULL );
+
+					reader->readChains( nChains, pChain );
+
+					gettimeofday( &tv2, NULL );
+					final = sub_timeofday( tv2, tv );
+
+					float fTime = 1.0f * final.tv_sec + 1.0f * final.tv_usec / 1000000;
+					printf("%u bytes read, disk access time: %.2f s\n", nChains * sizeOfChain, fTime);
+					m_fTotalDiskAccessTime += fTime;
+
+					// Verify table chunk
+					if ( debug && !fVerified )
 					{
-						// Load table chunk
-						if (debug)
-							printf("reading...\n");
+						printf("Debug: verifying the file...\n");
 
-						gettimeofday( &tv, NULL );
-
-						reader->readChains( nChains, pChain );
-
-						gettimeofday( &tv2, NULL );
-						final = sub_timeofday( tv2, tv );
-
-						float fTime = 1.0f * final.tv_sec + 1.0f * final.tv_usec / 1000000;
-						printf("%u bytes read, disk access time: %.2f s\n", nChains * sizeOfChain, fTime);
-						m_fTotalDiskAccessTime += fTime;
-
-						// Verify table chunk
-						if ( !fVerified && debug )
+						// Chain length test
+						int nIndexToVerify = nChains / 2;
+						CChainWalkContext cwc;
+						cwc.SetIndex(pChain[nIndexToVerify].nIndexS);
+						int nPos;
+						for (nPos = 0; nPos < nRainbowChainLen - 1; nPos++)
 						{
-							printf("verifying the file...\n");
-
-							// Chain length test
-							int nIndexToVerify = nChains / 2;
-							CChainWalkContext cwc;
-							cwc.SetIndex(pChain[nIndexToVerify].nIndexS);
-							int nPos;
-							for (nPos = 0; nPos < nRainbowChainLen - 1; nPos++)
-							{
-								cwc.IndexToPlain();
-								cwc.PlainToHash();
-								cwc.HashToIndex(nPos);
-							}
-							if (cwc.GetIndex() != pChain[nIndexToVerify].nIndexE)
-							{
-								printf("rainbow chain length verify fail\n");
-								break;
-							}
-
-							// Chain sort test
-							uint32 i;
-							for (i = 0; i < nChains - 1; i++)
-							{
-								if (pChain[i].nIndexE > pChain[i + 1].nIndexE)
-									break;
-							}
-							if (i != nChains - 1)
-							{
-								printf("this file is not sorted\n");
-								break;
-							}
-
-							fVerified = true;
+							cwc.IndexToPlain();
+							cwc.PlainToHash();
+							cwc.HashToIndex(nPos);
+						}
+						if (cwc.GetIndex() != pChain[nIndexToVerify].nIndexE)
+						{
+							printf("rainbow chain length verify fail\n");
+							break;
 						}
 
-						// Search table chunk
-						gettimeofday( &tv, NULL );
-						SearchTableChunkOld(pChain, nRainbowChainLen, nChains, hs);
-						gettimeofday( &tv2, NULL );
-						final = sub_timeofday( tv2, tv );
-						fTime = 1.0f * final.tv_sec + 1.0f * final.tv_usec / 1000000;
-						printf("cryptanalysis time: %.2f s\n", fTime);
-						m_fTotalCryptanalysisTime += fTime;
-
-						// Already finished?
-						if (!hs.AnyHashLeftWithLen(CChainWalkContext::GetHashLen()))
+						// Chain sort test
+						uint32 i;
+						for (i = 0; i < nChains - 1; i++)
+						{
+							if (pChain[i].nIndexE > pChain[i + 1].nIndexE)
+								break;
+						}
+						if (i != nChains - 1)
+						{
+							printf("this file is not sorted\n");
 							break;
+						}
+
+						fVerified = true;
 					}
+
+					// Search table chunk
+					gettimeofday( &tv, NULL );
+					SearchTableChunkOld(pChain, nRainbowChainLen, nChains, hs);
+					gettimeofday( &tv2, NULL );
+					final = sub_timeofday( tv2, tv );
+					fTime = 1.0f * final.tv_sec + 1.0f * final.tv_usec / 1000000;
+					printf("cryptanalysis time: %.2f s\n", fTime);
+					m_fTotalCryptanalysisTime += fTime;
+
+					// Already finished?
+					if (!hs.AnyHashLeftWithLen(CChainWalkContext::GetHashLen()))
+						break;
 				}
+			}
+			else
+				printf("memory allocation fail\n");
+
+			// XXX
+			//delete pChain;
+
+			if ( reader != NULL )
+				delete reader;
+		}
+		else
+		{
+			static CMemoryPool mpIndex(bytesForChainWalkSet, debug, maxMem);
+			uint64 nAllocatedSizeIndex;
+
+			std::string indexPathName = pathName + std::string(".index");
+
+			FILE* fIndex = fopen( indexPathName.c_str(), "rb");
+			if(fIndex != NULL)
+			{
+				// File length check
+				long nFileLenIndex = GetFileLen( indexPathName );
+				//unsigned int nRows = nFileLenIndex / 11;
+				//unsigned int nSize = nRows * sizeof(RTIrcrackiIndexChain);
+				//printf("Debug: 8\n");
+				if (nFileLenIndex % 11 != 0)
+					printf("index file length mismatch (%ld bytes)\n", nFileLenIndex);
 				else
-					printf("memory allocation fail\n");
+				{
+					//printf("index nSize: %d\n", nSize);
+					//pIndex = (RTIrcrackiIndexChain*)new unsigned char[nSize];
+					RTIrcrackiIndexChain *pIndex = (RTIrcrackiIndexChain*)mpIndex.Allocate(nFileLenIndex, nAllocatedSizeIndex);
+					if ( debug )
+					{
+						std::cout << "Debug: Allocated " << nAllocatedSizeIndex
+							<< " bytes for index with filelen " << nFileLenIndex
+							<< std::endl;
+					}
 
-				// XXX
-				//delete pChain;
+					static CMemoryPool mp(bytesForChainWalkSet + nAllocatedSizeIndex, debug, maxMem);
 
-				if ( reader != NULL )
-					delete reader;
+					if (pIndex != NULL && nAllocatedSizeIndex > 0)
+					{
+						nAllocatedSizeIndex = nAllocatedSizeIndex / sizeof(RTIrcrackiIndexChain) * sizeof(RTIrcrackiIndexChain);		// Round to sizeOfIndexChain boundary
+
+						fseek(fIndex, 0, SEEK_SET);
+
+						while ( ftell(fIndex) != nFileLenIndex )	// Index chunk read loop
+						{
+							// Load index chunk
+							memset(pIndex, 0x00, nAllocatedSizeIndex);
+							printf("reading index... ");
+							gettimeofday( &tv, NULL );
+							unsigned int nDataRead = fread(pIndex, 1, nAllocatedSizeIndex, fIndex);
+							gettimeofday( &tv2, NULL );
+							final = sub_timeofday( tv2, tv );
+
+							float fTime = 1.0f * final.tv_sec + 1.0f * final.tv_usec / 1000000;
+							printf("%u bytes read, disk access time: %.2f s\n", nDataRead, fTime);
+							m_fTotalDiskAccessTime += fTime;
+
+							//nIndexSize = nFileLenIndex / 11;
+							int nIndexChainCountRead = nDataRead / sizeof(RTIrcrackiIndexChain);
+							//fclose(fIndex);
+							unsigned int nCoveredRainbowTableChains = 0;
+							for(int i = 0; i < nIndexChainCountRead; i++)
+							{
+								nCoveredRainbowTableChains += pIndex[i].nChainCount;
+							}
+
+							//RainbowChain* pChain = (RainbowChain*)mp.Allocate(nFileLen, nAllocatedSize);
+							RainbowChain* pChain = (RainbowChain*)mp.Allocate(nCoveredRainbowTableChains * sizeOfChain, nAllocatedSize);
+							if ( debug )
+							{
+								std::cout << "Debug: Allocated " << nAllocatedSize
+									<< " for " << nCoveredRainbowTableChains
+									<< " chains, filelen " << nFileLen
+									<< std::endl;
+							}
+
+							if (pChain != NULL && nAllocatedSize > 0)
+							{
+								nAllocatedSize = nAllocatedSize / sizeOfChain * sizeOfChain;		// Round to sizeOfChain boundary
+
+								uint32 nProcessedChains = 0;
+								while ( ftell(file) != nFileLen
+									&& nProcessedChains < nCoveredRainbowTableChains )	// Chunk read loop
+								{
+									// Load table chunk
+									memset(pChain, 0x00, nAllocatedSize);
+									printf("reading table... ");
+									gettimeofday( &tv, NULL );
+									unsigned int nDataRead = fread(pChain, 1, nAllocatedSize, file);
+									gettimeofday( &tv2, NULL );
+									final = sub_timeofday( tv2, tv );
+
+									float fTime = 1.0f * final.tv_sec + 1.0f * final.tv_usec / 1000000;
+									printf("%u bytes read, disk access time: %.2f s\n", nDataRead, fTime);
+									m_fTotalDiskAccessTime += fTime;
+									int nRainbowChainCountRead = nDataRead / sizeOfChain;
+									// Verify table chunk (Too lazy to implement this)
+
+									if ( debug && !fVerified )
+									{
+										printf("Debug: verifying the file... ");
+
+										// Chain length test
+										unsigned int nIndexToVerify = nRainbowChainCountRead / 2;
+										CChainWalkContext cwc;
+										uint64 nIndexS;
+										nIndexS = pChain[nIndexToVerify].nIndexS & 0x0000FFFFFFFFFFFFULL; // for first 6 bytes
+
+										//printf("nIndexS: %s\n", uint64tostr(nIndexS).c_str());
+										cwc.SetIndex(nIndexS);
+
+										int nPos;
+										for (nPos = 0; nPos < nRainbowChainLen - 1; nPos++)
+										{
+											cwc.IndexToPlain();
+											cwc.PlainToHash();
+											cwc.HashToIndex(nPos);
+										}
+
+										uint64 nEndPoint = 0;
+
+										//for(int i = 0; i < nIndexSize; i++)
+										for(int i = 0; i < nIndexChainCountRead; i++)
+										{
+											if(nIndexToVerify >= pIndex[i].nFirstChain && nIndexToVerify < pIndex[i].nFirstChain + pIndex[i].nChainCount) // We found the matching index
+											{ // Now we need to seek nIndexToVerify into the chains
+												nEndPoint += (pIndex[i].nPrefix & 0x000000FFFFFFFFFFULL) << 16; // & 0x000000FFFFFFFFFFULL for first 5 bytes
+												//printf("nPrefix: %s\n", uint64tostr(pIndex[i].nPrefix & 0x000000FFFFFFFFFF).c_str());
+												//printf("nFirstChain: %d\n", pIndex[i].nFirstChain);
+												//printf("nChainCount: %d\n", pIndex[i].nChainCount);
+												nEndPoint += pChain[nIndexToVerify].nIndexE;
+												break;
+											}
+										}
+
+										if (cwc.GetIndex() != nEndPoint)
+										{
+											printf("rainbow chain length verify fail\n");
+											break;
+										}
+
+										fVerified = true;
+										printf("ok\n");
+									}
+
+									// Search table chunk
+									gettimeofday( &tv, NULL );
+									float preTime = m_fTotalCryptanalysisTime;
+
+									SearchTableChunk(pChain, nRainbowChainLen, nRainbowChainCountRead, hs, pIndex, nIndexChainCountRead, nProcessedChains);
+									float postTime = m_fTotalCryptanalysisTime;
+									gettimeofday( &tv2, NULL );
+									final = sub_timeofday( tv2, tv );
+
+									fTime = 1.0f * final.tv_sec + 1.0f * final.tv_usec / 1000000;
+									printf("cryptanalysis time: %.2f s\n", fTime + postTime - preTime);
+									m_fTotalCryptanalysisTime += fTime;
+									nProcessedChains += nRainbowChainCountRead;
+									// Already finished?
+									if (!hs.AnyHashLeftWithLen(CChainWalkContext::GetHashLen()))
+										break;
+								}
+							}
+							else
+								printf("memory allocation failed for rainbow table\n");
+
+							// XXX
+							//delete pChain;
+						}
+					}
+					else printf("memory allocation failed for index\n");
+				}
 			}
 			else
 			{
-				static CMemoryPool mpIndex(bytesForChainWalkSet, debug, maxMem);
-				uint64 nAllocatedSizeIndex;
-
-				//int nIndexSize = 0;
-				//RTIrcrackiIndexChain *pIndex = NULL;
-
-				std::string indexPathName = pathName + std::string(".index");
-
-				FILE* fIndex = fopen( indexPathName.c_str(), "rb");
-				if(fIndex != NULL)
-				{
-					// File length check
-					long nFileLenIndex = GetFileLen( indexPathName );
-					//unsigned int nRows = nFileLenIndex / 11;
-					//unsigned int nSize = nRows * sizeof(RTIrcrackiIndexChain);
-					//printf("Debug: 8\n");
-					if (nFileLenIndex % 11 != 0)
-						printf("index file length mismatch (%ld bytes)\n", nFileLenIndex);
-					else
-					{
-						//printf("index nSize: %d\n", nSize);
-						//pIndex = (RTIrcrackiIndexChain*)new unsigned char[nSize];
-						RTIrcrackiIndexChain *pIndex = (RTIrcrackiIndexChain*)mpIndex.Allocate(nFileLenIndex, nAllocatedSizeIndex);
-						#ifdef _WIN32
-							if (debug) printf("Debug: Allocated %I64u bytes for index with filelen %ld\n", nAllocatedSizeIndex, nFileLenIndex);
-						#else
-							if (debug) printf("Debug: Allocated %llu bytes for index with filelen %ld\n", nAllocatedSizeIndex, nFileLenIndex);
-						#endif
-
-						static CMemoryPool mp(bytesForChainWalkSet + nAllocatedSizeIndex, debug, maxMem);
-
-						if (pIndex != NULL && nAllocatedSizeIndex > 0)
-						{
-							nAllocatedSizeIndex = nAllocatedSizeIndex / sizeof(RTIrcrackiIndexChain) * sizeof(RTIrcrackiIndexChain);		// Round to sizeOfIndexChain boundary
-
-							fseek(fIndex, 0, SEEK_SET);
-
-							while ( ftell(fIndex) != nFileLenIndex )	// Index chunk read loop
-							{
-								// Load index chunk
-								memset(pIndex, 0x00, nAllocatedSizeIndex);
-								printf("reading index... ");
-								gettimeofday( &tv, NULL );
-								unsigned int nDataRead = fread(pIndex, 1, nAllocatedSizeIndex, fIndex);
-								gettimeofday( &tv2, NULL );
-								final = sub_timeofday( tv2, tv );
-
-								float fTime = 1.0f * final.tv_sec + 1.0f * final.tv_usec / 1000000;
-								printf("%u bytes read, disk access time: %.2f s\n", nDataRead, fTime);
-								m_fTotalDiskAccessTime += fTime;
-
-								//nIndexSize = nFileLenIndex / 11;
-								int nIndexChainCountRead = nDataRead / sizeof(RTIrcrackiIndexChain);
-								//fclose(fIndex);
-								unsigned int nCoveredRainbowTableChains = 0;
-								for(int i = 0; i < nIndexChainCountRead; i++)
-								{
-									nCoveredRainbowTableChains += pIndex[i].nChainCount;
-								}
-
-								//RainbowChain* pChain = (RainbowChain*)mp.Allocate(nFileLen, nAllocatedSize);
-								RainbowChain* pChain = (RainbowChain*)mp.Allocate(nCoveredRainbowTableChains * sizeOfChain, nAllocatedSize);
-								#ifdef _WIN32
-									if (debug) printf("Debug: Allocated %I64u bytes for %u chains, filelen %lu\n", nAllocatedSize, nCoveredRainbowTableChains, (unsigned long)nFileLen);
-								#else
-									if (debug) printf("Debug: Allocated %llu bytes for %u chains, filelen %lu\n", nAllocatedSize, nCoveredRainbowTableChains, (unsigned long)nFileLen);
-								#endif
-
-								if (pChain != NULL && nAllocatedSize > 0)
-								{
-									nAllocatedSize = nAllocatedSize / sizeOfChain * sizeOfChain;		// Round to sizeOfChain boundary
-
-									uint32 nProcessedChains = 0;
-									while ( ftell(file) != nFileLen
-										&& nProcessedChains < nCoveredRainbowTableChains )	// Chunk read loop
-									{
-										// Load table chunk
-										memset(pChain, 0x00, nAllocatedSize);
-										printf("reading table... ");
-										gettimeofday( &tv, NULL );
-										unsigned int nDataRead = fread(pChain, 1, nAllocatedSize, file);
-										gettimeofday( &tv2, NULL );
-										final = sub_timeofday( tv2, tv );
-
-										float fTime = 1.0f * final.tv_sec + 1.0f * final.tv_usec / 1000000;
-										printf("%u bytes read, disk access time: %.2f s\n", nDataRead, fTime);
-										m_fTotalDiskAccessTime += fTime;
-										int nRainbowChainCountRead = nDataRead / sizeOfChain;
-										// Verify table chunk (Too lazy to implement this)
-
-										if ( !fVerified && debug )
-										{
-											printf("verifying the file... ");
-
-											// Chain length test
-											unsigned int nIndexToVerify = nRainbowChainCountRead / 2;
-											CChainWalkContext cwc;
-											uint64 nIndexS;
-											nIndexS = pChain[nIndexToVerify].nIndexS & 0x0000FFFFFFFFFFFFULL; // for first 6 bytes
-
-											//printf("nIndexS: %s\n", uint64tostr(nIndexS).c_str());
-											cwc.SetIndex(nIndexS);
-
-											int nPos;
-											for (nPos = 0; nPos < nRainbowChainLen - 1; nPos++)
-											{
-												cwc.IndexToPlain();
-												cwc.PlainToHash();
-												cwc.HashToIndex(nPos);
-											}
-
-											uint64 nEndPoint = 0;
-
-											//for(int i = 0; i < nIndexSize; i++)
-											for(int i = 0; i < nIndexChainCountRead; i++)
-											{
-												if(nIndexToVerify >= pIndex[i].nFirstChain && nIndexToVerify < pIndex[i].nFirstChain + pIndex[i].nChainCount) // We found the matching index
-												{ // Now we need to seek nIndexToVerify into the chains
-													nEndPoint += (pIndex[i].nPrefix & 0x000000FFFFFFFFFFULL) << 16; // & 0x000000FFFFFFFFFFULL for first 5 bytes
-													//printf("nPrefix: %s\n", uint64tostr(pIndex[i].nPrefix & 0x000000FFFFFFFFFF).c_str());
-													//printf("nFirstChain: %d\n", pIndex[i].nFirstChain);
-													//printf("nChainCount: %d\n", pIndex[i].nChainCount);
-													nEndPoint += pChain[nIndexToVerify].nIndexE;
-													break;
-												}
-											}
-
-											if (cwc.GetIndex() != nEndPoint)
-											{
-												printf("rainbow chain length verify fail\n");
-												break;
-											}
-
-											fVerified = true;
-											printf("ok\n");
-										}
-
-										// Search table chunk
-										gettimeofday( &tv, NULL );
-										float preTime = m_fTotalCryptanalysisTime;
-
-										SearchTableChunk(pChain, nRainbowChainLen, nRainbowChainCountRead, hs, pIndex, nIndexChainCountRead, nProcessedChains);
-										float postTime = m_fTotalCryptanalysisTime;
-										gettimeofday( &tv2, NULL );
-										final = sub_timeofday( tv2, tv );
-
-										fTime = 1.0f * final.tv_sec + 1.0f * final.tv_usec / 1000000;
-										printf("cryptanalysis time: %.2f s\n", fTime + postTime - preTime);
-										m_fTotalCryptanalysisTime += fTime;
-										nProcessedChains += nRainbowChainCountRead;
-										// Already finished?
-										if (!hs.AnyHashLeftWithLen(CChainWalkContext::GetHashLen()))
-											break;
-									}
-								}
-								else
-									printf("memory allocation failed for rainbow table\n");
-
-								// XXX
-								//delete pChain;
-							}
-						}
-						else printf("memory allocation failed for index\n");
-					}
-				}
-				else
-				{
-					printf("Can't load index\n");
-					return;
-				}
-
-				if ( fIndex != NULL )
-					fclose(fIndex);
-
-				//delete pIndex;
-
-				if ( file != NULL )
-					fclose(file);
+				printf("Can't load index\n");
+				return;
 			}
+
+			if ( fIndex != NULL )
+				fclose(fIndex);
+
+			//delete pIndex;
+
+			if ( file != NULL )
+				fclose(file);
 		}
 
-		if (debug) printf("Debug: writing progress to %s\n", sProgressPathName.c_str());
+		if (debug)
+			printf("Debug: writing progress to %s\n", sProgressPathName.c_str());
+
 		FILE* file = fopen(sProgressPathName.c_str(), "a");
 		if (file!=NULL)
 		{
