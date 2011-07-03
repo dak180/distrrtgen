@@ -31,13 +31,13 @@ RTIReader::RTIReader( std::string filename )
 	setFilename( filename );
 
 	m_pIndex = NULL;
-	dataFile = fopen(filename.c_str(), "rb");
+	dataFile = fopen( filename.c_str(), "rb" );
 	if(dataFile == NULL) {
 		printf("could not open file %s\n", filename.c_str());
 		return;		
 	}
 	std::string sIndex = filename + ".index";
-	FILE *pFileIndex = fopen(sIndex.c_str(), "rb");
+	FILE *pFileIndex = fopen( sIndex.c_str(), "rb" );
 	if(pFileIndex == NULL) {
 		printf("could not open index file %s\n", sIndex.c_str());
 		return;

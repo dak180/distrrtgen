@@ -234,7 +234,7 @@ void CChainWalkSet::StoreToFile(uint64* pIndexE, unsigned char* pHash, int nHash
 			}
 		}
 		fclose(fp);
-		}
+	}
 	else
 		printf("Cannot open precalculation file %s\n", sCurrentPrecalcPathName.c_str());
 }

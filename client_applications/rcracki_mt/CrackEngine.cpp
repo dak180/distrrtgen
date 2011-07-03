@@ -583,8 +583,9 @@ void CCrackEngine::SearchTableChunkOld(RainbowChainO* pChain, int nRainbowChainL
 				}
 				hs.SetPlain(rThread->GetHash(), rThread->GetPlain(), rThread->GetBinary());
 
-				FILE* file = fopen(sSessionPathName.c_str(), "a");
-				if (file!=NULL)
+				FILE* file;
+				
+				if ( ( file = fopen( sSessionPathName.c_str(), "a" ) ) != NULL )
 				{
 					std::string buffer = "sHash=" + rThread->GetHash() + ":" + rThread->GetBinary() + ":" + rThread->GetPlain() + "\n";
 					fputs (buffer.c_str(), file);
@@ -908,8 +909,9 @@ void CCrackEngine::SearchTableChunk(RainbowChain* pChain, int nRainbowChainLen, 
 				}
 				hs.SetPlain(rThread->GetHash(), rThread->GetPlain(), rThread->GetBinary());
 
-				FILE* file = fopen(sSessionPathName.c_str(), "a");
-				if (file!=NULL)
+				FILE* file;
+				
+				if ( ( file = fopen( sSessionPathName.c_str(), "a" ) ) != NULL )
 				{
 					std::string buffer = "sHash=" + rThread->GetHash() + ":" + rThread->GetBinary() + ":" + rThread->GetPlain() + "\n";
 					fputs (buffer.c_str(), file);
@@ -995,9 +997,9 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 	}
 
 	// Open
-	FILE* file = fopen(pathName.c_str(), "rb");
+	FILE* file;
 
-	if (file != NULL)
+	if ( ( file = fopen( pathName.c_str(), "rb" ) ) != NULL )
 	{
 		// File length check
 		uint32 sizeOfChain = 0;
@@ -1169,8 +1171,9 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 
 			std::string indexPathName = pathName + std::string(".index");
 
-			FILE* fIndex = fopen( indexPathName.c_str(), "rb");
-			if(fIndex != NULL)
+			FILE* fIndex;
+			
+			if( ( fIndex = fopen( indexPathName.c_str(), "rb" ) ) != NULL )
 			{
 				// File length check
 				long nFileLenIndex = GetFileLen( indexPathName );
@@ -1347,8 +1350,9 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 		if (debug)
 			printf("Debug: writing progress to %s\n", sProgressPathName.c_str());
 
-		FILE* file = fopen(sProgressPathName.c_str(), "a");
-		if (file!=NULL)
+		FILE* file;
+		
+		if ( ( file = fopen( sProgressPathName.c_str(), "a" ) ) != NULL )
 		{
 			std::string buffer = pathName + "\n";
 			fputs (buffer.c_str(), file);

@@ -715,11 +715,12 @@ int main(int argc, char* argv[])
 	}
 	else
 	{
-	// (Over)write session data if we are not resuming
-		FILE* file = fopen(sSessionPathName.c_str(), "w");
+		FILE* file;
+		
 		std::string buffer = "";
 
-		if (file!=NULL)
+		// (Over)write session data if we are not resuming
+		if ( ( file = fopen( sSessionPathName.c_str(), "w" ) ) != NULL )
 		{
 			buffer += "sInputType=" + sInputType + "\n";
 			buffer += "sInput=" + sInput + "\n";
@@ -739,8 +740,9 @@ int main(int argc, char* argv[])
 			fputs (buffer.c_str(), file);
 			fclose (file);
 		}
-		file = fopen(sProgressPathName.c_str(), "w");
-		fclose (file);
+
+		file = fopen( sProgressPathName.c_str(), "w" );
+		fclose( file );
 	}
 
 	// Run

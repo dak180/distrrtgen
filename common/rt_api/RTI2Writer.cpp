@@ -27,7 +27,7 @@
 
 RTI2Writer::RTI2Writer( std::string filename )
 {
-	if ( (pFile = fopen(filename.c_str(), "wb")) == NULL )
+	if ( ( pFile = fopen( filename.c_str(), "wb") ) == NULL )
 	{
 		printf("Unable to open file %s\n", filename.c_str());
 		exit(1);

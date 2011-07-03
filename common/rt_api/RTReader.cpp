@@ -27,7 +27,7 @@ RTReader::RTReader( std::string filename )
 {
 	setChainSizeBytes( 16 );
 	setFilename( filename );
-	dataFile = fopen(filename.c_str(), "rb");
+	dataFile = fopen( filename.c_str(), "rb" );
 }
 
 uint32 RTReader::getChainsLeft()
