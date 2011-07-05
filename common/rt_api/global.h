@@ -42,14 +42,11 @@
 #endif
 
 #if defined(_WIN32) && !defined(__GNUC__)
-	#define UINT4 unsigned __int32
 	#define uint32 unsigned __int32
 #else
 	#ifndef u_int32_t
-		#define UINT4 unsigned int
 		#define uint32 unsigned int
 	#else
-		#define UINT4 u_int32_t
 		#define uint32 u_int32_t
 	#endif
 #endif
