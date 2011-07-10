@@ -128,8 +128,6 @@ RTI2Reader::RTI2Reader( std::string filename )
 			<< std::endl;
 	}
 
-	// XXX copies from header to setters or full RTI20_File struct?
-
 	str = new char[1024];
 
 	if ( header.algorithm == 0 )
