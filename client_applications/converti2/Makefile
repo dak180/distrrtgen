@@ -35,7 +35,7 @@ WARNALL = -Wextra -Wunused-macros -Wunsafe-loop-optimizations -Wundef \
 	-Woverlength-strings -Wdisabled-optimization -Wformat-extra-args \
 	-Wformat-security -Winline
 
-RELEASE_DIR = converti2_0.3_beta5_src
+RELEASE_DIR = converti2_0.3_src
 
 all: converti2
 
