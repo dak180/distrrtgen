@@ -1,6 +1,6 @@
 [rcracki_mt ChangeLog]
 
-0.6.6 (TBD):
+0.6.6 (11 Jul 2011, 01:42:30):
 * RTI2.0 - improved format with header
 * memory leak fixes
 * file descriptor leak fixes
