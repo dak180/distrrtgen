@@ -29,6 +29,8 @@
 #include <map>
 #ifdef _WIN32
 	#include <conio.h>
+	#include <time.h>
+	#include <windows.h>
 #endif
 #include "signal.h"
 #include "Public.h"
