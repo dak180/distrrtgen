@@ -6,6 +6,7 @@
  * Copyright Martin Westergaard Jørgensen <martinwj2005@gmail.com>
  * Copyright 2009, 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
  * Copyright 2009, 2010, 2011 James Nobis <quel@quelrod.net>
+ * Copyright 2011 Logan Watt <logan.watt@gmail.com>
  *
  * This file is part of freerainbowtables.
  *
@@ -28,12 +29,27 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 #include <string>
 #include <vector>
 #include <list>
+#include <iostream>
+#include <algorithm>
 
 #include "global.h"
+
+#ifdef _WIN32
+	#include <io.h>
+#else
+	#include <unistd.h>
+	#include <dirent.h>
+#endif
+
+#if defined(_WIN32) && !defined(__GNUC__)
+	#pragma comment(lib, "libeay32.lib")
+#endif
 
 struct RainbowChainO
 {

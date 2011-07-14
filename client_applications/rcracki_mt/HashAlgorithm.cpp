@@ -6,6 +6,7 @@
  * Copyright 2009, 2010, 2011 Martin Westergaard Jørgensen <martinwj2005@gmail.com>
  * Copyright 2009, 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
  * Copyright 2009, 2010, 2011 James Nobis <quel@quelrod.net>
+ * Copyright 2011 Logan Watt <logan.watt@gmail.com>
  *
  * This file is part of rcracki_mt.
  *
@@ -307,14 +308,14 @@ void HashMSCACHE(unsigned char *pPlain, int nPlainLen, unsigned char* pHash)
 	MD4_Update(&ctx,(unsigned char*) unicode_user,userlen*2);
 	MD4_Final(pHash,&ctx);
 
-	/*
+	
 	unsigned char unicode_pwd[256];
 	for (int i=0; i<nPlainLen; i++)
 	{
 		unicode_pwd[i*2] = pPlain[i];
 		unicode_pwd[i*2+1] = 0x00;
-	}*/
-	/*
+	}
+
 	unsigned char *buf = (unsigned char*)calloc(MSCACHE_HASH_SIZE + nSaltLength, sizeof(unsigned char));	
 	HashNTLM(pPlain, nPlainLen, buf, NULL);
 	//MD4(unicode_pwd, nPlainLen*2, buf);

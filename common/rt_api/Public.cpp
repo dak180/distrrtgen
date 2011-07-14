@@ -6,6 +6,7 @@
  * Copyright Martin Westergaard Jørgensen <martinwj2005@gmail.com>
  * Copyright 2009, 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
  * Copyright 2009, 2010, 2011 James Nobis <quel@quelrod.net>
+ * Copyright 2011 Logan Watt <logan.watt@gmail.com>
  *
  * This file is part of freerainbowtables.
  *
@@ -555,12 +556,13 @@ void ParseHash( std::string sHash, unsigned char* pHash, int& nHashLen )
 
 void Logo()
 {
-	printf("RainbowCrack (improved, multi-threaded) 2.0 - Making a Faster Cryptanalytic Time-Memory Trade-Off\n");
-	printf("by Martin Westergaard <martinwj2005@gmail.com>\n");
-	printf("multi-threaded and enhanced by neinbrucke\n");
-	printf("http://www.freerainbowtables.com/\n");
-	printf("original code by Zhu Shuanglei <shuanglei@hotmail.com>\n");
-	printf("http://www.antsight.com/zsl/rainbowcrack/\n\n");
+	std::cout	<< "RainbowCrack (improved, multi-threaded) 2.0 - Making a Faster Cryptanalytic Time-Memory Trade-Off" << std::endl
+			<< "by Martin Westergaard <martinwj2005@gmail.com>" << std::endl
+			<< "multi-threaded and enhanced by neinbrucke" << std::endl
+			<< "*nix/64-bit compatibility and co-maintainer - James Nobis <quel@quelrod.net>" << std::endl
+			<< "http://www.freerainbowtables.com/" << std::endl
+			<< "original code by Zhu Shuanglei <shuanglei@hotmail.com>" << std::endl
+			<< "http://www.antsight.com/zsl/rainbowcrack/" << std::endl << std::endl;
 }
 
 // XXX nmap is GPL2, will check newer releases regarding license

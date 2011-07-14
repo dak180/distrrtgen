@@ -686,7 +686,7 @@ void CChainWalkContext::PlainToHash()
 
 void CChainWalkContext::HashToIndex(int nPos)
 {
-	m_nIndex = (*(uint64*)m_Hash + m_nReduceOffset + nPos) % m_nPlainSpaceTotal;
+	m_nIndex = (((uint64)(*(&m_Hash))) + m_nReduceOffset + nPos) % m_nPlainSpaceTotal;
 }
 
 uint64 CChainWalkContext::GetIndex()

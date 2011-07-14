@@ -4,6 +4,7 @@
  *
  * Copyright 2010, 2011 Martin Westergaard Jørgensen <martinwj2005@gmail.com>
  * Copyright 2010, 2011 James Nobis <quel@quelrod.net>
+ * Copyright 2011 Logan Watt <logan.watt@gmail.com>
  *
  * This file is part of freerainbowtables.
  *
@@ -124,8 +125,7 @@ RTI2Reader::RTI2Reader( std::string filename )
 			|| (header.reductionFunction == 3 && header.chainLength > header.tableIndex))) // I think this might be "header.chainLength - 2 > header.tableIndex" need to double check
 	{
 		// Sc00bz remarks "(these tables suck)"
-		std::cerr << "WARNING: Table index is not large enough for this chain length"
-			<< std::endl;
+		std::cerr << "WARNING: Table index is not large enough for this chain length" << std::endl;
 	}
 
 	str = new char[1024];
@@ -136,8 +136,7 @@ RTI2Reader::RTI2Reader( std::string filename )
 
 		if ( ret < 0 )
 		{
-			std::cerr << "readHeader fin.read() error, custom algorithm"
-				<< std::endl;
+			std::cerr << "readHeader fin.read() error, custom algorithm" << std::endl;
 			delete [] str;
 			exit( -ret );
 		}
@@ -200,8 +199,7 @@ RTI2Reader::RTI2Reader( std::string filename )
 	
 		if ( hybridSets == 0 )
 		{
-			std::cerr << "readHeader fin.read() error, hybridSets is 0"
-				<< std::endl;
+			std::cerr << "readHeader fin.read() error, hybridSets is 0" << std::endl;
 			delete [] str;
 			exit( 2 ); // invalid header
 		}
@@ -221,8 +219,7 @@ RTI2Reader::RTI2Reader( std::string filename )
 
 			if ( passwordLength == 0 )
 			{
-				std::cerr << "readHeader fin.read() error, passwordLength is 0"
-					<< std::endl;
+				std::cerr << "readHeader fin.read() error, passwordLength is 0" << std::endl;
 				delete [] str;
 				exit( 2 ); //invalid header
 			}
@@ -239,8 +236,7 @@ RTI2Reader::RTI2Reader( std::string filename )
 
 			if ( characterSetFlags == 0 )
 			{
-				std::cerr << "readHeader fin.read() error, characterSetFlags is 0"
-					<< std::endl;
+				std::cerr << "readHeader fin.read() error, characterSetFlags is 0" << std::endl;
 				delete [] str;
 				exit( 2 ); // invalid header
 			}
@@ -336,8 +332,7 @@ RTI2Reader::RTI2Reader( std::string filename )
 
 	if ( count == 0 )
 	{
-		std::cerr << "readIndex fin.read() error, prefixIndex count is 0"
-			<< std::endl;
+		std::cerr << "readIndex fin.read() error, prefixIndex count is 0" << std::endl;
 		exit( 1 ); // file error
 	}
 
@@ -434,24 +429,17 @@ void RTI2Reader::Dump()
 {
 	std::cout << "header.tag: " << header.tag << std::endl;
 	std::cout << "header.minor: " << (uint32)header.minor << std::endl;
-	std::cout << "header.startPointBits: " << (uint32)header.startPointBits
-		<< std::endl;
-	std::cout << "header.endPointBits: " << (uint32)header.endPointBits
-		<< std::endl;
-	std::cout << "header.checkPointBits: "	<< (uint32)header.checkPointBits
-		<< std::endl;
+	std::cout << "header.startPointBits: " << (uint32)header.startPointBits	<< std::endl;
+	std::cout << "header.endPointBits: " << (uint32)header.endPointBits << std::endl;
+	std::cout << "header.checkPointBits: "	<< (uint32)header.checkPointBits << std::endl;
 	std::cout << "header.fileIndex: " << (uint32)header.fileIndex << std::endl;
 	std::cout << "header.files: " << (uint32)header.files << std::endl;
-	std::cout << "header.minimumStartPoint: "
-		<< (uint64)header.minimumStartPoint << std::endl;
-	std::cout << "header.chainLength: "
-		<< (uint32)header.chainLength << std::endl;
-	std::cout << "header.tableIndex: "
-		<< (uint16)header.tableIndex << std::endl;
-	std::cout << "header.algorithm: "
-		<< (uint32)header.algorithm << std::endl;
-	std::cout << "header.reductionFunction: "
-		<< (uint32)header.reductionFunction << std::endl;
+	std::cout << "header.minimumStartPoint: " << (uint64)header.minimumStartPoint << std::endl;
+	std::cout << "header.chainLength: " << (uint32)header.chainLength << std::endl;
+	std::cout << "header.tableIndex: " << (uint16)header.tableIndex << std::endl;
+	std::cout << "header.algorithm: " << (uint32)header.algorithm << std::endl;
+	std::cout << "header.reductionFunction: " << (uint32)header.reductionFunction << std::endl;
+
 	if ( getSalt().size() > 0 )
 		std::cout << "header.salt: " << getSalt() << std::endl;
 	std::cout << "subKeySpaces Count: " << subKeySpaces.size() << std::endl;
@@ -460,16 +448,13 @@ void RTI2Reader::Dump()
 	{
 		std::cout << "subKeySpace " << i + 1 << std::endl;
 		
-		std::cout << "Number of hybrid sets: "
-			<< (uint32)subKeySpaces[i].hybridSets << std::endl;
+		std::cout << "Number of hybrid sets: " << (uint32)subKeySpaces[i].hybridSets << std::endl;
 
 		for ( uint32 j = 0; j < (uint32)subKeySpaces[i].hybridSets; j++ )
 		{
 			std::cout << "Hybrid set " << j + 1 << std::endl;
-			std::cout << "Password length: " << (uint32)subKeySpaces[i].passwordLength[j]
-				<< std::endl;
-			std::cout << "charSetFlags: "
-				<< (uint32)subKeySpaces[i].charSetFlags[j] << std::endl;
+			std::cout << "Password length: " << (uint32)subKeySpaces[i].passwordLength[j] << std::endl;
+			std::cout << "charSetFlags: " << (uint32)subKeySpaces[i].charSetFlags[j] << std::endl;
 
 			if ( subKeySpaces[i].charSetFlags[j] & 1 )
 			{
@@ -484,8 +469,7 @@ void RTI2Reader::Dump()
 		
 	}
 
-	std::cout << "header.checkPointBits: " << (uint32)header.checkPointBits
-		<< std::endl;
+	std::cout << "header.checkPointBits: " << (uint32)header.checkPointBits << std::endl;
 
 	if ( (uint32)header.checkPointBits > 0 )
 	{
@@ -500,8 +484,7 @@ void RTI2Reader::Dump()
 	}
 
 	std::cout << "index.firstPrefix: " << index.firstPrefix << std::endl;
-	std::cout << "index.prefixIndex.size(): "
-		<< index.prefixIndex.size()  << std::endl;
+	std::cout << "index.prefixIndex.size(): " << index.prefixIndex.size()  << std::endl;
 
 	/*
 	for ( uint32 i = 0; i < index.prefixIndex.size(); i++ )
@@ -568,8 +551,9 @@ int RTI2Reader::readChains(unsigned int &numChains, RainbowChainO *pData)
 				std::cerr << "readData fin.read() error" << std::endl;
 				exit( 1 ); // file error
 			}
-
-			chainrow = *((uint64*) str);
+			
+			// Yeah you are welcome. No more warnings. - logan
+			chainrow = (uint64)(*(&str));
 
 			// end point prefix
 			pData[readChains].nIndexE = ( index.firstPrefix + i - 1 ) << header.endPointBits;
