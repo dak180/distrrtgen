@@ -851,7 +851,8 @@ int main(int argc, char* argv[])
 				else
 				{
 					std::cout	<< vUserName[i].c_str() << "\t" << sPlain.c_str() << "\thex:" << sBinary.c_str() << std::endl
-								<< "Failed case correction, trying unicode correction for: " << sPlain.c_str() << std::endl;
+							<< "Failed case correction, trying unicode correction for: " << sPlain.c_str() << std::endl;
+
 					LM2NTLMcorrector corrector;
 					if (corrector.LMPasswordCorrectUnicode(sBinary, NTLMHash, sNTLMPassword))
 					{

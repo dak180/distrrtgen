@@ -552,8 +552,7 @@ int RTI2Reader::readChains(unsigned int &numChains, RainbowChainO *pData)
 				exit( 1 ); // file error
 			}
 			
-			// Yeah you are welcome. No more warnings. - logan
-			chainrow = (uint64)(*(&str));
+			chainrow = *(uint64*)str;
 
 			// end point prefix
 			pData[readChains].nIndexE = ( index.firstPrefix + i - 1 ) << header.endPointBits;
