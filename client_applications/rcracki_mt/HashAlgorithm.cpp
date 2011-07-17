@@ -6,7 +6,6 @@
  * Copyright 2009, 2010, 2011 Martin Westergaard Jørgensen <martinwj2005@gmail.com>
  * Copyright 2009, 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
  * Copyright 2009, 2010, 2011 James Nobis <quel@quelrod.net>
- * Copyright 2011 Logan Watt <logan.watt@gmail.com>
  *
  * This file is part of rcracki_mt.
  *
