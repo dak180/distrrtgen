@@ -38,6 +38,17 @@
 #include "CrackEngine.h"
 #include "lm2ntlm.h"
 
+#ifdef _WIN32
+	#include <io.h>
+#else
+	#include <unistd.h>
+	#include <dirent.h>
+#endif
+
+#if defined(_WIN32) && !defined(__GNUC__)
+	#pragma comment(lib, "libeay32.lib")
+#endif
+
 //////////////////////////////////////////////////////////////////////
 
 #ifdef _WIN32
@@ -207,7 +218,8 @@ void LoadLMHashFromPwdumpFile( std::string sPathName, std::vector<std::string>& 
 						vNTLMHash.push_back(sNTLMHash);
 					}
 					else
-						std::cout << "invalid lm/ntlm hash " << sLMHash.c_str() << ":" << sNTLMHash.c_str() << std::endl;
+						std::cout << "invalid lm/ntlm hash " << sLMHash.c_str()
+							<< ":" << sNTLMHash.c_str() << std::endl;
 				}
 			}
 		}
@@ -241,7 +253,8 @@ void LoadLMHashFromCainLSTFile( std::string sPathName, std::vector<std::string>&
 						vNTLMHash.push_back(sNTLMHash);
 					}
 					else
-						std::cout << "invalid lm/ntlm hash " << sLMHash.c_str() << ":" << sNTLMHash.c_str() << std::endl;
+						std::cout << "invalid lm/ntlm hash " << sLMHash.c_str()
+							<< ":" << sNTLMHash.c_str() << std::endl;
 				}
 			}
 		}
@@ -269,7 +282,6 @@ bool NTLMPasswordSeek(unsigned char* pLMPassword, int nLMPasswordLen, int nLMPas
 		else
 			return false;
 	}
-
 
 	if (NTLMPasswordSeek(pLMPassword, nLMPasswordLen, nLMPasswordNext + 1, pNTLMHash, sNTLMPassword))
 		return true;
@@ -312,33 +324,47 @@ void Usage()
 {
 	Logo();
 
-	std::cout 	<< "usage: rcracki_mt -h hash rainbow_table_pathname" << std::endl
-			<< "       rcracki_mt -l hash_list_file rainbow_table_pathname" << std::endl
-			<< "       rcracki_mt -f pwdump_file rainbow_table_pathname" << std::endl
-			<< "       rcracki_mt -c lst_file rainbow_table_pathname" << std::endl
-			<< std::endl
-			<< "-h hash:                use raw hash as input" << std::endl
-			<< "-l hash_list_file:      use hash list file as input, each hash in a line" << std::endl
-			<< "-f pwdump_file:         use pwdump file as input, handles lanmanager hash only" << std::endl
-			<< "-c lst_file:            use .lst (cain format) file as input" << std::endl
-			<< "-r [-s session_name]:   resume from previous session, optional session name" << std::endl
-			<< "rainbow_table_pathname: pathname(s) of the rainbow table(s)" << std::endl
-			<< std::endl
-			<< "Extra options:    -t [nr] use this amount of threads/cores, default is 1" << std::endl
-			<< "                  -o [output_file] write (temporary) results to this file" << std::endl
-			<< "                  -s [session_name] write session data with this name" << std::endl
-			<< "                  -k keep precalculation on disk" << std::endl
-			<< "                  -m [megabytes] limit memory usage" << std::endl
-			<< "                  -v show debug information" << std::endl
-			<< std::endl;
+	std::cout << "usage: rcracki_mt -h hash rainbow_table_pathname" << std::endl
+		<< "       rcracki_mt -l hash_list_file rainbow_table_pathname"
+		<< std::endl
+		<< "       rcracki_mt -f pwdump_file rainbow_table_pathname" << std::endl
+		<< "       rcracki_mt -c lst_file rainbow_table_pathname" << std::endl
+		<< std::endl
+		<< "-h hash:                use raw hash as input" << std::endl
+		<< "-l hash_list_file:      use hash list file as input, each hash in a line"
+		<< std::endl
+		<< "-f pwdump_file:         use pwdump file as input, handles lanmanager hash only"
+		<< std::endl
+		<< "-c lst_file:            use .lst (cain format) file as input"
+		<< std::endl
+		<< "-r [-s session_name]:   resume from previous session, optional session name"
+		<< std::endl
+		<< "rainbow_table_pathname: pathname(s) of the rainbow table(s)"
+		<< std::endl << std::endl
+		<< "Extra options:    -t [nr] use this amount of threads/cores, default is 1"
+		<< std::endl
+		<< "                  -o [output_file] write (temporary) results to this file"
+		<< std::endl
+		<< "                  -s [session_name] write session data with this name"
+		<< std::endl
+		<< "                  -k keep precalculation on disk" << std::endl
+		<< "                  -m [megabytes] limit memory usage" << std::endl
+		<< "                  -v show debug information" << std::endl
+		<< std::endl;
 #ifdef _WIN32
-	std::cout	<< "example: rcracki_mt -h 5d41402abc4b2a76b9719d911017c592 -t 2 [path]\\MD5" << std::endl
-			<< "         rcracki_mt -l hash.txt [path_to_specific_table]\\*" << std::endl;
+	std::cout << "example: rcracki_mt -h 5d41402abc4b2a76b9719d911017c592 -t 2 [path]\\MD5"
+		<< std::endl
+		<< "         rcracki_mt -l hash.txt [path_to_specific_table]\\*"
+		<< std::endl;
 #else
-	std::cout	<< "example: rcracki_mt -h 5d41402abc4b2a76b9719d911017c592 -t 2 [path]/MD5" << std::endl
-			<< "         rcracki_mt -l hash.txt [path_to_specific_table]/*" << std::endl;
+	std::cout << "example: rcracki_mt -h 5d41402abc4b2a76b9719d911017c592 -t 2 [path]/MD5"
+		<< std::endl
+		<< "         rcracki_mt -l hash.txt [path_to_specific_table]/*"
+		<< std::endl;
 #endif
-	std::cout 	<< "         rcracki_mt -f hash.txt -t 4 -o results.txt *.rti" << std::endl;
+
+	std::cout << "         rcracki_mt -f hash.txt -t 4 -o results.txt *.rti"
+		<< std::endl;
 }
 
 int main(int argc, char* argv[])
@@ -422,7 +448,8 @@ int main(int argc, char* argv[])
 							keepPrecalcFiles = true;
 					}
 					else {
-						std::cout << "illegal option " << sOption.c_str() << " in ini file " << sIniPathName.c_str() << std::endl;
+						std::cout << "illegal option " << sOption.c_str()
+							<< " in ini file " << sIniPathName.c_str() << std::endl;
 						return 0;
 					}
 				}
@@ -430,7 +457,8 @@ int main(int argc, char* argv[])
 		}
 		if (writeOutput && outputFile == "")
 		{
-			std::cout << "You need to specify a 'DefaultResultsFile' with 'AlwaysStoreResultsToFile=1'" << std::endl;
+			std::cout << "You need to specify a 'DefaultResultsFile' "
+				<< "with 'AlwaysStoreResultsToFile=1'" << std::endl;
 			writeOutput = false;
 		}
 	}
@@ -513,7 +541,8 @@ int main(int argc, char* argv[])
 	}
 
 	if (debug && !readFromIni)
-		std::cout << "Debug: Couldn't read rcracki_mt.ini, continuing anyway." << std::endl;
+		std::cout << "Debug: Couldn't read rcracki_mt.ini, continuing anyway."
+			<< std::endl;
 
 	// Load session data if we are resuming
 	if (resumeSession)
@@ -552,7 +581,8 @@ int main(int argc, char* argv[])
 			}
 		}
 		else {
-			std::cout << "Couldn't open session file " << sSessionPathName.c_str() << std::endl;
+			std::cout << "Couldn't open session file " << sSessionPathName.c_str()
+				<< std::endl;
 			return 0;
 		}
 	}
@@ -578,7 +608,8 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	std::cout << "Using " << maxThreads << " threads for pre-calculation and false alarm checking..." << std::endl;
+	std::cout << "Using " << maxThreads << " threads for pre-calculation "
+		<< "and false alarm checking..." << std::endl;
 
 	setvbuf(stdout, NULL, _IONBF,0);
 	if (vPathName.size() == 0)
@@ -587,7 +618,8 @@ int main(int argc, char* argv[])
 		return 0;
 	}
 
-	std::cout << "Found " << vPathName.size() << " rainbowtable files..." << std::endl << std::endl;
+	std::cout << "Found " << vPathName.size() << " rainbowtable files..."
+		<< std::endl << std::endl;
 
 	bool fCrackerType;			// true: hash cracker, false: lm cracker
 	std::vector<std::string> vHash;		// hash cracker
@@ -729,28 +761,25 @@ int main(int argc, char* argv[])
 			fputs (buffer.c_str(), file);
 			fclose (file);
 		}
+		else
+		{
+			std::cout << "Error opening file " << sSessionPathName.c_str()
+				<< " . Check that you have write permission to the directory "
+				<< "that the application is run. Exiting Application." 
+				<< std::endl;
+			return  -1;
+		}
 
-             
-                // if sSessionPathName == NULL
-                // print error message and exit so we don't segfault
-                else
-                {
-					std::cout 	<< "Error opening file " << sSessionPathName.c_str() << " . Check that you have "
-							<< "write permission to the directory that the application is run. Exiting Application." 
-							<< std::endl;
-					return  -1;
-                }
-
-                if( (file = fopen( sProgressPathName.c_str(), "w" )) == NULL )
-                {
-					std::cout	<< "Error opening file " << sProgressPathName.c_str() << " . Check that you have "
-							<< "write permission to the directory that the application is run. Exiting Application." 
-							<< std::endl;
-					return  -1;
-                }
-                else
-                        fclose( file );
-
+		if( (file = fopen( sProgressPathName.c_str(), "w" )) == NULL )
+		{
+			std::cout << "Error opening file " << sProgressPathName.c_str()
+				<< " . Check that you have write permission to the directory "
+				<< "that the application is run. Exiting Application." 
+				<< std::endl;
+			return  -1;
+		}
+		else
+			fclose( file );
 	}
 
 	// Run
@@ -761,31 +790,41 @@ int main(int argc, char* argv[])
 	ce.Run(vPathName, hs, maxThreads, maxMem, resumeSession, debug);
 
 	// Remove session files
-	if (debug) std::cout << "Debug: Removing session files." << std::endl;
+	if (debug)
+		std::cout << "Debug: Removing session files." << std::endl;
 
 	if (remove(sSessionPathName.c_str()) == 0)
 		remove(sProgressPathName.c_str());
 	else
-		if (debug) std::cout << "Debug: Failed removing session files." << std::endl;
+	{
+		if (debug)
+			std::cout << "Debug: Failed removing session files." << std::endl;
+	}
 
 	// Statistics
-	// I could format the output here but how about you be cool and do that in the functions of the class before the return, hmmm?
-	std::cout	<< "statistics" << std::endl
-			<< "-------------------------------------------------------" << std::endl
-			<< "plaintext found:                          " << hs.GetStatHashFound() << " of " << hs.GetStatHashTotal()
-			<< "(" << 100.0f * hs.GetStatHashFound() / hs.GetStatHashTotal() << "%)" << std::endl
-			<< "total disk access time:                   " << ce.GetStatTotalDiskAccessTime() << "s" << std::endl
-			<< "total cryptanalysis time:                 " << ce.GetStatTotalCryptanalysisTime() << "s" << std::endl
-			<< "total pre-calculation time:               " << ce.GetStatTotalPrecalculationTime() << "s" << std::endl
-			<< "total chain walk step:                    " << ce.GetStatTotalChainWalkStep() << std::endl
-			<< "total false alarm:                        " << ce.GetStatTotalFalseAlarm() << std::endl
-			<< "total chain walk step due to false alarm: " << ce.GetStatTotalChainWalkStepDueToFalseAlarm() << std::endl
-			//<< "total chain walk step skipped due to checkpoints: " << ce.GetStatTotalFalseAlarmSkipped(); // Checkpoints not used - yet
-			<< std::endl;
+	std::cout << "statistics" << std::endl
+		<< "-------------------------------------------------------" << std::endl
+		<< "plaintext found:                          " << hs.GetStatHashFound()
+		<< " of " << hs.GetStatHashTotal()
+		<< "(" << 100.0f * hs.GetStatHashFound() / hs.GetStatHashTotal() << "%)"
+		<< std::endl << "total disk access time:                   "
+		<< ce.GetStatTotalDiskAccessTime() << "s" << std::endl
+		<< "total cryptanalysis time:                 "
+		<< ce.GetStatTotalCryptanalysisTime() << "s" << std::endl
+		<< "total pre-calculation time:               "
+		<< ce.GetStatTotalPrecalculationTime() << "s" << std::endl
+		<< "total chain walk step:                    "
+		<< ce.GetStatTotalChainWalkStep() << std::endl
+		<< "total false alarm:                        "
+		<< ce.GetStatTotalFalseAlarm() << std::endl
+		<< "total chain walk step due to false alarm: "
+		<< ce.GetStatTotalChainWalkStepDueToFalseAlarm() << std::endl
+		//<< "total chain walk step skipped due to checkpoints: " << ce.GetStatTotalFalseAlarmSkipped(); // Checkpoints not used - yet
+		<< std::endl;
 
 	// Result
-	std::cout	<< "result" << std::endl
-			<< "-------------------------------------------------------" << std::endl;
+	std::cout << "result" << std::endl
+		<< "-------------------------------------------------------" << std::endl;
 
 	if (fCrackerType)
 	{
@@ -799,7 +838,8 @@ int main(int argc, char* argv[])
 				sBinary = "<notfound>";
 			}
 
-			std::cout << vHash[i].c_str() << "\t" << sPlain.c_str() <<"\thex:" << sBinary.c_str() << std::endl;
+			std::cout << vHash[i].c_str() << "\t" << sPlain.c_str() <<"\thex:"
+				<< sBinary.c_str() << std::endl;
 		}
 	}
 	else
@@ -842,13 +882,16 @@ int main(int argc, char* argv[])
 					if (writeOutput)
 					{
 						if (!writeResultLineToFile(outputFile, vNTLMHash[i].c_str(), sPlain.c_str(), sBinary.c_str()))
-							std::cout << "Couldn't write final result to file!" << std::endl;
+							std::cout << "Couldn't write final result to file!"
+								<< std::endl;
 					}
 				}
 				else
 				{
-					std::cout	<< vUserName[i].c_str() << "\t" << sPlain.c_str() << "\thex:" << sBinary.c_str() << std::endl
-							<< "Failed case correction, trying unicode correction for: " << sPlain.c_str() << std::endl;
+					std::cout << vUserName[i].c_str() << "\t" << sPlain.c_str()
+						<< "\thex:" << sBinary.c_str() << std::endl
+						<< "Failed case correction, trying unicode correction for: "
+						<< sPlain.c_str() << std::endl;
 
 					LM2NTLMcorrector corrector;
 					if (corrector.LMPasswordCorrectUnicode(sBinary, NTLMHash, sNTLMPassword))
@@ -858,17 +901,19 @@ int main(int argc, char* argv[])
 						if (writeOutput)
 						{
 							if (!writeResultLineToFile(outputFile, vNTLMHash[i].c_str(), sPlain.c_str(), sBinary.c_str()))
-								std::cout << "Couldn't write final result to file!" << std::endl;
+								std::cout << "Couldn't write final result to file!"
+									<< std::endl;
 						}
 					}
 					else {
-						std::cout << "unicode correction for password " << sPlain.c_str() << " failed!" << std::endl;
+						std::cout << "unicode correction for password "
+							<< sPlain.c_str() << " failed!" << std::endl;
 					}
 				}
 			}
 
-			std::cout << vUserName[i].c_str() << "\t" << sPlain.c_str() << "\thex:" << sBinary.c_str() << std::endl;
-			
+			std::cout << vUserName[i].c_str() << "\t" << sPlain.c_str()
+				<< "\thex:" << sBinary.c_str() << std::endl;
 		}
 	}
 
