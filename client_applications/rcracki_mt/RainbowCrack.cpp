@@ -17,9 +17,6 @@
  * 2009-01-04 - <james.dickson@comhem.se> - Slightly modified (or "fulhack" as 
  * we say in sweden)  to support cain .lst files.
  *
- * Modified by Logan Watt - check on file open errors and remove C code from a C++ file. Also removed ugly #ifdef and includes
- * 						  - put all includes in a single file, then just include that. See Public.h in common/
- *
  * This file is part of rcracki_mt.
  *
  * rcracki_mt is free software: you can redistribute it and/or modify
@@ -733,8 +730,8 @@ int main(int argc, char* argv[])
 			fclose (file);
 		}
 
-                // Added by: Logan Watt 2011
-                // sSessionPathName == NULL
+             
+                // if sSessionPathName == NULL
                 // print error message and exit so we don't segfault
                 else
                 {

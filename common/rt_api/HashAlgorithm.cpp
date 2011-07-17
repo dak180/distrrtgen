@@ -314,7 +314,7 @@ void HashMSCACHE(unsigned char *pPlain, int nPlainLen, unsigned char* pHash)
 	{
 		unicode_pwd[i*2] = pPlain[i];
 		unicode_pwd[i*2+1] = 0x00;
-	}*/
+	}
 	/*
 	unsigned char *buf = (unsigned char*)calloc(MSCACHE_HASH_SIZE + nSaltLength, sizeof(unsigned char));	
 	HashNTLM(pPlain, nPlainLen, buf, NULL);
