@@ -47,10 +47,6 @@
 	#include <dirent.h>
 #endif
 
-#if defined(_WIN32) && !defined(__GNUC__)
-	#pragma comment(lib, "libeay32.lib")
-#endif
-
 struct RainbowChainO
 {
 	uint64 nIndexS;
