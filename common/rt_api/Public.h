@@ -40,13 +40,6 @@
 
 #include "global.h"
 
-#ifdef _WIN32
-	#include <io.h>
-#else
-	#include <unistd.h>
-	#include <dirent.h>
-#endif
-
 struct RainbowChainO
 {
 	uint64 nIndexS;
