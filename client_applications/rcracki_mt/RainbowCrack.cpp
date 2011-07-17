@@ -764,7 +764,7 @@ int main(int argc, char* argv[])
 		else
 		{
 			std::cout << "Error opening file " << sSessionPathName.c_str()
-				<< " . Check that you have write permission to the directory "
+				<< ". Check that you have write permission to the directory "
 				<< "that the application is run. Exiting Application." 
 				<< std::endl;
 			return  -1;
@@ -773,7 +773,7 @@ int main(int argc, char* argv[])
 		if( (file = fopen( sProgressPathName.c_str(), "w" )) == NULL )
 		{
 			std::cout << "Error opening file " << sProgressPathName.c_str()
-				<< " . Check that you have write permission to the directory "
+				<< ". Check that you have write permission to the directory "
 				<< "that the application is run. Exiting Application." 
 				<< std::endl;
 			return  -1;
