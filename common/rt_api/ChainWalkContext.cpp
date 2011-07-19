@@ -227,6 +227,7 @@ bool CChainWalkContext::SetPlainCharset( std::string sCharsetName, int nPlainLen
 	m_nPlainSpaceUpToX[0] = 0;
 	m_nPlainLenMaxTotal = 0;
 	m_nPlainLenMinTotal = 0;
+	m_nPlainSpaceTotal = 0;
 	uint64 nTemp = 1;
 	uint32 j, k = 1;
 	int i = 1;
