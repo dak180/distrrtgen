@@ -502,6 +502,57 @@ unsigned long GetAvailPhysMemorySize()
 	sysctl(mib, 2, &physMem, &len, NULL, 0);
 	return physMem;
 #elif defined(__linux__)
+	FILE *procfd = NULL;
+
+        /* this is where the memory dragons hide on linux */
+        procfd = fopen("/proc/meminfo", "r");
+        if ( procfd != NULL )
+        {
+                char result[256]={0};
+                char *tmp = NULL;
+                unsigned long cachedram = 0, freeram = 0, bufferram = 0;
+                uint64 tempram = 0;
+
+                /* Read line from /proc/meminfo and store in buffer */
+                while( fgets(result,sizeof(char)*256,procfd) != NULL )
+                {
+                        /* Tokenize the input, read until we find the string we want */
+                        tmp = strtok(result, " ");
+                        if((strncmp(tmp, "Cached:", 7)) == 0)
+                        {
+                                /* Next string is the actual value we need */
+                                tmp = strtok(NULL, " ");
+                                /* convert to unsigned long for calculation */
+                                cachedram = strtoul(tmp, NULL, 10);
+                        }
+                        else if((strncmp(tmp,"MemFree:" , 8)) == 0)
+                        {
+                                tmp = strtok(NULL, " ");
+                                freeram = strtoul(tmp, NULL, 10);
+                        }
+                        else if((strncmp(tmp, "Buffers:", 8)) == 0)
+                        {
+                                tmp = strtok(NULL, " ");
+                                bufferram = strtoul(tmp, NULL, 10);
+                        }
+                }
+                /* Done reading, close file descriptor */
+                fclose(procfd);
+
+                /* calculate the free ram */
+                tempram = (freeram + bufferram + cachedram) * 1024;
+
+                if ( sizeof(long) == 4 )
+                {
+                        if ( tempram > 0x7FFFFFFFLLU )
+                                return (unsigned long) 0x7FFFFFFFLLU;
+                        else
+                                return (unsigned long) tempram;
+                }
+
+                return tempram;
+        }
+
 	struct sysinfo info;
 	sysinfo(&info);
 	return ( info.freeram + info.bufferram ) * (unsigned long) info.mem_unit;
