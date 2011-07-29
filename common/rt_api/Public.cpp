@@ -513,16 +513,12 @@ unsigned long GetAvailPhysMemorySize()
                 unsigned int cachedram = 0, freeram = 0, bufferram = 0;
                 uint64 tempram = 0;
 
-                /* Read line from /proc/meminfo and store in buffer */
                 while( fgets(result,sizeof(char)*256,procfd) != NULL )
                 {
-                        /* Tokenize the input, read until we find the string we want */
                         tmp = strtok(result, " ");
                         if((strncmp(tmp, "Cached:", 7)) == 0)
                         {
-                                /* Next string is the actual value we need */
                                 tmp = strtok(NULL, " ");
-                                /* convert to unsigned int for calculation */
 				cachedram = atoi(tmp);
                         }
                         else if((strncmp(tmp,"MemFree:" , 8)) == 0)
@@ -536,10 +532,8 @@ unsigned long GetAvailPhysMemorySize()
 				bufferram = atoi(tmp);
                         }
                 }
-                /* Done reading, close file descriptor */
                 fclose(procfd);
 
-                /* calculate the free ram */
                 tempram = (freeram + bufferram + cachedram) * 1024;
 
                 if ( sizeof(long) == 4 )
