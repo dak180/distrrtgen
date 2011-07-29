@@ -504,7 +504,6 @@ unsigned long GetAvailPhysMemorySize()
 #elif defined(__linux__)
 	FILE *procfd = NULL;
 
-	printf("\n++++IN MEM AVAIL");
         /* this is where the memory dragons hide on linux */
         procfd = fopen("/proc/meminfo", "r");
         if ( procfd != NULL )
@@ -523,24 +522,18 @@ unsigned long GetAvailPhysMemorySize()
                         {
                                 /* Next string is the actual value we need */
                                 tmp = strtok(NULL, " ");
-                                /* convert to unsigned long for calculation */
-                                /* cachedram = strtoul(tmp, NULL, 10); */
+                                /* convert to unsigned int for calculation */
 				cachedram = atoi(tmp);
-				printf("\n\tCACHED:\t %i", cachedram);
                         }
                         else if((strncmp(tmp,"MemFree:" , 8)) == 0)
                         {
                                 tmp = strtok(NULL, " ");
-                                /* freeram = strtoul(tmp, NULL, 10); */
 				freeram = atoi(tmp);
-				printf("\n\tFREERAM: \t%i", freeram);
                         }
                         else if((strncmp(tmp, "Buffers:", 8)) == 0)
                         {
                                 tmp = strtok(NULL, " ");
-                                /*bufferram = strtoul(tmp, NULL, 10); */
 				bufferram = atoi(tmp);
-				printf("\n\tBUFFERRAM: \t%i", bufferram);
                         }
                 }
                 /* Done reading, close file descriptor */
@@ -549,7 +542,6 @@ unsigned long GetAvailPhysMemorySize()
                 /* calculate the free ram */
                 tempram = (freeram + bufferram + cachedram) * 1024;
 
-		printf("\n#####BOTTOM:\n\tNUM: %llu\n", tempram);
                 if ( sizeof(long) == 4 )
                 {
                         if ( tempram > 0x7FFFFFFFLLU )
@@ -560,7 +552,7 @@ unsigned long GetAvailPhysMemorySize()
 
                 return tempram;
         }
-	printf("\n&&&&&&&&&&^^^^^^^WHAT HAPPENED!@@@@@@@@@@\n\n");
+
 	struct sysinfo info;
 	sysinfo(&info);
 	return ( info.freeram + info.bufferram ) * (unsigned long) info.mem_unit;
