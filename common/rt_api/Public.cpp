@@ -504,8 +504,7 @@ unsigned long GetAvailPhysMemorySize()
 #elif defined(__linux__)
 	FILE *procfd = NULL;
 
-	procfd = fopen("/proc/meminfo", "r");
-	if ( procfd != NULL )
+	if ( (procfd = fopen("/proc/meminfo", "r")) != NULL )
 	{
 		char result[256]={0};
 		char *tmp = NULL;
@@ -515,26 +514,31 @@ unsigned long GetAvailPhysMemorySize()
 		while( fgets(result,sizeof(char)*256,procfd) != NULL )
 		{
 			tmp = strtok(result, " ");
-			if((strncmp(tmp, "Cached:", 7)) == 0)
-			{
-				tmp = strtok(NULL, " ");
-				cachedram = atoi(tmp);
-			}
-			else if((strncmp(tmp,"MemFree:" , 8)) == 0)
+			if( (strncmp(tmp,"MemFree:" , 8)) == 0 )
 			{
 				tmp = strtok(NULL, " ");
 				freeram = atoi(tmp);
 			}
-			else if((strncmp(tmp, "Buffers:", 8)) == 0)
+			else if( (strncmp(tmp, "Buffers:", 8)) == 0 )
 			{
 				tmp = strtok(NULL, " ");
 				bufferram = atoi(tmp);
+			}
+			else if( (strncmp(tmp, "Cached:", 7)) == 0 )
+			{
+				tmp = strtok(NULL, " ");
+				cachedram = atoi(tmp);
+				/*
+				 * in 2.6 and 3.0 kernels the order is maintained and this is the
+				 * last value to read.  Break and don't read more lines
+				 */
+				break;
 			}
 		}
 
 		fclose(procfd);
 
-		tempram = (freeram + bufferram + cachedram) * 1024;
+		tempram = (uint64)(freeram + bufferram + cachedram) * 1024;
 
 		if ( sizeof(long) == 4 )
 		{
@@ -544,7 +548,7 @@ unsigned long GetAvailPhysMemorySize()
 			else
 				return (unsigned long) tempram;
 		}
-
+		
 		return tempram;
 	}
 
