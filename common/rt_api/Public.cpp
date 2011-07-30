@@ -504,48 +504,49 @@ unsigned long GetAvailPhysMemorySize()
 #elif defined(__linux__)
 	FILE *procfd = NULL;
 
-        /* this is where the memory dragons hide on linux */
-        procfd = fopen("/proc/meminfo", "r");
-        if ( procfd != NULL )
-        {
-                char result[256]={0};
-                char *tmp = NULL;
-                unsigned int cachedram = 0, freeram = 0, bufferram = 0;
-                uint64 tempram = 0;
+	procfd = fopen("/proc/meminfo", "r");
+	if ( procfd != NULL )
+	{
+		char result[256]={0};
+		char *tmp = NULL;
+		unsigned int cachedram = 0, freeram = 0, bufferram = 0;
+		uint64 tempram = 0;
 
-                while( fgets(result,sizeof(char)*256,procfd) != NULL )
-                {
-                        tmp = strtok(result, " ");
-                        if((strncmp(tmp, "Cached:", 7)) == 0)
-                        {
-                                tmp = strtok(NULL, " ");
+		while( fgets(result,sizeof(char)*256,procfd) != NULL )
+		{
+			tmp = strtok(result, " ");
+			if((strncmp(tmp, "Cached:", 7)) == 0)
+			{
+				tmp = strtok(NULL, " ");
 				cachedram = atoi(tmp);
-                        }
-                        else if((strncmp(tmp,"MemFree:" , 8)) == 0)
-                        {
-                                tmp = strtok(NULL, " ");
+			}
+			else if((strncmp(tmp,"MemFree:" , 8)) == 0)
+			{
+				tmp = strtok(NULL, " ");
 				freeram = atoi(tmp);
-                        }
-                        else if((strncmp(tmp, "Buffers:", 8)) == 0)
-                        {
-                                tmp = strtok(NULL, " ");
+			}
+			else if((strncmp(tmp, "Buffers:", 8)) == 0)
+			{
+				tmp = strtok(NULL, " ");
 				bufferram = atoi(tmp);
-                        }
-                }
-                fclose(procfd);
+			}
+		}
 
-                tempram = (freeram + bufferram + cachedram) * 1024;
+		fclose(procfd);
 
-                if ( sizeof(long) == 4 )
-                {
-                        if ( tempram > 0x7FFFFFFFLLU )
-                                return (unsigned long) 0x7FFFFFFFLLU;
-                        else
-                                return (unsigned long) tempram;
-                }
+		tempram = (freeram + bufferram + cachedram) * 1024;
 
-                return tempram;
-        }
+		if ( sizeof(long) == 4 )
+		{
+			// ensure that we don't return more than 2^31-1 on 32-bit platforms
+			if ( tempram > 0x7FFFFFFFLLU )
+				return (unsigned long) 0x7FFFFFFFLLU;
+			else
+				return (unsigned long) tempram;
+		}
+
+		return tempram;
+	}
 
 	struct sysinfo info;
 	sysinfo(&info);
