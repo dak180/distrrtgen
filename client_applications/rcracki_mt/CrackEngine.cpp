@@ -7,6 +7,7 @@
  * Copyright 2009, 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
  * Copyright 2009, 2010, 2011 James Nobis <quel@quelrod.net>
  * Copyright 2010 uroskn
+ * Copyright 2011 Janosch Rux <janosch.rux@web.de>
  *
  * This file is part of rcracki_mt.
  *
@@ -1040,8 +1041,6 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 
 		if ( CChainWalkContext::getRTfileFormat() != getRTfileFormatId("RTI" ))
 		{
-			// XXX fix this up as this verified the file exists and is readable
-			// only RTI is directly reading here instead of using a reader
 			fclose( file );
 
 			BaseRTReader *reader = NULL;
@@ -1365,6 +1364,8 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 
 void CCrackEngine::Run(std::vector<std::string> vPathName, CHashSet& hs, int i_maxThreads, uint64 i_maxMem, bool resume, bool bDebug)
 {
+	uint32 i;
+
 #ifndef _WIN32
 	tty_init();
 #endif
@@ -1376,20 +1377,8 @@ void CCrackEngine::Run(std::vector<std::string> vPathName, CHashSet& hs, int i_m
 	// Reset statistics
 	ResetStatistics();
 
-	// XXX it's not like the STL has a sort method...
 	// Sort vPathName (CChainWalkSet need it)
-	uint32 i, j;
-	for (i = 0; i < vPathName.size() - 1; i++)
-		for (j = 0; j < vPathName.size() - i - 1; j++)
-		{
-			if (vPathName[j] > vPathName[j + 1])
-			{
-				std::string sTemp;
-				sTemp = vPathName[j];
-				vPathName[j] = vPathName[j + 1];
-				vPathName[j + 1] = sTemp;
-			}
-		}
+	sort(vPathName.begin(), vPathName.end());
 
 	// Run
 	for (i = 0; i < vPathName.size() && hs.AnyhashLeft(); i++)
