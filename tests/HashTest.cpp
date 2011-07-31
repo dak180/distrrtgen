@@ -18,7 +18,7 @@ int main() {
 	char buffer[250];
 	CHashRoutine hr;
 	string plaintext, hash, testhash;
-	string plainfilename = "plaintext.txt";
+	string plainfilename = "check_lists/plaintext.txt";
 	fstream plainfile, hashfile;
 	static HASHROUTINE HashRoutine;
         unsigned char m_Hash[MAX_HASH_LEN];
@@ -44,7 +44,7 @@ int main() {
 			cout << "Testing " << hashlist[i] << "... ";
 			hr.GetHashRoutine(hashlist[i], HashRoutine, hashlen);
 			plainfile.open(plainfilename.c_str());
-			string hashfilename = hashlist[i] + "_hash.txt";
+			string hashfilename = "check_lists/" + hashlist[i] + "_hash.txt";
 			hashfile.open(hashfilename.c_str());
 
 			if(!plainfile) { cerr << "Can't find " << plainfilename << endl; exit(-1);}
