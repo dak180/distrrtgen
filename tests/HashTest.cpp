@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <cstdlib>
+#include <algorithm>
 
 #include "HashRoutine.h"
 #include "Public.h"
@@ -13,7 +14,7 @@ using namespace std;
 
 int main() {
 
-	uint32 i;
+	uint32 i, num;
 	char buffer[250];
 	CHashRoutine hr;
 	string plaintext, hash, testhash;
@@ -25,7 +26,7 @@ int main() {
 
 	//XXX see todo in HashRoutine.cpp
 	vector<string> hashlist = hr.vHashRoutineName;
-	std::vector<int> hashlen = hr.vHashLen;
+	int hashlen;
 	std::vector<int> plainmaxlen = hr.vMaxPlainLen;
 
 	cout << "Available Routines: ";
@@ -41,8 +42,7 @@ int main() {
 		//until we have a lists for those
 		if ( hashlist[i] != "halflmchall" && hashlist[i] != "lmchall" && hashlist[i] != "ntlmchall" ) {
 			cout << "Testing " << hashlist[i] << "... ";
-			signed int mhm = 16;
-			hr.GetHashRoutine(hashlist[i], HashRoutine, mhm);
+			hr.GetHashRoutine(hashlist[i], HashRoutine, hashlen);
 			plainfile.open(plainfilename.c_str());
 			string hashfilename = hashlist[i] + "_hash.txt";
 			hashfile.open(hashfilename.c_str());
@@ -50,12 +50,18 @@ int main() {
 			if(!plainfile) { cerr << "Can't find " << plainfilename << endl; exit(-1);}
 			if(!hashfile) { cerr << "Can't find " << hashlist[i]+"_hash.txt" << endl; exit(-1);}
 
+			num = 0;
+
 			while( plainfile.getline(buffer, sizeof(buffer)) )  {
 
 				plaintext = buffer;
 				plaintext.erase(plaintext.find_last_not_of(" \n\r\t")+1);
 
 			  if (plainmaxlen[i] == -1 || plaintext.size() < plainmaxlen[i]){
+
+				if(hashlist[i] == "lm")
+					transform(plaintext.begin(), plaintext.end(), plaintext.begin(), ::toupper);
+
 				hashfile.getline(buffer, sizeof(buffer));
 				hash = buffer;
 				hash.erase(hash.find_last_not_of(" \n\r\t")+1);
@@ -63,18 +69,18 @@ int main() {
 
 				testhash.clear();
 
-				for (int ii = 0; ii < hashlen[i]; ii++)  {
+				for (int ii = 0; ii < hashlen; ii++)  {
 					 sprintf(m_HexHash,"%02x", m_Hash[ii]);
 					 testhash +=  m_HexHash;
 				}
 
-				if (testhash != hash) {
-					cout << " failed,  Plaintext: \"" << plaintext << "\" should be " << hash << " but returns " << testhash;
+				if (hash.compare(0, testhash.size(),testhash) != 0) {
+					cout << " failed,  Plaintext Nr." << num+1 << ": \"" << plaintext << "\" should be " << hash << " but returns " << testhash;
 					break;
 					//exit(-1);
 				}
+				num++;
 			 } else {
-				cout << "Skipping... ";
 				break;
 			 }//if
 			}//while
@@ -86,3 +92,7 @@ int main() {
 
 	return 0;
 }
+
+
+
+

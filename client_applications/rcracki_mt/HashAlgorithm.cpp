@@ -63,6 +63,9 @@ void setup_des_key(unsigned char key_56[], des_key_schedule &ks)
 	des_set_key(&key, ks);
 }
 
+
+//It doesnt convert to upper case that must be done before 
+//otherwise it will produce a wrong a hash
 void HashLM(unsigned char* pPlain, int nPlainLen, unsigned char* pHash)
 {
 	/*
