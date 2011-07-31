@@ -7,7 +7,7 @@
  * Copyright 2009, 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
  * Copyright 2009, 2010, 2011 James Nobis <quel@quelrod.net>
  * Copyright 2011 Logan Watt <logan.watt@gmail.com>
- * Copyright 2011 BorderlineADD
+ * Copyright 2011 Karl Fox <karl@lithik.com>
  *
  * This file is part of freerainbowtables.
  *
