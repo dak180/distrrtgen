@@ -51,8 +51,8 @@ debug: all
 debugall: DEBUG += -DDEBUG -g $(WARNALL)
 debugall: all
 
-#m32: DEBUG += -m32
-#m32: all
+m32: DEBUG += -m32
+m32: all
 
 rebuild: clean all
 
