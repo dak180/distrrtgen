@@ -25,6 +25,8 @@
 
 #include "HashRoutine.h"
 #include "HashAlgorithm.h"
+#include "vector"
+
 
 //////////////////////////////////////////////////////////////////////
 
@@ -33,35 +35,36 @@ CHashRoutine::CHashRoutine()
 	// Notice: MIN_HASH_LEN <= nHashLen <= MAX_HASH_LEN
 
 
-	AddHashRoutine("lm",   HashLM,   8);
-	AddHashRoutine("ntlm", HashNTLM, 16);
-//	AddHashRoutine("md2",  HashMD2,  16);
-	AddHashRoutine("md4",  HashMD4,  16);
-	AddHashRoutine("md5",  HashMD5,  16);
-	AddHashRoutine("doublemd5",  HashDoubleMD5,  16);
-/*	AddHashRoutine("sha1", HashSHA1, 20);
-	AddHashRoutine("ripemd160", HashRIPEMD160, 20);
-	AddHashRoutine("mysql323", HashMySQL323, 8);
-	AddHashRoutine("mysqlsha1", HashMySQLSHA1, 20);
-	AddHashRoutine("ciscopix", HashPIX, 16);*/
-//	AddHashRoutine("mscache", HashMSCACHE, 16);
-	AddHashRoutine("halflmchall", HashHALFLMCHALL, 8);
+	AddHashRoutine("lm",   HashLM,   8, 14);
+	AddHashRoutine("ntlm", HashNTLM, 16, -1);
+//	AddHashRoutine("md2",  HashMD2,  16, -1);
+	AddHashRoutine("md4",  HashMD4,  16, -1);
+	AddHashRoutine("md5",  HashMD5,  16, -1);
+	AddHashRoutine("doublemd5",  HashDoubleMD5,  16, -1);
+/*	AddHashRoutine("sha1", HashSHA1, 20, -1);
+	AddHashRoutine("ripemd160", HashRIPEMD160, 20, -1);
+	AddHashRoutine("mysql323", HashMySQL323, 8, -1);
+	AddHashRoutine("mysqlsha1", HashMySQLSHA1, 20, -1);
+	AddHashRoutine("ciscopix", HashPIX, 16, -1);*/
+//	AddHashRoutine("mscache", HashMSCACHE, 16, -1);
+	AddHashRoutine("halflmchall", HashHALFLMCHALL, 8, -1);
 
 	// Added from mao
-	AddHashRoutine("lmchall", HashLMCHALL, 24);
-	AddHashRoutine("ntlmchall", HashNTLMCHALL, 24);
-//	AddHashRoutine("oracle", HashORACLE, 8);
+	AddHashRoutine("lmchall", HashLMCHALL, 24, -1);
+	AddHashRoutine("ntlmchall", HashNTLMCHALL, 24, -1);
+//	AddHashRoutine("oracle", HashORACLE, 8, -1);
 }
 
 CHashRoutine::~CHashRoutine()
 {
 }
 
-void CHashRoutine::AddHashRoutine( std::string sHashRoutineName, HASHROUTINE pHashRoutine, int nHashLen )
+void CHashRoutine::AddHashRoutine( std::string sHashRoutineName, HASHROUTINE pHashRoutine, int nHashLen, int nMaxPlainLen )
 {
 	vHashRoutineName.push_back(sHashRoutineName);
 	vHashRoutine.push_back(pHashRoutine);
 	vHashLen.push_back(nHashLen);
+	vMaxPlainLen.push_pack(nMaxPlainLen);
 }
 
 std::string CHashRoutine::GetAllHashRoutineName()
@@ -73,7 +76,13 @@ std::string CHashRoutine::GetAllHashRoutineName()
 
 	return sRet;
 }
+/*
+std::vector<std::string> CHashRoutine::GetAllHashRoutineNameV()
+{
 
+	return vHashRoutineName;
+}
+*/
 void CHashRoutine::GetHashRoutine( std::string sHashRoutineName, HASHROUTINE& pHashRoutine, int& nHashLen )
 {
 	uint32 i;

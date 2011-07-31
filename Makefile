@@ -50,6 +50,9 @@ rtperfecti:
 rtperfectp:
 	cd server_applications/rtperfectp && make $(TARGET)
 
+tests:
+	cd tests/ && make $(TARGET)
+
 clean: TARGET=clean
 clean: converti2 distrrtgen distrrtgen_cuda distrrtgen_validator rcracki_mt \
 	rti2rto rtperfecter0.0 rtperfecti rtperfectp
