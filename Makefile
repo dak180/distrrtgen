@@ -19,36 +19,48 @@
 # along with freerainbowtables.  If not, see <http://www.gnu.org/licenses/>.
 
 SHELL = /bin/sh
+MAKE = /usr/bin/make
+
+OSNAME = $(shell uname -s)
+
+MAKE_Darwin = /usr/bin/make
+MAKE_FreeBSD = /usr/bin/make
+MAKE_Linux = /usr/bin/make
+MAKE_NetBSD = /usr/bin/make
+MAKE_OpenBSD = /usr/bin/make
+MAKE_SunOS = /usr/bin/gmake
+
+MAKE = ${MAKE_$(OSNAME)}
 
 all: converti2 distrrtgen distrrtgen_cuda rcracki_mt rti2rto \
 	rtperfecter0.0 rtperfecti rtperfectp
 
 converti2:
-	cd client_applications/converti2 && make $(TARGET)
+	cd client_applications/converti2 && $(MAKE) $(TARGET)
 
 distrrtgen:
-	cd boinc_software/boinc_client_apps/distrrtgen && make $(TARGET)
+	cd boinc_software/boinc_client_apps/distrrtgen && $(MAKE) $(TARGET)
 
 distrrtgen_cuda:
-	cd boinc_software/boinc_client_apps/distrrtgen_cuda && make $(TARGET)
+	cd boinc_software/boinc_client_apps/distrrtgen_cuda && $(MAKE) $(TARGET)
 
 distrrtgen_validator:
-	cd boinc_software/boinc_server_apps/distrrtgen_validator && make $(TARGET)
+	cd boinc_software/boinc_server_apps/distrrtgen_validator && $(MAKE) $(TARGET)
 
 rcracki_mt:
-	cd client_applications/rcracki_mt && make $(TARGET)
+	cd client_applications/rcracki_mt && $(MAKE) $(TARGET)
 
 rti2rto:
-	cd client_applications/rti2rto && make $(TARGET)
+	cd client_applications/rti2rto && $(MAKE) $(TARGET)
 
 rtperfecter0.0:
-	cd server_applications/rtperfecter0.0 && make $(TARGET)
+	cd server_applications/rtperfecter0.0 && $(MAKE) $(TARGET)
 
 rtperfecti:
-	cd server_applications/rtperfecti && make $(TARGET)
+	cd server_applications/rtperfecti && $(MAKE) $(TARGET)
 
 rtperfectp:
-	cd server_applications/rtperfectp && make $(TARGET)
+	cd server_applications/rtperfectp && $(MAKE) $(TARGET)
 
 clean: TARGET=clean
 clean: converti2 distrrtgen distrrtgen_cuda distrrtgen_validator rcracki_mt \

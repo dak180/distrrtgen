@@ -37,5 +37,9 @@ You will need Xcode fully installed and then just run make.
 Some versions of g++ will allow -mtune=native as noted for better performance
 for Linux users.  If you enable the option and it fails to build then just use the Makefile as shipped.
 
+SunOS/Solaris/OpenSolaris users
+You must use gmake.  If the system fails to find g++ then either edit CC in the
+Makefile as needed or create a symlink in your PATH for g++.
+
 Linux binary builds/packages
 https://build.opensuse.org/package/show?package=rcracki&project=home%3Aquelrod is the head/trunk build and you may look for derived packages named similar to the release names.

@@ -30,26 +30,32 @@ OPTIMIZATION = -O3
 INCLUDES = -I../../common/rt_api
 CFLAGS = -Wall -ansi $(INCLUDES) $(OPTIMIZATION) -c $(DEBUG)
 LFLAGS = -Wall -ansi -filt $(INCLUDES) $(OPTIMIZATION) $(DEBUG)
-LIBS = -lcrypto -lpthread
+LIBS = -L/lib -L/usr/lib -lcrypto -lpthread
 OBJS = BaseRTReader.o ChainWalkContext.o ChainWalkSet.o CrackEngine.o fast_md5.o HashAlgorithm.o HashRoutine.o HashSet.o lm2ntlm.o fast_md4.o MemoryPool.o Public.o RainbowCrack.o rcrackiThread.o RTReader.o RTIReader.o RTI2Reader.o
 COMMON_API_PATH = ../../common/rt_api
 #sha1.o
 WARNALL = -Wextra -Wunused-macros -Wunsafe-loop-optimizations -Wundef -Woverlength-strings -Wdisabled-optimization -Wformat-extra-args -Wformat-security -Winline
 
 OSNAME = $(shell uname -s)
-# apparently --string-debug works on Linux, OpenBSD, NetBSD, and FreeBSD
-# but not on OSX so to the short name -S
-STRIP = $(shell which strip) -S
+# apparently --strip-debug works on FreeBSD, Linux, NetBSD, OpenBSD, and NetBSD
+# but not on OSX which only takes the short name -S
+# OpenSolaris effectively uses -x
+# Oh lets just forget this until we have autoconf
+#STRIP = $(shell which strip) -S
 
-#LIBS_Darwin = -lcrypto
+#LIBS_Darwin = 
+#LIBS_FreeBSD = 
+#LIBS_Linux = 
 LIBS_NetBSD = -ldes
-#LIBS_OpenBSD = -lcrypto
+#LIBS_OpenBSD = 
+#LIBS_SunOS = 
 
 LIBS += ${LIBS_$(OSNAME)}
 
 RELEASE_DIR = rcracki_mt_0.6.6_src
 
-all: rcracki_mt strip
+#all: rcracki_mt strip
+all: rcracki_mt
 
 rcracki_mt: $(OBJS)
 	$(CC) $(LFLAGS) $(OBJS) $(LIBS) -o rcracki_mt
@@ -129,8 +135,8 @@ rebuild: clean all
 static: DEBUG += -static -static-libgcc
 static: all
 
-strip:
-	$(STRIP) rcracki_mt
+#strip:
+#	$(STRIP) rcracki_mt
 
 uninstall:
 	rm -f $(BIN)/rcracki_mt

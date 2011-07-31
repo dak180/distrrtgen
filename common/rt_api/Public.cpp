@@ -7,6 +7,7 @@
  * Copyright 2009, 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
  * Copyright 2009, 2010, 2011 James Nobis <quel@quelrod.net>
  * Copyright 2011 Logan Watt <logan.watt@gmail.com>
+ * Copyright 2011 BorderlineADD
  *
  * This file is part of freerainbowtables.
  *
@@ -126,7 +127,7 @@
 
 	#if defined(BSD)
 		#include <sys/sysctl.h>
-	#elif defined(__linux__)
+	#elif defined(__linux__) || defined(__sun__)
 		#include <sys/sysinfo.h>
 	#else
 		#error Unsupported Operating System
@@ -555,6 +556,8 @@ unsigned long GetAvailPhysMemorySize()
 	struct sysinfo info;
 	sysinfo(&info);
 	return ( info.freeram + info.bufferram ) * (unsigned long) info.mem_unit;
+#elif defined(__sun__)
+	return ((unsigned long)sysconf(_SC_AVPHYS_PAGES) * (unsigned long)sysconf(_SC_PAGESIZE));
 #else
 	return 0;
 	#error Unsupported Operating System
@@ -570,7 +573,7 @@ std::string GetApplicationPath()
 #else
 	char szTmp[32];
 	// XXX linux/proc file system dependent
-	sprintf(szTmp, "/proc/%d/exe", getpid());
+	sprintf(szTmp, "/proc/%d/exe", (int)getpid());
 	int bytes = readlink(szTmp, fullPath, FILENAME_MAX);
 
 	if( bytes >= 0 )
