@@ -39,15 +39,18 @@ public:
 	CHashRoutine();
 	virtual ~CHashRoutine();
 
-private:
+	//XXX change both to private again and make function for it
 	std::vector<std::string> vHashRoutineName;
+	//-1 means unlimited
+	std::vector<int> vMaxPlainLen;
+private:
 	std::vector<HASHROUTINE> vHashRoutine;
-	std::vector<int> vHashLen;
-
-	void AddHashRoutine( std::string sHashRoutineName, HASHROUTINE pHashRoutine, int nHashLen);
+        std::vector<int> vHashLen;
+	void AddHashRoutine( std::string sHashRoutineName, HASHROUTINE pHashRoutine, int nHashLen, int nMaxPlainLen);
 
 public:
 	std::string GetAllHashRoutineName();
+	//std::vector<std::string> GetAllHashRoutineNameV();
 	void GetHashRoutine( std::string sHashRoutineName, HASHROUTINE& pHashRoutine, int& nHashLen );
 };
 
