@@ -12,13 +12,13 @@
 
 using namespace std;
 
-int main() {
+int main(int argc, char *argv[]) {
 
+	int hashlen;
 	uint32 i, num;
 	char buffer[250];
 	CHashRoutine hr;
-	string plaintext, hash, testhash;
-	string plainfilename = "check_lists/plaintext.txt";
+	string plaintext, hash, testhash, plainfilename;
 	fstream plainfile, hashfile;
 	static HASHROUTINE HashRoutine;
         unsigned char m_Hash[MAX_HASH_LEN];
@@ -26,12 +26,15 @@ int main() {
 
 	//XXX see todo in HashRoutine.cpp
 	vector<string> hashlist = hr.vHashRoutineName;
-	int hashlen;
 	std::vector<int> plainmaxlen = hr.vMaxPlainLen;
 
-	cout << "Available Routines: ";
+        if(argc < 2) {
+		cout << "usage: HashTest plaintextfile\n";
+		exit(-1);
+	}
+	plainfilename = argv[1];
 
-	//Display Algos
+	cout << "Available Routines: ";
 	for(i=0; i < hashlist.size(); i++) {
  		cout << hashlist[i] << " ";
 	}
@@ -39,19 +42,18 @@ int main() {
 
 	//Test each Algo
 	for(i=0; i < hashlist.size(); i++) {
-		//until we have a lists for those
+		//see notes in bug #20
 		if ( hashlist[i] != "halflmchall" && hashlist[i] != "lmchall" && hashlist[i] != "ntlmchall" ) {
 			cout << "Testing " << hashlist[i] << "... ";
 			hr.GetHashRoutine(hashlist[i], HashRoutine, hashlen);
 			plainfile.open(plainfilename.c_str());
-			string hashfilename = "check_lists/" + hashlist[i] + "_hash.txt";
+			string hashfilename = "check_lists/" +  hashlist[i] + "_hash.txt";
 			hashfile.open(hashfilename.c_str());
 
 			if(!plainfile) { cerr << "Can't find " << plainfilename << endl; exit(-1);}
-			if(!hashfile) { cerr << "Can't find " << hashlist[i]+"_hash.txt" << endl; exit(-1);}
+			if(!hashfile) { cerr << "Can't find " << hashfilename << endl; exit(-1);}
 
 			num = 0;
-
 			while( plainfile.getline(buffer, sizeof(buffer)) )  {
 
 				plaintext = buffer;
@@ -62,6 +64,7 @@ int main() {
 				if(hashlist[i] == "lm")
 					transform(plaintext.begin(), plaintext.end(), plaintext.begin(), ::toupper);
 
+				//plaintext = "AAAAAAAAAAAAAAAA";
 				hashfile.getline(buffer, sizeof(buffer));
 				hash = buffer;
 				hash.erase(hash.find_last_not_of(" \n\r\t")+1);
@@ -77,7 +80,6 @@ int main() {
 				if (hash.compare(0, testhash.size(),testhash) != 0) {
 					cout << " failed,  Plaintext Nr." << num+1 << ": \"" << plaintext << "\" should be " << hash << " but returns " << testhash;
 					break;
-					//exit(-1);
 				}
 				num++;
 			 } else {
@@ -92,7 +94,3 @@ int main() {
 
 	return 0;
 }
-
-
-
-
