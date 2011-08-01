@@ -65,7 +65,7 @@ void CHashRoutine::AddHashRoutine( std::string sHashRoutineName, HASHROUTINE pHa
 	vHashRoutineName.push_back(sHashRoutineName);
 	vHashRoutine.push_back(pHashRoutine);
 	vHashLen.push_back(nHashLen);
-	vMaxPlainLen.push_pack(nMaxPlainLen);
+	vMaxPlainLen.push_back(nMaxPlainLen);
 }
 
 std::string CHashRoutine::GetAllHashRoutineName()
