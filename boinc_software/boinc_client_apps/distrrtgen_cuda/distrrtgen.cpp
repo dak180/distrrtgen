@@ -268,7 +268,7 @@ int main(int argc, char **argv) {
 		} else {
 			std::cerr << "Calculations on CUDA failed!" << std::endl;
 			fclose(outfile);
-			return 0;
+			return -1;
 		}
 	}
 	delete [] calcBuff;
