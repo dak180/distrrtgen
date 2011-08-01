@@ -1143,10 +1143,10 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 		uint64 nAllocatedSize = 0;
 		unsigned int bytesForChainWalkSet = hs.GetStatHashTotal() * (nRainbowChainLen-1) * 8;
 
-		if (debug) 
+		if (debug)
 			std::cout << "Debug: Saving " << bytesForChainWalkSet << " bytes of memory for chainwalkset." << std::endl;
 
-		
+
 		if( debug )
 			std::cout << "Debug: This is a table in .rti format." << std::endl;
 
@@ -1190,7 +1190,7 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 					// Load index chunk
 					memset( pIndex, 0x00, nAllocatedSizeIndex );
 					std::cout << "reading index... ";
-					
+
 					gettimeofday( &tv, NULL );
 					unsigned int nDataRead = fread( pIndex, 1, nAllocatedSizeIndex, fIndex );
 					gettimeofday( &tv2, NULL );
@@ -1239,7 +1239,7 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 							int nRainbowChainCountRead = nDataRead / sizeOfChain;
 
 							// Verify table chunk (someone was too lazy to implement)
-							
+
 							if( debug && !fVerified )
 							{
 								std::cout << "Debug: verifying the file...";
@@ -1319,7 +1319,7 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 			if( fIndex != NULL )
 				fclose( fIndex );
 		}//end else
-		
+
 	} // end RTI stuff
 
 	// RTI2 stuff
@@ -1331,7 +1331,7 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 		uint64 nAllocatedSize = 0;
 		unsigned int bytesForChainWalkSet = hs.GetStatHashTotal() * (nRainbowChainLen-1) * 8;
 
-		if (debug) 
+		if (debug)
 			std::cout << "Debug: Saving " << bytesForChainWalkSet << " bytes of memory for chainwalkset." << std::endl;
 
 
@@ -1445,7 +1445,7 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 			printf("Debug: writing progress to %s\n", sProgressPathName.c_str());
 
 	FILE* file;
-		
+
 	if ( ( file = fopen( sProgressPathName.c_str(), "a" ) ) != NULL )
 	{
 		std::string buffer = pathName + std::endl;
