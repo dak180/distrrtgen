@@ -1,3 +1,27 @@
+/*
+ * freerainbowtables is a project for generating, distributing, and using
+ * perfect rainbow tables
+ *
+ * Copyright 2011 Janosch Rux <janosch.rux@web.de>
+ * Copyright 2011 James Nobis <quel@quelrod.net>
+ *
+ * This file is part of freerainbowtables.
+ *
+ * freerainbowtables is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * freerainbowtables is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with freerainbowtables.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Changes: not using OpenSSL routines the slow way anymore, as suggested by jci.
+ */
 #include <fstream>
 #include <iostream>
 #include <vector>
@@ -59,7 +83,7 @@ int main(int argc, char *argv[]) {
 				plaintext = buffer;
 				plaintext.erase(plaintext.find_last_not_of(" \n\r\t")+1);
 
-			  if (plainmaxlen[i] == -1 || plaintext.size() < plainmaxlen[i]){
+			  if (plainmaxlen[i] == -1 || plaintext.size() < (unsigned int)plainmaxlen[i]){
 
 				if(hashlist[i] == "lm")
 					transform(plaintext.begin(), plaintext.end(), plaintext.begin(), ::toupper);

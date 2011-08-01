@@ -2,6 +2,7 @@
 # perfect rainbow tables
 #
 # Copyright 2011 James Nobis <quel@quelrod.net>
+# Copyright 2011 Janosch Rux <janosch.rux@web.de>
 #
 # This file is part of freerainbowtables.
 #
@@ -63,7 +64,7 @@ rtperfectp:
 	cd server_applications/rtperfectp && $(MAKE) $(TARGET)
 
 tests:
-	cd tests/ && make $(TARGET)
+	cd tests && $(MAKE) $(TARGET)
 
 clean: TARGET=clean
 clean: converti2 distrrtgen distrrtgen_cuda distrrtgen_validator rcracki_mt \
