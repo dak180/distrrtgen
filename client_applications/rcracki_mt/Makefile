@@ -86,7 +86,7 @@ m32debug: DEBUG += -m32
 m32debug: debug
 
 m32debugall: DEBUG += -m32
-m32debugall: debugll
+m32debugall: debugall
 
 m32dumpasmall: DEBUG += -m32
 m32dumpasmall: dumpasmall
