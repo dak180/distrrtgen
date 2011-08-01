@@ -44,6 +44,7 @@ WARNALL = -Wextra -Wunused-macros -Wunsafe-loop-optimizations -Wundef \
 
 CXXFLAGS = -Wall -static -static-libgcc -ansi -c -DBOINC $(INCLUDES) \
 	$(OPTIMIZATION) $(DEBUG)
+NVCCFLAGS = --ptxas-options=-v
 
 # -static
 LFLAGS = -Wall -static-libgcc -ansi $(INCLUDES) $(OPTIMIZATION) \
@@ -77,9 +78,11 @@ clean:
 	/bin/rm -f distrrtgen *.o
 
 debug: DEBUG += -DDEBUG -g
+debug: NVCCDEBUG += -DDEBUG -g
 debug: all
 
 debugall: DEBUG += -DDEBUG -g $(WARNALL)
+debugall: NVCCDEBUG += -DDEBUG -g
 debugall: all
 
 distclean:
@@ -123,6 +126,15 @@ rcuda_ext.o: rcuda_ext.h rcuda_ext.cpp $(COMMON_API_PATH)/ChainWalkContext.h
 	$(CXX) $(CXXFLAGS) rcuda_ext.cpp
 
 rcuda.o: rcuda.h rcuda.cu $(COMMON_API_PATH)/Public.h $(COMMON_API_PATH)/global.h
-	$(CUDA_PATH)/bin/nvcc --compiler-bindir=/usr/bin/gcc-4.3 $(OPTIMIZATION) $(DEBUG) -I../../../common/rt_api --compile rcuda.cu
-#	$(CUDA_PATH)/bin/nvcc -G $(OPTIMIZATION) $(DEBUG) -I../../../common/rt_api --compile rcuda.cu
-#	$(CUDA_PATH)/bin/nvcc -G $(DEBUG) --machine 32 -I../../../common/rt_api --compile rcuda.cu
+	$(CUDA_PATH)/bin/nvcc --compiler-bindir=/usr/bin/gcc-4.3 $(OPTIMIZATION) \
+		$(NVCCDEBUG) $(NVCCFLAGS) --compiler-options="$(DEBUG)" \
+		--compiler-options="$(CXXFLAGS)" -I../../../common/rt_api \
+		--compile rcuda.cu
+# debug needs a -G but:
+# /usr/local/cuda/bin/../include/common_functions.h(82): Error: memcpy intrinsic
+# needs a constant size (non-inlined intrinsics not supported)
+
+#	$(CUDA_PATH)/bin/nvcc --compiler-bindir=/usr/bin/gcc-4.3 $(OPTIMIZATION) \
+#		$(NVCCDEBUG) $(NVCCFLAGS) --compiler-options="$(DEBUG)" --machine 32 \
+#		--compiler-options="$(CXXFLAGS)" -I../../../common/rt_api \
+#		--compile rcuda.cu
