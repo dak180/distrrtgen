@@ -20,7 +20,7 @@
 # You should have received a copy of the GNU General Public License
 # along with freerainbowtables.  If not, see <http://www.gnu.org/licenses/>.
 
-import hashlib, smbpasswd, sys
+import hashlib, smbpasswd, sys, os
 from passlib.hash import mysql323
 
 def addHashtoFile(prefix, hash):
@@ -33,7 +33,21 @@ if (len(sys.argv) < 2):
  exit(0)
 
 f = open(sys.argv[1],"r")
+
+try:
+ os.remove("lm_hash.txt")
+ os.remove("ntlm_hash.txt")
+ os.remove("mysql323_hash.txt")
+ os.remove("mysqlsha1_hash.txt")
+ os.remove("md4_hash.txt")
+ os.remove("md5_hash.txt")
+ os.remove("doublemd5_hash.txt")
+ os.remove("sha1_hash.txt")
+except:
+ blub="foo"
+
 line = f.readline()
+
 while line:
     #lm
     addHashtoFile("lm", smbpasswd.lmhash(line.rstrip('\n\r')).lower())

@@ -1,0 +1,22 @@
+###### How to use the HashTest ######
+
+HashTest takes a list of plaintexts, generate the hashes and compare
+them against a list with "check" hashes stored in "check_lists/".
+
+At first you have to generate a set of lists with list_generator.py passing
+a file with plaintexts. After that start HashTest with the Plaintext File you used. 
+There is a sample file in the check_lists/ directory.
+
+
+##### Quick #####
+
+1. ./list_generator.py plain_1-28_100k_words.txt
+2. ./HashTest check_lists/plain_1-28_100k_words.txt
+
+
+##### Dependencies #####
+
+list_generator.py needs serveral cryptolibs:
+
+	- Passlib (http://pypi.python.org/pypi/passlib)
+	- py-smbpasswd (http://barryp.org/software/py-smbpasswd/)
