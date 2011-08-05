@@ -117,9 +117,9 @@ release: clean
 	cat Makefile | sed 's/..\/..\/common\/rt_api/./' > $(RELEASE_DIR)/Makefile
 
 ChainWalkContext.o: $(COMMON_API_PATH)/ChainWalkContext.h \
-	ChainWalkContext.cpp $(COMMON_API_PATH)/HashRoutine.h \
+	$(COMMON_API_PATH)/ChainWalkContext.cpp $(COMMON_API_PATH)/HashRoutine.h \
 	$(COMMON_API_PATH)/Public.h
-	$(CXX) $(CXXFLAGS) -c ChainWalkContext.cpp
+	$(CXX) $(CXXFLAGS) -c $(COMMON_API_PATH)/ChainWalkContext.cpp
 
 des_enc.o: $(COMMON_API_PATH)/des_enc.c $(COMMON_API_PATH)/des_locl.h \
 	$(COMMON_API_PATH)/spr.h

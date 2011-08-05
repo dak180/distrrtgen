@@ -120,7 +120,7 @@ int check_set(
         char partnum[256] = {0};
         strncpy(partnum, results[i].name, pos - results[i].name);
         int partid = atoi(partnum);
-        sprintf(query, "SELECT t.PartSize, t.HashRoutine, t.Charset, t.MinLetters, t.MaxLetters, t.Index, t.ChainLength, p.ChainStart FROM generator_parts p INNER JOIN generator_tables t ON t.TableID = p.TableID WHERE p.PartID = %i", partid);
+        sprintf(query, "SELECT t.PartSize, t.HashRoutine, t.Charset, t.MinLetters, t.MaxLetters, t.Index, t.ChainLength, p.ChainStart, t.Keyspace FROM generator_parts p INNER JOIN generator_tables t ON t.TableID = p.TableID WHERE p.PartID = %i", partid);
         retval = frt.do_query(query);
         if(retval)  {
 		retry = true;
@@ -153,7 +153,7 @@ int check_set(
             results[i].validate_state = VALIDATE_STATE_INVALID;		
 	     continue;
 	 }
-	log_messages.printf(MSG_DEBUG, "Converting %i %s %s %s %s %s %s %s...\n", partid, row[1], row[2], row[3], row[4], row[5], row[6], row[7]);
+	log_messages.printf(MSG_DEBUG, "Validating %i %s %s %s %s %s %s %s %s...\n", partid, row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8]);
 	
 	 string sHashRoutineName = row[1];
 	 string sCharsetName = row[2];
@@ -164,6 +164,7 @@ int check_set(
     mysql_free_result(resp);
 
 	 uint64 nChainStartPosition = atoll(row[7]);
+	 uint64 nKeyspace = atoll(row[8]);
 	log_messages.printf(MSG_DEBUG, "Setting hash routine to %s...\n", sHashRoutineName.c_str());
   	 if (!CChainWalkContext::SetHashRoutine(sHashRoutineName))
  	 {
@@ -196,8 +197,8 @@ int check_set(
 	{
 		int nIndexToVerify = nRainbowChainCountRead / 25 * j - 1;
 		CChainWalkContext cwc;
-		log_messages.printf(MSG_DEBUG, "Setting seed to %lld for verification step %i...\n", (nChainStartPosition + nIndexToVerify), j);
-
+		log_messages.printf(MSG_DEBUG, "Setting seed to %llu for verification step %i...\n", (nChainStartPosition + nIndexToVerify), j);
+//		cwc.Dump();
 		cwc.SetIndex(nChainStartPosition + nIndexToVerify);
 		int nPos;
 		for (nPos = 0; nPos < nRainbowChainLen - 1; nPos++)
@@ -210,14 +211,25 @@ int check_set(
 		if (cwc.GetIndex() != pChain[nIndexToVerify].nIndexE)
 		{
 			log_messages.printf(MSG_CRITICAL,
-				"[RESULT#%d %s] Rainbow chain length verification failed at step %i index %i (%lld != %lld)\n", results[i].id, results[i].name, j, nIndexToVerify, cwc.GetIndex(), pChain[nIndexToVerify].nIndexE);
+				"[RESULT#%d %s] Rainbow chain length verification failed at step %i index %i (%llu != %llu)\n", results[i].id, results[i].name, j, nIndexToVerify, cwc.GetIndex(), pChain[nIndexToVerify].nIndexE);
 	                results[i].outcome = RESULT_OUTCOME_VALIDATE_ERROR;
                         results[i].validate_state = VALIDATE_STATE_INVALID;		
 			break;
-		}
+		} 
 	}
 	if(results[i].outcome == RESULT_OUTCOME_VALIDATE_ERROR && results[i].validate_state == VALIDATE_STATE_INVALID) continue;
 	log_messages.printf(MSG_DEBUG, "Checking if all %i chains is within bounds...\n", PartSize);
+	for(j = 0; j < PartSize; j++)
+   {
+      if(pChain[j].nIndexE > nKeyspace)
+      {
+         log_messages.printf(MSG_CRITICAL,
+         "[RESULT#%d %s] Endpoint index verification failed at step %i with number %llu > keyspace %llu\n", results[i].id, results[i].name, j, pChain[j].nIndexE, nKeyspace);
+         results[i].outcome = RESULT_OUTCOME_VALIDATE_ERROR;
+         results[i].validate_state = VALIDATE_STATE_INVALID;
+         break;
+      }
+   }
 
 /* We can't do StartingPoint and sorting tests anymore because we don't recieve the start points and the files should NOT be sorted anymore!
 	for(j = 0; j < PartSize; j++)
@@ -243,7 +255,7 @@ int check_set(
 	if(results[i].outcome == RESULT_OUTCOME_VALIDATE_ERROR && results[i].validate_state == VALIDATE_STATE_INVALID) continue;
 
 	results[i].validate_state = VALIDATE_STATE_VALID;
-       canonicalid = results[i].id;
+       canonicalid = results[i].id;		
        log_messages.printf(MSG_DEBUG, "WU %i is OK\n", wu.id);
 	retry = false;
 	 /*

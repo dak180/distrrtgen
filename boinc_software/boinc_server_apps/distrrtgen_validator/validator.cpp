@@ -59,7 +59,7 @@
 #define LOCKFILE "validate.out"
 #define PIDFILE  "validate.pid"
 
-#define SELECT_LIMIT    1000
+#define SELECT_LIMIT    100
 #define SLEEP_PERIOD    5
 
 int sleep_interval = SLEEP_PERIOD;
@@ -391,7 +391,7 @@ int handle_wu(
                     transition_time = IMMEDIATE;
                 }
             }
-
+        
     }
 
 leave:
