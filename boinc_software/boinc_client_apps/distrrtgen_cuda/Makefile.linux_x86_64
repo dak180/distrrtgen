@@ -38,7 +38,7 @@ CUDA_VERSION = cuda__23
 #CUDA_VERSION = cuda__30
 #CUDA_VERSION = cuda__32
 PLATFORM = x86_64-pc-linux-gnu
-VERSION = 3.30
+VERSION = 3.31
 INCLUDES = -I../../../common/rt_api -I$(BOINC_DIR) -I$(BOINC_LIB_DIR) \
 	-I$(BOINC_API_DIR) -I$(CUDA_PATH)/include
 COMMON_API_PATH = ../../../common/rt_api
