@@ -38,7 +38,7 @@ CUDA_VERSION = cuda__23
 #CUDA_VERSION = cuda__30
 #CUDA_VERSION = cuda__32
 PLATFORM = i686-pc-linux-gnu
-VERSION = 3.30
+VERSION = 3.32
 INCLUDES = -I../../../common/rt_api -I$(BOINC_DIR) -I$(BOINC_LIB_DIR) \
 	-I$(BOINC_API_DIR) -I$(CUDA_PATH)/include
 COMMON_API_PATH = ../../../common/rt_api
@@ -48,11 +48,10 @@ WARNALL = -Wextra -Wunused-macros -Wunsafe-loop-optimizations -Wundef \
 	-Woverlength-strings -Wdisabled-optimization -Wformat-extra-args \
 	-Wformat-security -Winline
 
-CXXFLAGS = -Wall -static -static-libgcc -ansi -c -DBOINC $(INCLUDES) \
-	$(OPTIMIZATION) $(DEBUG)
+CXXFLAGS = -Wall -ansi -c -DBOINC $(INCLUDES) $(OPTIMIZATION) $(DEBUG)
+NVCCFLAGS = --ptxas-options=-v
 
-# -static
-LFLAGS = -Wall -static-libgcc -ansi $(INCLUDES) $(OPTIMIZATION) \
+LFLAGS = -Wall -ansi $(INCLUDES) $(OPTIMIZATION) \
 	-L$(BOINC_API_DIR) -L$(BOINC_LIB_DIR) -L/usr/X11R6/lib -L/usr/lib \
 	-L$(CUDA_PATH)/lib -L. -Xlinker -rpath . $(DEBUG)
 
@@ -92,9 +91,11 @@ clean:
 	/bin/rm -f distrrtgen *.o
 
 debug: DEBUG += -DDEBUG -g
+debug: NVCCDEBUG += -DDEBUG -g
 debug: all
 
 debugall: DEBUG += -DDEBUG -g $(WARNALL)
+debugall: NVCCDEBUG += -DDEBUG -g
 debugall: all
 
 distclean:
@@ -142,5 +143,8 @@ rcuda_ext.o: rcuda_ext.h rcuda_ext.cpp $(COMMON_API_PATH)/ChainWalkContext.h
 	$(CXX) $(CXXFLAGS) rcuda_ext.cpp
 
 rcuda.o: rcuda.h rcuda.cu $(COMMON_API_PATH)/Public.h $(COMMON_API_PATH)/global.h
-	$(CUDA_PATH)/bin/nvcc $(OPTIMIZATION) $(DEBUG) --machine 32 -I../../../common/rt_api --compile rcuda.cu
+	$(CUDA_PATH)/bin/nvcc --compiler-bindir=/usr/bin/gcc-4.3 $(OPTIMIZATION) \
+		$(NVCCDEBUG) $(NVCCFLAGS) --compiler-options="$(DEBUG)" --machine 32 \
+		--compiler-options="$(CXXFLAGS)" -I../../../common/rt_api \
+		--compile rcuda.cu
 #	$(CUDA_PATH)/bin/nvcc -G $(DEBUG) --machine 32 -I../../../common/rt_api --compile rcuda.cu

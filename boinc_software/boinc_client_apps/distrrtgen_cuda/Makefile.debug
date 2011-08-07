@@ -4,8 +4,7 @@
 # Copyright (C) Zhu Shuanglei <shuanglei@hotmail.com>
 # Copyright 2010 Martin Westergaard Jørgensen <martinwj2005@gmail.com>
 # Copyright 2009, 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
-# Copyright 2009, 2010, 2011 James Nobis <quel@quelrod.net>
-# Copyright 2011 Andrew Dranse <aramith@aramith.org>
+# Copyright 2009, 2010, 2011 James Nobis <frt@quelrod.net>
 #
 # This file is part of freerainbowtables.
 #
@@ -31,60 +30,58 @@ BOINC_LIB_DIR = $(BOINC_DIR)/lib
 CC = g++
 COMMON_LIB_DIR = /usr/lib
 CUDA_PATH = /usr/local/cuda
-CUDA_LIB = libcudart.so.2
+CUDA_LIB = libcudart.so.3
 #CUDA_LIB = libcudart.so.3
-INCLUDES = -I../../../common/rt_api -I$(BOINC_DIR) -I$(BOINC_LIB_DIR) \
+INCLUDES = -I../../../Common/rt\ api -I$(BOINC_DIR) -I$(BOINC_LIB_DIR) \
 	-I$(BOINC_API_DIR) -I$(CUDA_PATH)/include
-COMMON_API_PATH = ../../../common/rt_api
+COMMON_API_PATH = ../../../Common/rt\ api
 
-OPTIMIZATION = -O3
+OPTIMIZATION = #-O3
 WARNALL = -Wextra -Wunused-macros -Wunsafe-loop-optimizations -Wundef \
 	-Woverlength-strings -Wdisabled-optimization -Wformat-extra-args \
 	-Wformat-security -Winline
 
-CXXFLAGS = -Wall -ansi -c -DBOINC $(INCLUDES) $(OPTIMIZATION) $(DEBUG)
-NVCCFLAGS = --ptxas-options=-v
+CXXFLAGS = -Wall -static -static-libgcc -ansi -c -DBOINC $(INCLUDES) \
+	$(OPTIMIZATION) $(DEBUG)
 
-LFLAGS = -Wall -ansi $(INCLUDES) $(OPTIMIZATION) \
+# -static
+LFLAGS = -Wall -static-libgcc -ansi $(INCLUDES) $(OPTIMIZATION) \
 	-L$(BOINC_API_DIR) -L$(BOINC_LIB_DIR) -L/usr/X11R6/lib -L/usr/lib \
-	-L$(CUDA_PATH)/lib64 -L$(CUDA_PATH)/lib -L. -Xlinker -rpath . \
+	-L$(CUDA_PATH)/lib64 -L$(CUDA_PATH)/lib -L. \
 	$(DEBUG)
 
-LIBS = -lboinc_api -lboinc -lpthread -lcudart $(CUDA_LIB) libgcc_s.so.1 \
-	libstdc++.so.6 $(COMMON_LIB_DIR)/libpthread.a
+LIBS = -lboinc_api -lboinc -lpthread -lcudart -lgcc \
+	-lstdc++ $(COMMON_LIB_DIR)/libpthread.a
 OBJS = ChainWalkContext.o des_enc.o des_setkey.o distrrtgen.o ecb_enc.o \
-	HashAlgorithm.o HashRoutine.o fast_md4.o fast_md5.o Public.o rcuda_ext.o \
-	rcuda.o
+	HashAlgorithm.o HashRoutine.o md4.o md5.o Public.o rcuda_ext.o rcuda.o
 
 OSNAME = $(shell uname -s)
 
 all: distrrtgen
 
-distrrtgen: $(CUDA_LIB) libgcc_s.so.1 libstdc++.so.6 $(BOINC_API_DIR)/libboinc_api.a $(BOINC_LIB_DIR)/libboinc.a $(OBJS)
+distrrtgen: $(BOINC_API_DIR)/libboinc_api.a $(BOINC_LIB_DIR)/libboinc.a $(OBJS)
 	$(CXX) $(LFLAGS) $(OBJS) $(LIBS) -o distrrtgen
 
-$(CUDA_LIB):
-	if [ ! -f $(CUDA_LIB) ]; then ln -s $(CUDA_PATH)/lib64/$(CUDA_LIB) $(CUDA_LIB); fi
+#$(CUDA_LIB):
+#	ln -s $(CUDA_PATH)/lib64/$(CUDA_LIB) $(CUDA_LIB)
 
-libstdc++.so.6:
-	if [ ! -f libstdc++.so.6 ]; then ln -s `$(CC) $(CXXFLAGS) -print-file-name=libstdc++.so.6`; fi
+#libstdc++.so.6:
+#	ln -s `$(CC) $(CXXFLAGS) -print-file-name=libstdc++.so.6`
 
-libgcc_s.so.1:
-	if [ ! -f libgcc_s.so.1 ]; then ln -s `$(CC) $(CXXFLAGS) -print-file-name=libgcc_s.so.1`; fi
+#libgcc_s.so.1:
+#	ln -s `$(CC) $(CXXFLAGS) -print-file-name=libgcc_s.so.1`
 
 clean:
 	/bin/rm -f distrrtgen *.o
 
 debug: DEBUG += -DDEBUG -g
-debug: NVCCDEBUG += -DDEBUG -g
 debug: all
 
 debugall: DEBUG += -DDEBUG -g $(WARNALL)
-debugall: NVCCDEBUG += -DDEBUG -g
 debugall: all
 
 distclean:
-	/bin/rm -f distrrtgen *.o $(CUDA_LIB) libgcc_s.so.1 libstdc++.so.6 \
+	/bin/rm -f distrrtgen *.o \
 		boinc_lockfile stderr.txt result init_data.xml boinc_finish_called
 
 rebuild: clean all
@@ -104,18 +101,17 @@ distrrtgen.o: distrrtgen.cpp distrrtgen.h $(COMMON_API_PATH)/ChainWalkContext.h 
 ecb_enc.o: $(COMMON_API_PATH)/ecb_enc.c $(COMMON_API_PATH)/des_locl.h $(COMMON_API_PATH)/spr.h
 	$(CXX) $(CXXFLAGS) $(COMMON_API_PATH)/ecb_enc.c
 
-HashAlgorithm.o: $(COMMON_API_PATH)/HashAlgorithm.h $(COMMON_API_PATH)/HashAlgorithm.cpp $(COMMON_API_PATH)/Public.h $(COMMON_API_PATH)/fast_md4.h 
+HashAlgorithm.o: $(COMMON_API_PATH)/HashAlgorithm.h $(COMMON_API_PATH)/HashAlgorithm.cpp $(COMMON_API_PATH)/Public.h $(COMMON_API_PATH)/md4.h 
 	$(CXX) $(CXXFLAGS) $(COMMON_API_PATH)/HashAlgorithm.cpp
 
 HashRoutine.o: $(COMMON_API_PATH)/HashRoutine.h $(COMMON_API_PATH)/HashRoutine.cpp $(COMMON_API_PATH)/global.h $(COMMON_API_PATH)/HashAlgorithm.h
 	$(CXX) $(CXXFLAGS) $(COMMON_API_PATH)/HashRoutine.cpp
 
-fast_md4.o: $(COMMON_API_PATH)/fast_md4.h $(COMMON_API_PATH)/fast_md4.cpp \
-	$(COMMON_API_PATH)/global.h
-	$(CXX) $(CXXFLAGS) $(COMMON_API_PATH)/fast_md4.cpp
+md4.o: $(COMMON_API_PATH)/md4.h $(COMMON_API_PATH)/md4.cpp $(COMMON_API_PATH)/global.h
+	$(CXX) $(CXXFLAGS) $(COMMON_API_PATH)/md4.cpp
 
-fast_md5.o: $(COMMON_API_PATH)/fast_md5.h $(COMMON_API_PATH)/fast_md5.cpp $(COMMON_API_PATH)/global.h
-	$(CXX) $(CXXFLAGS) $(COMMON_API_PATH)/fast_md5.cpp
+md5.o: $(COMMON_API_PATH)/md5.h $(COMMON_API_PATH)/md5.cpp $(COMMON_API_PATH)/global.h
+	$(CXX) $(CXXFLAGS) $(COMMON_API_PATH)/md5.cpp
 
 Public.o: $(COMMON_API_PATH)/Public.h $(COMMON_API_PATH)/Public.cpp $(COMMON_API_PATH)/global.h
 	$(CXX) $(CXXFLAGS) $(COMMON_API_PATH)/Public.cpp
@@ -124,15 +120,5 @@ rcuda_ext.o: rcuda_ext.h rcuda_ext.cpp $(COMMON_API_PATH)/ChainWalkContext.h
 	$(CXX) $(CXXFLAGS) rcuda_ext.cpp
 
 rcuda.o: rcuda.h rcuda.cu $(COMMON_API_PATH)/Public.h $(COMMON_API_PATH)/global.h
-	$(CUDA_PATH)/bin/nvcc --compiler-bindir=/usr/bin/gcc-4.3 $(OPTIMIZATION) \
-		$(NVCCDEBUG) $(NVCCFLAGS) --compiler-options="$(DEBUG)" \
-		--compiler-options="$(CXXFLAGS)" -I../../../common/rt_api \
-		--compile rcuda.cu
-# debug needs a -G but:
-# /usr/local/cuda/bin/../include/common_functions.h(82): Error: memcpy intrinsic
-# needs a constant size (non-inlined intrinsics not supported)
-
-#	$(CUDA_PATH)/bin/nvcc --compiler-bindir=/usr/bin/gcc-4.3 $(OPTIMIZATION) \
-#		$(NVCCDEBUG) $(NVCCFLAGS) --compiler-options="$(DEBUG)" --machine 32 \
-#		--compiler-options="$(CXXFLAGS)" -I../../../common/rt_api \
-#		--compile rcuda.cu
+	$(CUDA_PATH)/bin/nvcc $(OPTIMIZATION) -G $(DEBUG) -I../../../Common/rt\ api --compile rcuda.cu
+#	$(CUDA_PATH)/bin/nvcc -G $(DEBUG) --machine 32 -I../../../Common/rt\ api --compile rcuda.cu
