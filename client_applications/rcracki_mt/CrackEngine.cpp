@@ -1024,9 +1024,9 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 	{
 		fclose( file );
 
-		BaseRTReader *reader = (BaseRTReader*)new RTReader( pathName );
+		RTReader *reader = new RTReader( pathName );
 
-		uint32 sizeOfChain = reader->getChainSizeBytes();
+		uint32 sizeOfChain = reader->getChainSize();
 		uint64 nAllocatedSize = 0;
 		unsigned int bytesForChainWalkSet = hs.GetStatHashTotal() * (nRainbowChainLen-1) * 8;
 
@@ -1138,8 +1138,8 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 	else if( CChainWalkContext::getRTfileFormat() == getRTfileFormatId("RTI") )
 	{
 		fclose( file );
-		BaseRTReader *reader = (BaseRTReader*)new RTIReader( pathName );
-		uint32 sizeOfChain = reader->getChainSizeBytes();
+		RTIReader *reader = new RTIReader( pathName );
+		uint32 sizeOfChain = reader->getChainSize();
 		uint64 nAllocatedSize = 0;
 		unsigned int bytesForChainWalkSet = hs.GetStatHashTotal() * (nRainbowChainLen-1) * 8;
 
@@ -1318,7 +1318,7 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 	else if( CChainWalkContext::getRTfileFormat() == getRTfileFormatId("RTI2") )
 	{
 		fclose( file );
-		BaseRTReader *reader = (BaseRTReader*)new RTI2Reader( pathName );
+		RTI2Reader *reader = new RTI2Reader( pathName );
 		uint32 sizeOfChain = reader->getChainSizeBytes();
 		uint64 nAllocatedSize = 0;
 		unsigned int bytesForChainWalkSet = hs.GetStatHashTotal() * (nRainbowChainLen-1) * 8;

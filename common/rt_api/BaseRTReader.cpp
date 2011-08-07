@@ -47,12 +47,12 @@ BaseRTReader::BaseRTReader(uint32 chCount, uint32 chLength, uint32 tblIdx, uint3
 	this->tableIndex = tblIdx;
 	this->startPointBits = stPt;
 	this->endPointBits = endPt;
-	this->filename = fname;
+	this->fileName = fname;
 
-	this->data = fopen( filename.c_str(), "rb" );
+	this->data = fopen( fileName.c_str(), "rb" );
 	if( data == NULL )
 	{
-		std::cerr << "ERROR: could not open file: " << filename.c_str() << " EXITING!" << std::endl;
+		std::cerr << "ERROR: could not open file: " << fileName.c_str() << " EXITING!" << std::endl;
 		exit(-1);
 	}
 
@@ -134,7 +134,7 @@ void BaseRTReader::setEndPointBits(uint32 endPt)
 /// setFileName
 void BaseRTReader::setFileName(std::string fname)
 {
-	this->filename = fname;
+	this->fileName = fname;
 }
 
 /// setSalt

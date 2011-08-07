@@ -77,6 +77,12 @@ RTIReader::RTIReader(uint32 chCount, uint32 chLength, uint32 tblIdx, uint32 stPt
 	BaseRTReader(chCount, chLength, tblIdx, stPt, endPt, fname, slt);
 }
 
+/// getChainSize
+uint32 RTIReader::getChainSize()
+{
+	return this->chainSize();
+}
+
 
 /**
  * reads data chains into memory

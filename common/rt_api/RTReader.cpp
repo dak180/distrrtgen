@@ -64,6 +64,12 @@ RTReader::RTReader(uint32 chCount, uint32 chLength, uint32 tblIdx, uint32 stPt, 
 	BaseRTReader(chCount, chLength, tblIdx, stPt, endPt, fname, slt);
 }
 
+/// getChainSize
+uint32 RTReader::getChainSize()
+{
+	return this->chainSize;
+}
+
 /**
  * reads data chains into memory
  * @param uint32 reference to the number of chains to read

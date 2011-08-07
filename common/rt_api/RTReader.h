@@ -63,6 +63,9 @@ class RTReader : public BaseRTReader
 		/// Destructor
 		~RTReader();
 
+		/// Get Methods
+		uint32 getChainSize();
+
 		int readChains(uint32&, RainbowChainO*);
 		uint32 getChainsLeft();
 		uint64 getMinimumStartPoint();
