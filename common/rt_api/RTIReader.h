@@ -4,6 +4,7 @@
  *
  * Copyright 2010, 2011 Martin Westergaard Jørgensen <martinwj2005@gmail.com>
  * Copyright 2010, 2011 James Nobis <quel@quelrod.net>
+ * Copyright 2011 Logan Watt <logan.watt@gmail.com>
  *
  * This file is part of freerainbowtables.
  *
@@ -24,30 +25,58 @@
 #ifndef _RTIREADER_H
 #define _RTIREADER_H
 
-#include <string>
-
-#if defined(_WIN32) && !defined(__GNUC__)
-	#include <io.h>
-#endif
-
-#include "Public.h"
 #include "BaseRTReader.h"
 
-class RTIReader : BaseRTReader
+class RTIReader : public BaseRTReader
 {
-private:
-	unsigned int m_nIndexSize;
-	IndexChain *m_pIndex;
+	private:
+		uint32 chainSize;
+		std::string indexFileName;
+		FILE *indexFileData;
+		struct stat fileStats;
+		struct stat indexFileStats;
+	//unsigned int m_nIndexSize;
+	//IndexChain *m_pIndex;
 
-public:
-	RTIReader( std::string filename );
-	~RTIReader();
+	protected:
+		/// Set methods
+		void setChainSize();
+		void setIndexFileName();
 
-	uint32 getChainsLeft();
-	int readChains(uint32 &numChains, RainbowChainO *pData);
-	void setMinimumStartPoint();
+	public:
+		/// Default Constructor
+		RTIReader();
 
-	void Dump();
+		/** Constructor with filename
+		 * @param std::string file name on disk
+		 * index file is std::string + '.index'
+		 */
+		RTIReader( std::string filename );
+
+		/**
+		 * Argument Constructor
+		 * @param uint32 number of chains in the file
+		 * @param uint32 size of the chain
+		 * @param uint32 reduction function index offset
+		 * @param uint32 start point in the chain
+		 * @param uint32 end point in the chain
+		 * @param std::string name of the file on disk
+		 * @param std::string salt used for hash
+		 */
+		RTIReader(uint32, uint32, uint32, uint32, uint32, std::string, std::string);
+
+		/// Destructor
+		~RTIReader();
+
+		/// Get Methods
+		std::string getIndexFileName();
+		uint32 getChainSize();
+
+		int readChains(uint32 &numChains, RainbowChainO *pData);
+		uint32 getChainsLeft();
+		uint64 getMinimumStartPoint();
+
+		void Dump();
 };
 
 #endif

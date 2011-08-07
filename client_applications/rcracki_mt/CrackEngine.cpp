@@ -1146,15 +1146,15 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 		if (debug)
 			std::cout << "Debug: Saving " << bytesForChainWalkSet << " bytes of memory for chainwalkset." << std::endl;
 
-
 		if( debug )
 			std::cout << "Debug: This is a table in .rti format." << std::endl;
 
 		static CMemoryPool mpIndex( bytesForChainWalkSet, debug, maxMem );
 		uint64 nAllocatedSizeIndex;
 
-		std::string indexPathName = pathName + std::string( ".index" );
-
+		// File length check
+		long nFileLenIndex = GetFileLen( pathName + std::string(".index") );
+		std::string indexPathName = pathName + std::string(".index");
 		FILE *fIndex = fopen( indexPathName.c_str(), "rb" );
 		if( fIndex == NULL )
 		{
@@ -1162,14 +1162,7 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 			return;
 		}
 
-		// File length check
-		long nFileLenIndex = GetFileLen( indexPathName );
-
-		if( nFileLenIndex % 11 != 0 )
-			std::cout << "index file length mismatch (" << nFileLenIndex << " bytes)" << std::endl;
-		else
-		{
-			RTIrcrackiIndexChain *pIndex = (RTIrcrackiIndexChain*)mpIndex.Allocate( nFileLenIndex, nAllocatedSizeIndex );
+		RTIrcrackiIndexChain *pIndex = (RTIrcrackiIndexChain*)mpIndex.Allocate( nFileLenIndex, nAllocatedSizeIndex );
 			if( debug )
 			{
 				std::cout << "Debug: Allocated " << nAllocatedSizeIndex << " bytes for index with filelen " << nFileLenIndex << std::endl;
@@ -1313,12 +1306,11 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 			// XXX
 			// delete pChain
 
-			//if( reader != NULL )
-			//	delete reader;
+			if( reader != NULL )
+				delete reader;
 
 			if( fIndex != NULL )
 				fclose( fIndex );
-		}//end else
 
 	} // end RTI stuff
 

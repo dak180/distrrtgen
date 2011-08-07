@@ -4,6 +4,7 @@
  *
  * Copyright 2010, 2011 Martin Westergaard Jørgensen <martinwj2005@gmail.com>
  * Copyright 2010, 2011 James Nobis <quel@quelrod.net>
+ * Copyright 2011 Logan Watt <logan.watt@gmail.com>
  *
  * This file is part of freerainbowtables.
  *
@@ -21,29 +22,51 @@
  * along with freerainbowtables.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+
 #ifndef _RTREADER_H
 #define _RTREADER_H
 
-#include <string>
-
-#if defined(_WIN32) && !defined(__GNUC__)
-	#include <io.h>
-#endif
-
-#include "Public.h"
 #include "BaseRTReader.h"
 
-class RTReader : BaseRTReader
+/**
+ * Reader class for original .rt file format
+ */
+class RTReader : public BaseRTReader
 {
-private:
+	private:
+		uint32 chainSize;
+		struct stat fileStats;
 
-public:
-	RTReader( std::string filename );
-	~RTReader() { };
+	protected:
 
-	uint32 getChainsLeft();
-	int readChains(uint32 &numChains, RainbowChainO *pData);
-	void setMinimumStartPoint();
+	public:
+		/// Default Constructor
+		RTReader();
+
+		/** Constructor with filename
+		 * @param std::string file name on disk
+		 */
+		RTReader(std::string);
+
+		/**
+		 * Argument Constructor
+		 * @param uint32 number of chains in the file
+		 * @param uint32 size of the chain
+		 * @param uint32 reduction function index offset
+		 * @param uint32 start point in the chain
+		 * @param uint32 end point in the chain
+		 * @param std::string name of the file on disk
+		 * @param std::string salt used for hash
+		 */
+		RTReader(uint32, uint32, uint32, uint32, uint32, std::string, std::string);
+
+		/// Destructor
+		~RTReader();
+
+		int readChains(uint32&, RainbowChainO*);
+		uint32 getChainsLeft();
+		uint64 getMinimumStartPoint();
+
 };
 
 #endif

@@ -5,6 +5,7 @@
  * Copyright 2010, 2011 Martin Westergaard Jørgensen <martinwj2005@gmail.com>
  * Copyright 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
  * Copyright 2010, 2011 James Nobis <quel@quelrod.net>
+ * Copyright 2011 Logan Watt <logan.watt@gmail.com>
  *
  * This file is part of freerainbowtables.
  *
@@ -24,59 +25,120 @@
 
 #include "BaseRTReader.h"
 
+/// Empty Constructor for speed
 BaseRTReader::BaseRTReader()
 {
-	chainPosition = 0;
-
-	// set it to the maximum possible value
-	minimumStartPoint = (uint64)-1;
 }
 
+/**
+ * Argument Constructor
+ * @param uint32 number of chains in the file
+ * @param uint32 size of the chain
+ * @param uint32 reduction function index offset
+ * @param uint32 start point in the chain
+ * @param uint32 end point in the chain
+ * @param std::string name of the file on disk
+ * @param std::string salt used for hash
+ */
+BaseRTReader::BaseRTReader(uint32 chCount, uint32 chLength, uint32 tblIdx, uint32 stPt, uint32 endPt, std::string fname, std::string slt)
+{
+	this->chainCount = chCount;
+	this->chainLength = chLength;
+	this->tableIndex = tblIdx;
+	this->startPointBits = stPt;
+	this->endPointBits = endPt;
+	this->filename = fname;
+
+	this->data = fopen( filename.c_str(), "rb" );
+	if( data == NULL )
+	{
+		std::cerr << "ERROR: could not open file: " << filename.c_str() << " EXITING!" << std::endl;
+		exit(-1);
+	}
+
+	this->salt = slt;
+	this->chainPosition = 0;
+}
+
+/// Destructor
+BaseRTReader::~BaseRTReader()
+{
+}
+
+/// getChainCount
+uint32 BaseRTReader::getChainCount()
+{
+	return this->chainCount;
+}
+
+/// getChainLength
 uint32 BaseRTReader::getChainLength()
 {
-	return chainLength;
+	return this->chainLength;
 }
 
-uint32 BaseRTReader::getChainSizeBytes()
+/// getTableIndex
+uint32 BaseRTReader::getTableIndex()
 {
-	return chainSizeBytes;
+	return this->tableIndex;
 }
 
-uint64 BaseRTReader::getMinimumStartPoint()
+/// getStartPointBits
+uint32 BaseRTReader::getStartPointBits()
 {
-	return minimumStartPoint;
+	return this->startPointBits;
 }
 
-std::string BaseRTReader::getFilename()
+/// getEndPointBits
+uint32 BaseRTReader::getEndPointBits()
 {
-	return filename;
+	return this->endPointBits;
 }
 
+/// getSalt
 std::string BaseRTReader::getSalt()
 {
-	return salt;
+	return this->salt;
 }
 
-void BaseRTReader::setChainLength( uint32 chainLength )
+/// setChainCount
+void BaseRTReader::setChainCount(uint32 chCount)
 {
-	this->chainLength = chainLength;
+	this->chainCount = chCount;
 }
 
-void BaseRTReader::setChainSizeBytes( uint32 chainSizeBytes )
+/// setChainLength
+void BaseRTReader::setChainLength(uint32 chLength)
 {
-	this->chainSizeBytes = chainSizeBytes;
+	this->chainLength = chLength;
 }
 
-void BaseRTReader::setFilename( std::string filename )
+/// setTableIndex
+void BaseRTReader::setTableIndex(uint32 tblIdx)
 {
-	this->filename = filename;
+	this->tableIndex = tblIdx;
 }
 
-void BaseRTReader::setSalt( std::string salt )
+/// setStartPointBits
+void BaseRTReader::setStartPointBits(uint32 stPt)
 {
-	this->salt = salt;
+	this->startPointBits = stPt;
 }
 
-void BaseRTReader::Dump()
+/// setEndPointBits
+void BaseRTReader::setEndPointBits(uint32 endPt)
 {
+	this->endPointBits = endPt;
+}
+
+/// setFileName
+void BaseRTReader::setFileName(std::string fname)
+{
+	this->filename = fname;
+}
+
+/// setSalt
+void BaseRTReader::setSalt(std::string slt)
+{
+	this->salt = slt;
 }
