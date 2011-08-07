@@ -70,7 +70,7 @@ all: distrrtgen
 distrrtgen: libcudart_$(PLATFORM).$(CUDA_LIB) \
 	libgcc_s_$(PLATFORM).so.1 libstdc++_$(PLATFORM).so.6 \
 	$(BOINC_API_DIR)/libboinc_api.a $(BOINC_LIB_DIR)/libboinc.a $(OBJS)
-	$(CXX) $(LFLAGS) $(OBJS) $(LIBS) -o distrrtgen
+	$(CXX) $(LFLAGS) $(OBJS) $(LIBS) -o distrrtgen_$(VERSION)_$(PLATFORM)_$(CUDA_VERSION)
 
 libcudart_$(PLATFORM).$(CUDA_LIB):
 	ln -s $(CUDA_PATH)/lib/libcudart.$(CUDA_LIB) \
@@ -88,7 +88,7 @@ libgcc_s_$(PLATFORM).so.1:
 	echo -n "<copy_file/>" > libgcc_s.so.1=libgcc_s_$(VERSION)_$(PLATFORM)_$(CUDA_VERSION).so.1.file_ref_info
 
 clean:
-	/bin/rm -f distrrtgen *.o
+	/bin/rm -f distrrtgen_$(VERSION)_$(PLATFORM)_$(CUDA_VERSION) *.o
 
 debug: DEBUG += -DDEBUG -g
 debug: NVCCDEBUG += -DDEBUG -g
@@ -98,8 +98,8 @@ debugall: DEBUG += -DDEBUG -g $(WARNALL)
 debugall: NVCCDEBUG += -DDEBUG -g
 debugall: all
 
-distclean:
-	/bin/rm -f distrrtgen *.o \
+distclean: clean
+	/bin/rm -f \
 		libgcc_s.so.1=libgcc_s_$(VERSION)_$(PLATFORM)_$(CUDA_VERSION).so.1 \
 		libstdc++.so.6=libstdc++_$(VERSION)_$(PLATFORM)_$(CUDA_VERSION).so.6 \
 		libcudart.$(CUDA_LIB)=libcudart_$(VERSION)_$(PLATFORM)_$(CUDA_VERSION).$(CUDA_LIB) \

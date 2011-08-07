@@ -83,8 +83,8 @@ debugall: DEBUG += -DDEBUG -g $(WARNALL)
 debugall: NVCCDEBUG += -DDEBUG -g
 debugall: all
 
-distclean:
-	/bin/rm -f distrrtgen *.o $(CUDA_LIB) libgcc_s.so.1 libstdc++.so.6 \
+distclean: clean
+	/bin/rm -f $(CUDA_LIB) libgcc_s.so.1 libstdc++.so.6 \
 		boinc_lockfile stderr.txt result init_data.xml boinc_finish_called
 
 rebuild: clean all
