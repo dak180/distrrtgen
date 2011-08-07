@@ -196,9 +196,8 @@ extern "C" int CalcChainsOnCUDA(const rcuda::RCudaTask* task, uint64 *resultBuff
 		case rcuda::RHASH_UNDEF:
 			break;
 		}
-		cuErr = cudaGetLastError();
-		if(cuErr == cudaSuccess)
-			cuErr = cudaThreadSynchronize();
+
+		cuErr = cudaThreadSynchronize();
 	}
 
 	if(cuErr == cudaSuccess)

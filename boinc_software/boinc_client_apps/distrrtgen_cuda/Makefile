@@ -42,12 +42,11 @@ WARNALL = -Wextra -Wunused-macros -Wunsafe-loop-optimizations -Wundef \
 	-Woverlength-strings -Wdisabled-optimization -Wformat-extra-args \
 	-Wformat-security -Winline
 
-CXXFLAGS = -Wall -static -static-libgcc -ansi -c -DBOINC $(INCLUDES) \
+CXXFLAGS = -Wall -ansi -c -DBOINC $(INCLUDES) \
 	$(OPTIMIZATION) $(DEBUG)
 NVCCFLAGS = --ptxas-options=-v
 
-# -static
-LFLAGS = -Wall -static-libgcc -ansi $(INCLUDES) $(OPTIMIZATION) \
+LFLAGS = -Wall -ansi $(INCLUDES) $(OPTIMIZATION) \
 	-L$(BOINC_API_DIR) -L$(BOINC_LIB_DIR) -L/usr/X11R6/lib -L/usr/lib \
 	-L$(CUDA_PATH)/lib64 -L$(CUDA_PATH)/lib -L. -Xlinker -rpath . \
 	$(DEBUG)

@@ -60,9 +60,6 @@
 #include "rcuda.h"
 #include "rcuda_ext.h"
 
-#define EXIT_CODE_TEMP_SLEEP -20
-
-
 /*
 bool early_exit = false;
 bool early_crash = false;
@@ -92,20 +89,14 @@ int main(int argc, char **argv) {
 	}
 	argc = (int)argVec.size();
 	argv = &argVec[0];
-	if(!(cudaDevice < 0))
-		// set the cuda device
-		if(rcuda::SetCudaDevice(cudaDevice) != 0)
-		{
-			//XXX this call doesn't work on linux
-			// fixed in upstream source 2010-09-16
-			// http://bolt.berkeley.edu/trac/changeset/22382
-			#ifdef _WIN32
-				boinc_temporary_exit(60);
-			#else
-				sleep(60);
-				exit(EXIT_CODE_TEMP_SLEEP);
-			#endif
-		}
+	if(cudaDevice < 0)
+		cudaDevice = 0;
+
+	boinc_begin_critical_section();
+
+	// set the cuda device
+	if ( rcuda::SetCudaDevice(cudaDevice) != 0 )
+		boinc_temporary_exitHack();
 
 	if(argc < 10)
 	{
@@ -251,6 +242,15 @@ int main(int argc, char **argv) {
 			calcBuff[2*ii+1] = 0;
 		}
 		calcSize = rcuda::CalcChainsOnCUDA(&cuTask, calcBuff);
+
+		BOINC_STATUS boinc_status;
+		boinc_get_status(&boinc_status);
+
+		if (boinc_status.quit_request || boinc_status.abort_request)
+		{
+			boinc_end_critical_section();
+			while (1) boinc_sleep(1);
+		}
 
 		if(calcSize > 0) {
 			nCurrentCalculatedChains += calcSize;
