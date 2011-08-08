@@ -63,6 +63,11 @@ BaseRTReader::BaseRTReader(uint32 chCount, uint32 chLength, uint32 tblIdx, uint3
 /// Destructor
 BaseRTReader::~BaseRTReader()
 {
+	if( data != NULL )
+	{
+		fclose( data );
+		delete data;
+	}
 }
 
 /// getChainCount
@@ -93,6 +98,12 @@ uint32 BaseRTReader::getStartPointBits()
 uint32 BaseRTReader::getEndPointBits()
 {
 	return this->endPointBits;
+}
+
+/// getFileName
+std::string BaseRTReader::getFileName()
+{
+	return this->fileName;
 }
 
 /// getSalt
@@ -141,4 +152,9 @@ void BaseRTReader::setFileName(std::string fname)
 void BaseRTReader::setSalt(std::string slt)
 {
 	this->salt = slt;
+}
+
+/// Dump
+void BaseRTReader::Dump()
+{
 }

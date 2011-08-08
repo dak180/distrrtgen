@@ -27,21 +27,24 @@
 
 #include "BaseRTReader.h"
 
+// http://www.tobtu.com/rtcalc.php#info -- RTI file format info
+
 class RTIReader : public BaseRTReader
 {
 	private:
-		uint32 chainSize;
+		uint32 chainSize;					// 8 bytes -> 6 byte start point + 2 byte end point
+		uint32 indexSize; 				// 11 bytes -> 5 byte EP prefix + 4 byte Chain offset + 2 bytes number of chains
 		std::string indexFileName;
 		FILE *indexFileData;
 		struct stat fileStats;
 		struct stat indexFileStats;
-	//unsigned int m_nIndexSize;
-	//IndexChain *m_pIndex;
+		IndexChain *index;
 
 	protected:
 		/// Set methods
-		void setChainSize();
-		void setIndexFileName();
+		void setChainSize(uint32);
+		void setIndexFileName(std::string);
+		void loadIndex();
 
 	public:
 		/// Default Constructor
@@ -71,6 +74,7 @@ class RTIReader : public BaseRTReader
 		/// Get Methods
 		std::string getIndexFileName();
 		uint32 getChainSize();
+		uint32 getIndexSize();
 
 		int readChains(uint32 &numChains, RainbowChainO *pData);
 		uint32 getChainsLeft();

@@ -39,11 +39,11 @@ RTReader::RTReader(std::string fname)
 {
 	//bytes per chain
 	this->chainSize = 16;
-	filename = fname;
-	
-	if( stat( filename.c_str(), &fileStats ) == -1 )
+	setFileName( fname );
+
+	if( stat( getFileName().c_str(), &fileStats ) == -1 )
 	{
-		std::cerr << "ERROR: stat() for file: " << filename.c_str() << " FAILED! " << std::endl;	
+		std::cerr << "ERROR: stat() for file: " << getFileName() << " FAILED! " << std::endl;	
 		exit(-1);
 	}
 }
@@ -60,8 +60,26 @@ RTReader::RTReader(std::string fname)
  */
 RTReader::RTReader(uint32 chCount, uint32 chLength, uint32 tblIdx, uint32 stPt, uint32 endPt, std::string fname, std::string slt)
 {
-	RTReader(fname);
-	BaseRTReader(chCount, chLength, tblIdx, stPt, endPt, fname, slt);
+	this->chainSize = 16;
+	setFileName( fname );
+
+	if( stat( getFileName().c_str(), &fileStats ) == -1 )
+	{
+		std::cerr << "ERROR: stat() for file: " << getFileName() << " FAILED! " << std::endl;	
+		exit(-1);
+	}
+
+	setChainCount( chCount );
+	setChainLength( chLength );
+	setTableIndex( tblIdx );
+	setStartPointBits( stPt );
+	setEndPointBits( endPt );
+	setSalt( slt );
+}
+
+/// Deconstructor
+RTReader::~RTReader()
+{
 }
 
 /// getChainSize
@@ -97,7 +115,7 @@ uint32 RTReader::getChainsLeft()
 }
 
 /// getMinimumStartPoint
-uint64 RTReader::getMinumumStartPoint()
+uint64 RTReader::getMinimumStartPoint()
 {
 	uint64 tmpStartPoint;
 	uint64 tmpEndPoint;

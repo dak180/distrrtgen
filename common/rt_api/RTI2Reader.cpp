@@ -4,6 +4,7 @@
  *
  * Copyright 2010, 2011 Martin Westergaard Jørgensen <martinwj2005@gmail.com>
  * Copyright 2010, 2011 James Nobis <quel@quelrod.net>
+ * Copyright 2011 Logan Watt <logan.watt@gmail.com>
  *
  * This file is part of freerainbowtables.
  *
@@ -21,11 +22,7 @@
  * along with freerainbowtables.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "BaseRTReader.h"
 #include "RTI2Reader.h"
-
-#include <math.h>
-#include <iomanip>
 
 RTI2Reader::RTI2Reader( std::string filename )
 {
@@ -145,7 +142,7 @@ RTI2Reader::RTI2Reader( std::string filename )
 		// XXX finish handling custom algorithm
 	}
 	
-	setMinimumStartPoint();
+	//setMinimumStartPoint();
 
 	// Salt
 	setSalt( "" );
@@ -602,7 +599,19 @@ int RTI2Reader::readChains(unsigned int &numChains, RainbowChainO *pData)
 	return 0;
 }
 
-void RTI2Reader::setMinimumStartPoint()
+void RTI2Reader::setMinimumStartPoint( uint64 minimumStartPoint )
 {
-	minimumStartPoint = header.minimumStartPoint;
+	header.minimumStartPoint = minimumStartPoint;
+}
+
+/// getChainSizeBytes
+uint32 RTI2Reader::getChainSizeBytes()
+{
+	return this->chainSizeBytes;
+}
+
+/// getMinimumStartPoint
+uint64 RTI2Reader::getMinimumStartPoint()
+{
+	return header.minimumStartPoint;
 }

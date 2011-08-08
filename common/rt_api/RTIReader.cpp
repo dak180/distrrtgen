@@ -28,8 +28,12 @@
 RTIReader::RTIReader()
 {
 	this->chainSize = 8;
-}
+	this->indexSize = 11;
 
+	setStartPointBits(6);
+	setEndPointBits(2);
+	index = NULL;
+}
 
 /** Constructor with filename
  * @param std::string file name on disk
@@ -38,18 +42,29 @@ RTIReader::RTIReader()
 RTIReader::RTIReader( std::string fname )
 {
 	this->chainSize = 8;
+	this->indexSize = 11;
 	this->indexFileName = fname + ".index";
-	filename = fname;
 
-	if( stat( filename.c_str(), &fileStats ) == -1 )
+	setFileName( fname );
+	setStartPointBits(6);
+	setEndPointBits(2);
+
+	if( stat( getFileName().c_str(), &fileStats ) == -1 )
 	{
-		std::cerr << "ERROR: stat() for file: " << filename.c_str() << " FAILED! " << std::endl;	
+		std::cerr << "ERROR: stat() for file: " << getFileName() << " FAILED! " << std::endl;	
 		exit(-1);
 	}
 
 	if( stat( indexFileName.c_str(), &indexFileStats ) == -1 )
 	{
-		std::cerr << "ERROR: stat() for file: " << indexFileName.c_str() << " FAILED! " << std::endl;
+		std::cerr << "ERROR: stat() for file: " << indexFileName << " FAILED! " << std::endl;
+		exit(-1);
+	}
+
+	data = fopen( getFileName().c_str(), "rb");
+	if( data == NULL )
+	{
+		std::cerr << "ERROR: could not open table file: " << getFileName() << " EXITING!" << std::endl;
 		exit(-1);
 	}
 
@@ -59,6 +74,9 @@ RTIReader::RTIReader( std::string fname )
 		std::cerr << "ERROR: could not open index file: " << indexFileName.c_str() << " EXITING!" << std::endl;
 		exit(-1);
 	}
+
+	// XXX possibly remove if we dont want this to happen automagically
+	loadIndex();
 }
 
 /**
@@ -73,16 +91,144 @@ RTIReader::RTIReader( std::string fname )
  */
 RTIReader::RTIReader(uint32 chCount, uint32 chLength, uint32 tblIdx, uint32 stPt, uint32 endPt, std::string fname, std::string slt)
 {
-	RTIReader( fname );
-	BaseRTReader(chCount, chLength, tblIdx, stPt, endPt, fname, slt);
+	this->chainSize = 8;
+	this->indexSize = 11;
+	this->indexFileName = fname + ".index";
+
+	setFileName( fname );
+	setStartPointBits(6);
+	setEndPointBits(2);
+
+	if( stat( getFileName().c_str(), &fileStats ) == -1 )
+	{
+		std::cerr << "ERROR: stat() for file: " << getFileName() << " FAILED! " << std::endl;	
+		exit(-1);
+	}
+
+	if( stat( indexFileName.c_str(), &indexFileStats ) == -1 )
+	{
+		std::cerr << "ERROR: stat() for file: " << indexFileName << " FAILED! " << std::endl;
+		exit(-1);
+	}
+
+	data = fopen( getFileName().c_str(), "rb");
+	if( data == NULL )
+	{
+		std::cerr << "ERROR: could not open table file: " << getFileName() << " EXITING!" << std::endl;
+		exit(-1);
+	}
+
+	indexFileData = fopen( indexFileName.c_str(), "rb");
+	if( indexFileData == NULL )
+	{
+		std::cerr << "ERROR: could not open index file: " << indexFileName.c_str() << " EXITING!" << std::endl;
+		exit(-1);
+	}
+
+	// XXX remove this if we don't want it to happen automagically
+	loadIndex();
+
+	setChainCount( chCount );
+	setChainLength( chLength );
+	setTableIndex( tblIdx );
+	setStartPointBits( stPt );
+	setEndPointBits( endPt );
+	setSalt( slt );
+}
+
+/// loadIndex
+void RTIReader::loadIndex()
+{
+	if( ( fileStats.st_size % indexSize ) != 0 )
+	{
+		std::cerr << "ERROR: file length mismatch (" << fileStats.st_size << " bytes) EXITING!" << std::endl;
+		exit(-1);
+	}
+
+	if( ( indexFileStats.st_size % indexSize ) != 0 )
+	{
+		std::cerr << "ERROR: index file length mismatch (" << indexFileStats.st_size << " bytes) EXITING!" << std::endl;
+		exit(-1);
+	}
+
+	if( index != NULL )
+	{
+		delete index;
+		index = NULL;
+	}
+
+	index = new (std::nothrow) IndexChain[ indexFileStats.st_size / indexSize ];
+
+	if( index == NULL )
+	{
+		std::cerr << "ERROR: failed to allocate " << ( indexFileStats.st_size / indexSize / 1024/ 1024 ) << " MB of memory. EXITING!" << std::endl;
+		exit(-2);
+	}
+
+	memset( index, 0x00, sizeof(IndexChain) * ( indexFileStats.st_size / indexSize ) );
+	fseek( indexFileData, 0, SEEK_SET );
+
+	uint32 rows;
+	for( rows = 0; (rows * indexSize) < indexFileStats.st_size; rows++ )
+	{
+		if( fread( &index[rows].nPrefix, 5, 1, indexFileData ) != 1 )
+			break;
+		if( fread( &index[rows].nFirstChain, 4, 1, indexFileData ) != 1 )
+			break;
+		if( fread( &index[rows].nChainCount, 2, 1, indexFileData ) != 1)
+			break;
+
+		// Index Check
+		if( rows != 0 && index[rows].nFirstChain != index[rows - 1].nFirstChain )
+		{
+			std::cerr << "ERROR: Corrupted index detected (FirstChain is less than previous) EXITING!" << std::endl;
+			exit(-1);
+		}
+		else if( rows != 0 && index[rows].nFirstChain != index[rows - 1].nFirstChain + index[rows - 1].nChainCount )
+		{
+			std::cerr << "ERROR: Corrupted index detected ( LastChain + nChainCount != FirstChain ) EXITING!" << std::endl;
+			exit(-1);
+		}
+	}
+
+	if( index[rows - 1].nFirstChain + index[rows - 1].nChainCount + 1 <= fileStats.st_size / chainSize )
+	{
+		std::cerr << "ERROR: Corrupted index detected. Not covering the entire file EXITING!" << std::endl;
+		exit(-1);
+	}
+	
+	if( index[rows - 1].nFirstChain + index[rows - 1].nChainCount > fileStats.st_size / chainSize )
+	{
+		std::cerr << "ERROR: Corrupted index detected. The index is covering more than the file" 
+					 << index[rows - 1].nFirstChain + index[rows - 1].nChainCount << " chains of " 
+					 << fileStats.st_size / chainSize << "chains) EXITING!"<< std::endl;
+		exit(-1);
+	}
+}
+
+/// getIndexFileName
+std::string RTIReader::getIndexFileName()
+{
+	return this->indexFileName;
 }
 
 /// getChainSize
 uint32 RTIReader::getChainSize()
 {
-	return this->chainSize();
+	return this->chainSize;
 }
 
+/// getIndexSize
+uint32 RTIReader::getIndexSize()
+{
+	return this->indexSize;
+}
+
+/// getChainsLeft
+uint32 RTIReader::getChainsLeft()
+{
+	return ( fileStats.st_size / chainSize ) - chainPosition;
+}
 
 /**
  * reads data chains into memory
@@ -92,11 +238,40 @@ uint32 RTIReader::getChainSize()
  */
 int RTIReader::readChains(uint32 &numChains, RainbowChainO *pData)
 {
-}
+	// reset data to 0x00 or something bad happens
+	memset( pData, 0x00, sizeof( RainbowChainO ) * numChains );
+	uint32 readChains = 0;
 
-uint32 RTIReader::getChainsLeft()
-{
-	return ( fileStats.st_size / chainSize ) - chainPosition;
+	// uint32 chainsLeft - getChainsLeft();
+	
+	for( uint32 i = 0; i < indexSize; i++ )
+	{
+		if( chainPosition + readChains > index[i].nFirstChain + index[i].nChainCount )
+		{
+			while( chainPosition + readChains < index[i].nFirstChain + index[i].nChainCount )
+			{
+				pData[readChains].nIndexE = index[i].nPrefix << 16;
+				uint32 endPoint = 0; // have to set to 0
+				// XXX start points may not exceed 6 bytes ( 2^48 )
+				fread( &pData[readChains].nIndexS, 6, 1, data);
+				fread( &endPoint, 2, 1, data);
+				pData[readChains].nIndexE += endPoint;
+				readChains++;
+				
+				if( readChains == numChains || readChains == getChainsLeft() )
+					break;
+			}
+			if( readChains == numChains )
+				break;
+		}
+	}
+	if( readChains != numChains )
+		numChains = readChains; // update how many chains we read
+
+	chainPosition += readChains;
+	std::cout << "Chain position is now " << chainPosition << std::endl;
+
+	return EXIT_SUCCESS;	
 }
 
 uint64 RTIReader::getMinimumStartPoint()
@@ -117,7 +292,7 @@ uint64 RTIReader::getMinimumStartPoint()
 			minimumStartPoint = tmpStartPoint;
 	}
 
-	fseek( dataFile, originalFilePos, SEEK_SET );
+	fseek( data, originalFilePos, SEEK_SET );
 	return minimumStartPoint;
 
 }
@@ -129,5 +304,10 @@ void RTIReader::Dump()
 /// Destructor
 RTIReader::~RTIReader()
 {
+	if( indexFileData != NULL )
+	{
+		fclose( indexFileData );
+		delete indexFileData;
+	}
 }
 

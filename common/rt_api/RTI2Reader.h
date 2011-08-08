@@ -4,6 +4,7 @@
  *
  * Copyright 2010, 2011 Martin Westergaard Jørgensen <martinwj2005@gmail.com>
  * Copyright 2010, 2011 James Nobis <quel@quelrod.net>
+ * Copyright 2011 Logan Watt <logan.watt@gmail.com>
  *
  * This file is part of freerainbowtables.
  *
@@ -24,44 +25,39 @@
 #ifndef _RTI2READER_H
 #define _RTI2READER_H
 
-#include "Public.h"
-#include <string>
-
-#if defined(_WIN32) && !defined(__GNUC__)
-	#include <io.h>
-#endif
-
-#include <fstream>
-#include <iostream>
-#include <vector>
 #include "BaseRTReader.h"
 #include "RTI2Common.h"
 
 class RTI2Reader : BaseRTReader
 {
-private:
-	std::ifstream fin;
-	uint32 chainPosition;
-	uint8 indexOffset;
-	RTI20_File in;
-	RTI20_File_Header header;
-	RTI20_Index index;
-	uint8 *data;
-	uint32 chainCount;
-	std::vector<SubKeySpace> subKeySpaces;
-	std::vector<uint32> checkPointPositions;
-	
-	int readRTI2String( std::ifstream &fin, void *str, uint32 charSize = 0 );
+	private:
+		std::ifstream fin;
+		uint32 chainPosition;
+		uint8 indexOffset;
+		RTI20_File in;
+		RTI20_File_Header header;
+		RTI20_Index index;
+		uint8 *data;
+		uint32 chainCount;
+		uint32 chainSizeBytes;
+		std::vector<SubKeySpace> subKeySpaces;
+		std::vector<uint32> checkPointPositions;
 
-public:
-	RTI2Reader( std::string filename );
-	~RTI2Reader();
+		int readRTI2String( std::ifstream &fin, void *str, uint32 charSize = 0 );
 
-	uint32 getChainsLeft();
-	int readChains(uint32 &numChains, RainbowChainO *pData);
-	void setMinimumStartPoint();
+	protected:
+		void setMinimumStartPoint(uint64);
 
-	void Dump();
+	public:
+		RTI2Reader( std::string filename );
+		~RTI2Reader();
+
+		uint32 getChainsLeft();
+		int readChains(uint32 &numChains, RainbowChainO *pData);
+		uint32 getChainSizeBytes();
+		uint64 getMinimumStartPoint();
+
+		void Dump();
 };
 
 
