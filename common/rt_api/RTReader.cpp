@@ -51,10 +51,6 @@ RTReader::RTReader(std::string fname)
 		exit(-1);
 	}
 
-	// XXX debugggggggggggggggggggggggggggggggggggggg
-	std::cout << "RTReader constructor() fileStats.st_size = " << fileStats.st_size << std::endl;
-	std::cout << "FILE: " << getFileName() << std::endl;
-
 	data = fopen( getFileName().c_str(), "rb" );
 
 	if( data == NULL )
@@ -128,11 +124,12 @@ int RTReader::readChains(uint32 &numChains, RainbowChainO *pData)
 {
 	unsigned int numRead = fread(pData, 1, chainSize * numChains, data);
 
-	numChains = numRead / chainSize;
-	chainPosition += numChains;
-
 	if( numRead == 0 )
 		return EXIT_FAILURE;
+
+
+	numChains = numRead / chainSize;
+	chainPosition += numChains;
 
 	return EXIT_SUCCESS;
 }

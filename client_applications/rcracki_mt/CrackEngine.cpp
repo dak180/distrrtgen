@@ -1010,8 +1010,6 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 	if( CChainWalkContext::getRTfileFormat() == getRTfileFormatId("RT") )
 	{
 		RTReader *reader = new RTReader( pathName );
-
-		uint32 sizeOfChain = reader->getChainSize();
 		uint64 nAllocatedSize = 0;
 		unsigned int bytesForChainWalkSet = hs.GetStatHashTotal() * (nRainbowChainLen-1) * 8;
 
@@ -1022,8 +1020,8 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 			std::cout << "Debug: This is a table in .rt format." << std::endl;
 
 		static CMemoryPool mp( bytesForChainWalkSet, debug, maxMem );
-		uint64 size = reader->getChainsLeft() * sizeof( RainbowChainO );
-		RainbowChainO* pChain = ( RainbowChainO* )mp.Allocate( size, nAllocatedSize );
+		//uint64 size = reader->getChainsLeft() * sizeof( RainbowChainO );
+		RainbowChainO* pChain = ( RainbowChainO* )mp.Allocate( reader->getDataFileSize() , nAllocatedSize );
 
 		if( debug )
 			std::cout << "Debug: Allocate " << nAllocatedSize << " bytes, filelen " << reader->getDataFileSize() << std::endl;
@@ -1037,19 +1035,20 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 
 			while( reader->getChainsLeft() > 0 )
 			{
+				gettimeofday( &tv, NULL );
+				
+				if( reader->readChains( nChains, pChain ) == EXIT_FAILURE )
+					break;
+
 				// Load table chunk
 				if( debug )
 					std::cout << "Debug: reading..." << std::endl;
-
-				gettimeofday( &tv, NULL );
-
-				reader->readChains( nChains, pChain );
-
+				
 				gettimeofday( &tv2, NULL );
 				final = sub_timeofday( tv2, tv );
 
 				float fTime = 1.0f * final.tv_sec + 1.0f * final.tv_usec / 1000000;
-				std::cout << (nChains * sizeOfChain ) << " bytes read, disk access time: " << fTime << "s" << std::endl;
+				std::cout << (nChains * reader->getChainSize() ) << " bytes read, disk access time: " << fTime << "s" << std::endl;
 				m_fTotalDiskAccessTime += fTime;
 
 				// Verify table chunk
