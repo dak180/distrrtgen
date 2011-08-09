@@ -30,6 +30,8 @@ RTReader::RTReader()
 {
 	// bytes per chain
 	this->chainSize = 16;
+	setStartPointBits(8);
+	setEndPointBits(8);
 }
 
 /** Constructor with filename
@@ -40,12 +42,27 @@ RTReader::RTReader(std::string fname)
 	//bytes per chain
 	this->chainSize = 16;
 	setFileName( fname );
+	setStartPointBits(8);
+	setEndPointBits(8);
 
 	if( stat( getFileName().c_str(), &fileStats ) == -1 )
 	{
 		std::cerr << "ERROR: stat() for file: " << getFileName() << " FAILED! " << std::endl;	
 		exit(-1);
 	}
+
+	// XXX debugggggggggggggggggggggggggggggggggggggg
+	std::cout << "RTReader constructor() fileStats.st_size = " << fileStats.st_size << std::endl;
+	std::cout << "FILE: " << getFileName() << std::endl;
+
+	data = fopen( getFileName().c_str(), "rb" );
+
+	if( data == NULL )
+	{
+		std::cerr << "ERROR: could not open table file: " << getFileName() << " EXITING!" << std::endl;
+		exit(-1);
+	}
+
 }
 
 /**
@@ -75,6 +92,13 @@ RTReader::RTReader(uint32 chCount, uint32 chLength, uint32 tblIdx, uint32 stPt, 
 	setStartPointBits( stPt );
 	setEndPointBits( endPt );
 	setSalt( slt );
+
+	data = fopen( getFileName().c_str(), "rb" );
+	if( data == NULL )
+	{
+		std::cerr << "ERROR: could not open table file: " << getFileName() << " EXITING!" << std::endl;
+		exit(-1);
+	}
 }
 
 /// Deconstructor
@@ -88,6 +112,12 @@ uint32 RTReader::getChainSize()
 	return this->chainSize;
 }
 
+/// getDataFileSize
+uint32 RTReader::getDataFileSize()
+{
+	return fileStats.st_size;
+}
+
 /**
  * reads data chains into memory
  * @param uint32 reference to the number of chains to read
@@ -98,12 +128,12 @@ int RTReader::readChains(uint32 &numChains, RainbowChainO *pData)
 {
 	unsigned int numRead = fread(pData, 1, chainSize * numChains, data);
 
+	numChains = numRead / chainSize;
+	chainPosition += numChains;
+
 	if( numRead == 0 )
 		return EXIT_FAILURE;
 
-	numChains = numRead / chainSize;
-	chainPosition += numChains;
-	
 	return EXIT_SUCCESS;
 }
 

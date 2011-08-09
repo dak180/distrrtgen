@@ -88,6 +88,7 @@ class BaseRTReader
 		/// Get Methods
 		virtual uint32 getChainCount();
 		virtual uint32 getChainLength();
+		virtual uint32 getChainPosition();
 		virtual uint32 getTableIndex();
 		virtual uint32 getStartPointBits();
 		virtual uint32 getEndPointBits();

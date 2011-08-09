@@ -65,6 +65,7 @@ class RTReader : public BaseRTReader
 
 		/// Get Methods
 		uint32 getChainSize();
+		uint32 getDataFileSize();
 
 		int readChains(uint32&, RainbowChainO*);
 		uint32 getChainsLeft();

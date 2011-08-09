@@ -1000,30 +1000,15 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 		return;
 	}
 
-	// Open
-	FILE* file = fopen(pathName.c_str(), "rb");
-	if( file == NULL )
-	{
-		std::cout << "Could not open " << pathName.c_str() << " for reading. Exiting!";
-		return;
-	}
-
-	long nFileLen = GetFileLen( pathName );
 	bool fVerified = false;
-	//uint64 nAllocatedSize = 0;
-	//uint32 sizeOfChain = 0;
 
 	timeval tv;
 	timeval tv2;
 	timeval final;
 
-	//unsigned int bytesForChainWalkSet = 0;
-
 	// RT stuff
 	if( CChainWalkContext::getRTfileFormat() == getRTfileFormatId("RT") )
 	{
-		fclose( file );
-
 		RTReader *reader = new RTReader( pathName );
 
 		uint32 sizeOfChain = reader->getChainSize();
@@ -1041,7 +1026,7 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 		RainbowChainO* pChain = ( RainbowChainO* )mp.Allocate( size, nAllocatedSize );
 
 		if( debug )
-			std::cout << "Debug: Allocate " << nAllocatedSize << " bytes, filelen " << nFileLen << std::endl;
+			std::cout << "Debug: Allocate " << nAllocatedSize << " bytes, filelen " << reader->getDataFileSize() << std::endl;
 
 		if( pChain != NULL )
 		{
@@ -1137,13 +1122,6 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 	// RTI stuff
 	else if( CChainWalkContext::getRTfileFormat() == getRTfileFormatId("RTI") )
 	{
-		//fclose( reader->getDataFile() );
-		// XXX debug
-		if( file != NULL )
-		{
-			fclose( file );
-			file = NULL;
-		}
 		RTIReader *reader = new RTIReader( pathName );
 		uint32 sizeOfChain = reader->getChainSize();
 		uint64 nAllocatedSize = 0;
@@ -1157,16 +1135,6 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 
 		static CMemoryPool mpIndex( bytesForChainWalkSet, debug, maxMem );
 		uint64 nAllocatedSizeIndex;
-
-		/* File length check
-		long nFileLenIndex = GetFileLen( pathName + std::string(".index") );
-		std::string indexPathName = pathName + std::string(".index");
-		FILE *fIndex = fopen( indexPathName.c_str(), "rb" );
-		if( fIndex == NULL )
-		{
-			std::cout << "Can't load index! Returning." << std::endl;
-			return;
-		}*/
 
 		RTIrcrackiIndexChain *pIndex = (RTIrcrackiIndexChain*)mpIndex.Allocate( reader->getIndexFileSize(), nAllocatedSizeIndex );
 		if( debug )
@@ -1210,8 +1178,8 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 					RainbowChain* pChain = (RainbowChain*)mp.Allocate( nCoveredRainbowTableChains * sizeOfChain, nAllocatedSize );
 					if( debug )
 					{
-						std::cout << "Debug: Allocated " << nAllocatedSize << " for " << nCoveredRainbowTableChains << " chains, filelen " << nFileLen
-									 << std::endl;
+						std::cout << "Debug: Allocated " << nAllocatedSize << " for " << nCoveredRainbowTableChains << " chains, filelen " 
+									 << reader->getDataFileSize() << std::endl;
 					}
 
 					if( pChain != NULL && nAllocatedSize > 0 )
@@ -1228,7 +1196,7 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 							memset( pChain, 0x00, nAllocatedSize );
 							std::cout << "reading table... ";
 							gettimeofday( &tv, NULL );
-							unsigned int nDataRead = fread( pChain, 1, nAllocatedSize, file );
+							unsigned int nDataRead = fread( pChain, 1, nAllocatedSize, reader->getDataFile() );
 							gettimeofday( &tv2, NULL );
 							final = sub_timeofday( tv2, tv );
 
@@ -1320,7 +1288,6 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 	// RTI2 stuff
 	else if( CChainWalkContext::getRTfileFormat() == getRTfileFormatId("RTI2") )
 	{
-		fclose( file );
 		RTI2Reader *reader = new RTI2Reader( pathName );
 		uint32 sizeOfChain = reader->getChainSizeBytes();
 		uint64 nAllocatedSize = 0;
@@ -1338,7 +1305,7 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 		RainbowChainO* pChain = ( RainbowChainO* )mp.Allocate( size, nAllocatedSize );
 
 		if( debug )
-			std::cout << "Debug: Allocate " << nAllocatedSize << " bytes, filelen " << nFileLen << std::endl;
+			std::cout << "Debug: Allocate " << nAllocatedSize << " bytes, filelen " << GetFileLen( pathName ) << std::endl;
 
 		if( pChain != NULL )
 		{

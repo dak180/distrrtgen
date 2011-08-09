@@ -84,6 +84,12 @@ uint32 BaseRTReader::getChainLength()
 	return this->chainLength;
 }
 
+/// getChainPosition
+uint32 BaseRTReader::getChainPosition()
+{
+	return this->chainPosition;
+}
+
 /// getTableIndex
 uint32 BaseRTReader::getTableIndex()
 {
