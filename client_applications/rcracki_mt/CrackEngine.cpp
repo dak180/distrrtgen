@@ -1139,9 +1139,13 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 	{
 		fclose( file );
 		RTIReader *reader = new RTIReader( pathName );
+		printf("AFTER OBJ CREATE\n");
 		uint32 sizeOfChain = reader->getChainSize();
 		uint64 nAllocatedSize = 0;
 		unsigned int bytesForChainWalkSet = hs.GetStatHashTotal() * (nRainbowChainLen-1) * 8;
+
+		printf("BEFORE FIRST DEBUG\n");
+
 
 		if (debug)
 			std::cout << "Debug: Saving " << bytesForChainWalkSet << " bytes of memory for chainwalkset." << std::endl;

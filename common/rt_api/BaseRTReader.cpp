@@ -28,6 +28,7 @@
 /// Empty Constructor for speed
 BaseRTReader::BaseRTReader()
 {
+	data = NULL;
 }
 
 /**
@@ -48,6 +49,7 @@ BaseRTReader::BaseRTReader(uint32 chCount, uint32 chLength, uint32 tblIdx, uint3
 	this->startPointBits = stPt;
 	this->endPointBits = endPt;
 	this->fileName = fname;
+	this->data = NULL;
 
 	this->data = fopen( fileName.c_str(), "rb" );
 	if( data == NULL )

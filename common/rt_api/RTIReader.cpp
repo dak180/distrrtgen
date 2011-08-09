@@ -48,6 +48,7 @@ RTIReader::RTIReader( std::string fname )
 	setFileName( fname );
 	setStartPointBits(6);
 	setEndPointBits(2);
+	index = NULL;
 
 	if( stat( getFileName().c_str(), &fileStats ) == -1 )
 	{
@@ -98,6 +99,7 @@ RTIReader::RTIReader(uint32 chCount, uint32 chLength, uint32 tblIdx, uint32 stPt
 	setFileName( fname );
 	setStartPointBits(6);
 	setEndPointBits(2);
+	index = NULL;
 
 	if( stat( getFileName().c_str(), &fileStats ) == -1 )
 	{
@@ -139,7 +141,7 @@ RTIReader::RTIReader(uint32 chCount, uint32 chLength, uint32 tblIdx, uint32 stPt
 /// loadIndex
 void RTIReader::loadIndex()
 {
-	if( ( fileStats.st_size % indexSize ) != 0 )
+	if( ( fileStats.st_size % chainSize ) != 0 )
 	{
 		std::cerr << "ERROR: file length mismatch (" << fileStats.st_size << " bytes) EXITING!" << std::endl;
 		exit(-1);
