@@ -68,7 +68,7 @@ BaseRTReader::~BaseRTReader()
 	if( data != NULL )
 	{
 		fclose( data );
-		delete data;
+		//delete data;
 	}
 }
 

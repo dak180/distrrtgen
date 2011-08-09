@@ -1137,15 +1137,17 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 	// RTI stuff
 	else if( CChainWalkContext::getRTfileFormat() == getRTfileFormatId("RTI") )
 	{
-		fclose( file );
+		//fclose( reader->getDataFile() );
+		// XXX debug
+		if( file != NULL )
+		{
+			fclose( file );
+			file = NULL;
+		}
 		RTIReader *reader = new RTIReader( pathName );
-		printf("AFTER OBJ CREATE\n");
 		uint32 sizeOfChain = reader->getChainSize();
 		uint64 nAllocatedSize = 0;
 		unsigned int bytesForChainWalkSet = hs.GetStatHashTotal() * (nRainbowChainLen-1) * 8;
-
-		printf("BEFORE FIRST DEBUG\n");
-
 
 		if (debug)
 			std::cout << "Debug: Saving " << bytesForChainWalkSet << " bytes of memory for chainwalkset." << std::endl;
@@ -1156,7 +1158,7 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 		static CMemoryPool mpIndex( bytesForChainWalkSet, debug, maxMem );
 		uint64 nAllocatedSizeIndex;
 
-		// File length check
+		/* File length check
 		long nFileLenIndex = GetFileLen( pathName + std::string(".index") );
 		std::string indexPathName = pathName + std::string(".index");
 		FILE *fIndex = fopen( indexPathName.c_str(), "rb" );
@@ -1164,32 +1166,32 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 		{
 			std::cout << "Can't load index! Returning." << std::endl;
 			return;
+		}*/
+
+		RTIrcrackiIndexChain *pIndex = (RTIrcrackiIndexChain*)mpIndex.Allocate( reader->getIndexFileSize(), nAllocatedSizeIndex );
+		if( debug )
+		{
+			std::cout << "Debug: Allocated " << nAllocatedSizeIndex << " bytes for index with filelen " << reader->getIndexFileSize() << std::endl;
 		}
 
-		RTIrcrackiIndexChain *pIndex = (RTIrcrackiIndexChain*)mpIndex.Allocate( nFileLenIndex, nAllocatedSizeIndex );
-			if( debug )
-			{
-				std::cout << "Debug: Allocated " << nAllocatedSizeIndex << " bytes for index with filelen " << nFileLenIndex << std::endl;
-			}
-
-			static CMemoryPool mp( bytesForChainWalkSet + nAllocatedSizeIndex, debug, maxMem );
+		static CMemoryPool mp( bytesForChainWalkSet + nAllocatedSizeIndex, debug, maxMem );
 
 			if( pIndex != NULL && nAllocatedSizeIndex > 0 )
 			{
 				// Round to sizeOfIndexChain boundary
 				nAllocatedSizeIndex = nAllocatedSizeIndex / sizeof( RTIrcrackiIndexChain ) * sizeof( RTIrcrackiIndexChain );
 
-				fseek( fIndex, 0, SEEK_SET );
+				fseek( reader->getIndexFileData(), 0, SEEK_SET );
 
 				// Index chunk read loop
-				while( ftell( fIndex ) != nFileLenIndex )
+				while( ftell( reader->getIndexFileData() ) != reader->getIndexFileSize() )
 				{
 					// Load index chunk
 					memset( pIndex, 0x00, nAllocatedSizeIndex );
 					std::cout << "reading index... ";
 
 					gettimeofday( &tv, NULL );
-					unsigned int nDataRead = fread( pIndex, 1, nAllocatedSizeIndex, fIndex );
+					unsigned int nDataRead = fread( pIndex, 1, nAllocatedSizeIndex, reader->getIndexFileData() );
 					gettimeofday( &tv2, NULL );
 					final = sub_timeofday( tv2, tv );
 
@@ -1220,7 +1222,7 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 						uint32 nProcessedChains = 0;
 
 						// Chunk read loop
-						while( ftell( file ) != nFileLen && nProcessedChains < nCoveredRainbowTableChains )
+						while( ftell( reader->getDataFile() ) != reader->getDataFileSize() && nProcessedChains < nCoveredRainbowTableChains )
 						{
 							// Load table chunk
 							memset( pChain, 0x00, nAllocatedSize );
@@ -1312,9 +1314,6 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 
 			if( reader != NULL )
 				delete reader;
-
-			if( fIndex != NULL )
-				fclose( fIndex );
 
 	} // end RTI stuff
 

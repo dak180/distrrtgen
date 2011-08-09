@@ -75,6 +75,12 @@ class RTIReader : public BaseRTReader
 		std::string getIndexFileName();
 		uint32 getChainSize();
 		uint32 getIndexSize();
+		// XXX used for debugging, can remove later if not needed
+		uint32 getIndexFileSize();
+		uint32 getDataFileSize();
+		FILE* getIndexFileData();
+		FILE* getDataFile();
+		// XXX end debug type functions
 
 		int readChains(uint32 &numChains, RainbowChainO *pData);
 		uint32 getChainsLeft();

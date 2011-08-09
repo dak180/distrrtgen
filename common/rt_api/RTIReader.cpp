@@ -181,7 +181,7 @@ void RTIReader::loadIndex()
 			break;
 
 		// Index Check
-		if( rows != 0 && index[rows].nFirstChain != index[rows - 1].nFirstChain )
+		if( rows != 0 && index[rows].nFirstChain < index[rows - 1].nFirstChain )
 		{
 			std::cerr << "ERROR: Corrupted index detected (FirstChain is less than previous) EXITING!" << std::endl;
 			exit(-1);
@@ -225,6 +225,29 @@ uint32 RTIReader::getIndexSize()
 {
 	return this->indexSize;
 }
+
+// XXX used for debugging getIndexFileSize
+uint32 RTIReader::getIndexFileSize()
+{
+	return indexFileStats.st_size;
+}
+
+uint32 RTIReader::getDataFileSize()
+{
+	return fileStats.st_size;
+}
+
+FILE* RTIReader::getIndexFileData()
+{
+	return indexFileData;
+}
+
+FILE* RTIReader::getDataFile()
+{
+	return data;
+}
+
+// XXX end debug type functions
 
 /// getChainsLeft
 uint32 RTIReader::getChainsLeft()
@@ -309,7 +332,6 @@ RTIReader::~RTIReader()
 	if( indexFileData != NULL )
 	{
 		fclose( indexFileData );
-		delete indexFileData;
+	//	delete indexFileData;
 	}
 }
-
