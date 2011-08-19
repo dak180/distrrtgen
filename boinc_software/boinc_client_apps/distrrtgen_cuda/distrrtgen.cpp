@@ -37,6 +37,7 @@
 
 #ifdef _WIN32
 #include "boinc_win.h"
+#include <windows.h>
 #else
 #include "config.h"
 #include <cstdio>
@@ -59,7 +60,8 @@
 #include "distrrtgen.h"
 #include "rcuda.h"
 #include "rcuda_ext.h"
-
+#include <cuda.h> 
+#include <cuda_runtime_api.h>
 /*
 bool early_exit = false;
 bool early_crash = false;
@@ -95,9 +97,44 @@ int main(int argc, char **argv) {
 	boinc_begin_critical_section();
 
 	// set the cuda device
-	if ( rcuda::SetCudaDevice(cudaDevice) != 0 )
+	if ( rcuda::SetCudaDevice(cudaDevice) != 0 ) {
+		fprintf(stderr, "Error setting device %u. Temporary exiting for 60 secs\n", cudaDevice);
 		boinc_temporary_exitHack();
-
+	}
+	cudaDeviceProp deviceProp;
+	if(cudaGetDeviceProperties(&deviceProp, cudaDevice) == cudaErrorInvalidDevice) {
+		fprintf(stderr, "Error querying device %u. Temporary exiting for 60 secs\n", cudaDevice);
+		boinc_temporary_exitHack();
+	}
+#ifdef WIN32
+	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL);
+#endif
+	int buffCount = 0x2000;
+	int chainSize = 100;
+	if(deviceProp.major == 1) {	
+/*		
+		buffCount = deviceProp.multiProcessorCount * 8;// 8 blocks per multiprocessor
+		buffCount *= deviceProp.maxThreadsPerBlock / 64; // (BLOCK_X_SIZE)
+//		buffCount *= 24;
+		if(deviceProp.minor <= 1) buffCount *= 24; // 24 warps per multiprocessor for compute 1.0 and 1.1
+		else buffCount *= 32; // 32 warps per multiprocessor for compute 1.2 and 1.3		
+		*/
+		buffCount = 0x2000;
+	}
+	else if(deviceProp.major == 2) {		
+		chainSize = 200;
+/*		buffCount = deviceProp.multiProcessorCount * 8;// 8 blocks per multiprocessor
+		buffCount *= deviceProp.maxThreadsPerBlock / 64; //(BLOCK_X_SIZE)		
+		buffCount *= 32; // 48 warps per multiprocessor for compute 2.x
+/*		if(deviceProp.minor == 1) {
+			buffCount *= 2;
+		}
+*/		
+		buffCount = 0x4000;
+	}
+	if(cudaDevice > 0) {
+		chainSize = 1000;
+	}
 	if(argc < 10)
 	{
 		fprintf(stderr, "Not enough parameters");
@@ -209,7 +246,8 @@ int main(int argc, char **argv) {
 	//time_t tStart = time(NULL);
 
 //	std::cout << "Starting to generate chains" << std::endl;
-	int maxCalcBuffSize = rcuda::GetChainsBufferSize( CALC_BUFFER_SIZE_ADJ );
+	int maxCalcBuffSize = rcuda::GetChainsBufferSize( buffCount );
+	std::cerr << "maxCalcBuffSize - estimated: " << buffCount << ". Chosen: " << maxCalcBuffSize << std::endl;
 	uint64 *calcBuff = new uint64[2*maxCalcBuffSize];
 	int ii;
 
@@ -218,11 +256,11 @@ int main(int argc, char **argv) {
 	std::vector<unsigned char> stPlain;
 	ex.Init();
 
-	for(uint32 nCurrentCalculatedChains = nDataLen / 10, calcSize; nCurrentCalculatedChains < nRainbowChainCount; )
+	for(int nCurrentCalculatedChains = nDataLen / 10, calcSize; nCurrentCalculatedChains < nRainbowChainCount; )
 	{		
 		fd = (double)nCurrentCalculatedChains / (double)nRainbowChainCount;
 		boinc_fraction_done(fd);
-
+		
 		cuTask.hash = ex.GetHash();
 		cuTask.startIdx = nChainStart + nCurrentCalculatedChains;
 		cuTask.idxCount = std::min<int>(nRainbowChainCount - nCurrentCalculatedChains, maxCalcBuffSize);
@@ -237,6 +275,7 @@ int main(int argc, char **argv) {
 		cuTask.reduceOffset = ex.GetReduceOffset();
 		cuTask.plainSpaceTotal = ex.GetPlainSpaceTotal();
 		cuTask.rainbowChainLen = nRainbowChainLen;
+		cuTask.kernChainSize = chainSize;
 		for(ii = 0; ii < cuTask.idxCount; ii++) {
 			calcBuff[2*ii] = cuTask.startIdx + ii;
 			calcBuff[2*ii+1] = 0;
@@ -268,7 +307,7 @@ int main(int argc, char **argv) {
 		} else {
 			std::cerr << "Calculations on CUDA failed!" << std::endl;
 			fclose(outfile);
-			return -1;
+			return -1;	
 		}
 	}
 	delete [] calcBuff;

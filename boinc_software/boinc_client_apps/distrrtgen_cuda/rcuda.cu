@@ -31,7 +31,7 @@
 #define   GRID_Y_SIZE   (1<<GRID_Y_L2)
 #define   BLOCK_X_SIZE  (1<<BLOCK_X_L2)
 #define   PLAIN_MAX_SIZE     20
-#define   KERN_CHAIN_SIZE   100
+//#define   KERN_CHAIN_SIZE   100
 #define   CHAR_SET_MAXLEN   512
 #define   SHIDX(x)      ((x)<<4)
 
@@ -176,22 +176,22 @@ extern "C" int CalcChainsOnCUDA(const rcuda::RCudaTask* task, uint64 *resultBuff
 	dim3 numBlocks(grSizeX, grSizeY);
 	cuErr = cudaSuccess;
 
-	for(unsigned int idx = 0; idx < task->rainbowChainLen-1 && cuErr == cudaSuccess; idx+=KERN_CHAIN_SIZE) {
+	for(unsigned int idx = 0; idx < task->rainbowChainLen-1 && cuErr == cudaSuccess; idx+=task->kernChainSize) {
 		switch(task->hash) {
 		case rcuda::RHASH_MD5:
-			RTGenMD5Kernel<<<numBlocks, BLOCK_X_SIZE>>>(idx, min(idx+KERN_CHAIN_SIZE, task->rainbowChainLen-1));
+			RTGenMD5Kernel<<<numBlocks, BLOCK_X_SIZE>>>(idx, min(idx+task->kernChainSize, task->rainbowChainLen-1));
 			break;
 		case rcuda::RHASH_MD4:
-			RTGenMD4Kernel<<<numBlocks, BLOCK_X_SIZE>>>(idx, min(idx+KERN_CHAIN_SIZE, task->rainbowChainLen-1));
+			RTGenMD4Kernel<<<numBlocks, BLOCK_X_SIZE>>>(idx, min(idx+task->kernChainSize, task->rainbowChainLen-1));
 			break;
 		case rcuda::RHASH_NTLM:
-			RTGenNTLMKernel<<<numBlocks, BLOCK_X_SIZE>>>(idx, min(idx+KERN_CHAIN_SIZE, task->rainbowChainLen-1));
+			RTGenNTLMKernel<<<numBlocks, BLOCK_X_SIZE>>>(idx, min(idx+task->kernChainSize, task->rainbowChainLen-1));
 			break;
 		case rcuda::RHASH_SHA1:
-			RTGenSHA1Kernel<<<numBlocks, BLOCK_X_SIZE>>>(idx, min(idx+KERN_CHAIN_SIZE, task->rainbowChainLen-1));
+			RTGenSHA1Kernel<<<numBlocks, BLOCK_X_SIZE>>>(idx, min(idx+task->kernChainSize, task->rainbowChainLen-1));
 			break;
 		case rcuda::RHASH_LM:
-			RTGenLMKernel<<<numBlocks, BLOCK_X_SIZE>>>(idx, min(idx+KERN_CHAIN_SIZE, task->rainbowChainLen-1));
+			RTGenLMKernel<<<numBlocks, BLOCK_X_SIZE>>>(idx, min(idx+task->kernChainSize, task->rainbowChainLen-1));
 			break;
 		case rcuda::RHASH_UNDEF:
 			break;
