@@ -23,11 +23,11 @@
 #ifndef RCUDA_H
 #define RCUDA_H
 
-#include "Public.h"
+#include "../../../common/rt_api/Public.h"
 
 namespace rcuda {
 
-enum RHash { RHASH_UNDEF = -1, RHASH_LM, RHASH_MD4, RHASH_MD5, RHASH_SHA1, RHASH_NTLM };
+	enum RHash { RHASH_UNDEF = -1, RHASH_LM, RHASH_MD4, RHASH_MD5, RHASH_SHA1, RHASH_NTLM };
 
 struct RCudaTask {
 	RHash hash;
@@ -41,6 +41,7 @@ struct RCudaTask {
 	int charSetSize;
 	int *cpPositions;
 	int cpPosSize;
+	int kernChainSize;
 	uint64 reduceOffset;
 	uint64 plainSpaceTotal;
 	unsigned int rainbowChainLen;
