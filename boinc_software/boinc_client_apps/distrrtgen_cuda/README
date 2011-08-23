@@ -29,3 +29,4 @@ Makefile.linux_i686
 Cuda 2.3 tookit requires a driver version of at least 190.38
 Cuda 3.0 toolkit requires a driver version of at least 195.00
 Cuda 3.2 toolkit requires a driver version of at least 260.61
+Cuda 4.0 toolkit requires a driver version of at least 275.33
