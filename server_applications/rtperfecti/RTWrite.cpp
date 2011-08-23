@@ -134,9 +134,9 @@ void RTWrite::writeChain(RTChain *chain)
 									return;
 								}
 #ifdef _WIN32
-								if(chain->startpt > 0x0000ffffffffffffI64)
+								if(chain->startpt > 0x0000FFFFFFFFFFFFI64)
 #else
-								if(chain->startpt > 0x0000ffffffffffffllu)
+								if(chain->startpt > 0x0000FFFFFFFFFFFFllu)
 #endif
 								{
 									fprintf(stderr, "**** Error writeChain() in %i: Startpoint is bigger than 6 bytes. (%llx) ****\n", m_curFileChains, chain->startpt);
@@ -144,9 +144,9 @@ void RTWrite::writeChain(RTChain *chain)
 									return;
 								}
 #ifdef _WIN32
-								if(chain->endpt > 0x00ffffffffffffffI64)
+								if(chain->endpt > 0x00FFFFFFFFFFFFFFI64)
 #else
-								if(chain->endpt > 0x00fffffffffffffllu)
+								if(chain->endpt > 0x00FFFFFFFFFFFFFFllu)
 #endif
 								{
 									fprintf(stderr, "**** Error writeChain() in %i: Endpoint is bigger than 7 bytes. (%llx) ****\n", m_curFileChains, chain->endpt);
