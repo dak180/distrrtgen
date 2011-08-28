@@ -390,10 +390,10 @@ int RTRead::getInfo(char *file, int len, FileList *ret)
 	// Get file size
 	fseek(pFile, 0, SEEK_END);
 	size = ftell(pFile);
-	if ( (size & 15) != 0)
+	if ( (size & 17) != 0)
 	{
 		fclose(pFile);
-		printf("Error file size of '%s' is not a multiple of 16 bytes.\n", file);
+		printf("Error file size of '%s' is not a multiple of 18 bytes.\n", file);
 		return 1;
 	}
 	fseek(pFile, 0, SEEK_SET);
