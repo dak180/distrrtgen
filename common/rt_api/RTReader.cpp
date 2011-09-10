@@ -125,7 +125,10 @@ int RTReader::readChains(uint32 &numChains, RainbowChainO *pData)
 	unsigned int numRead = fread(pData, 1, chainSize * numChains, data);
 
 	if( numRead == 0 )
+	{
+		chainPosition = 0;
 		return EXIT_FAILURE;
+	}
 
 
 	numChains = numRead / chainSize;

@@ -78,6 +78,7 @@ RTIReader::RTIReader( std::string fname )
 
 	// XXX possibly remove if we dont want this to happen automagically
 	loadIndex();
+	fclose(indexFileData);
 }
 
 /**
@@ -206,6 +207,10 @@ void RTIReader::loadIndex()
 					 << fileStats.st_size / chainSize << "chains) EXITING!"<< std::endl;
 		exit(-1);
 	}
+
+	// XXX this was in the original RTIReader - i dont know why but putting it
+	// hear just in case
+	indexSize = rows;
 }
 
 /// getIndexFileName
@@ -266,36 +271,40 @@ int RTIReader::readChains(uint32 &numChains, RainbowChainO *pData)
 	// reset data to 0x00 or something bad happens
 	memset( pData, 0x00, sizeof( RainbowChainO ) * numChains );
 	uint32 readChains = 0;
+	uint32 chainsLeft = getChainsLeft();
 
-	// uint32 chainsLeft - getChainsLeft();
+	printf("++++ chainPosition: \t%d\n++++ readChains: \t%d\n", chainPosition, readChains );
+	printf("***** indexSize: \t%u\n", indexSize );
+	printf("***** numChains: \t%u\n", numChains);
+
 	
 	for( uint32 i = 0; i < indexSize; i++ )
 	{
 		if( chainPosition + readChains > index[i].nFirstChain + index[i].nChainCount )
-		{
-			while( chainPosition + readChains < index[i].nFirstChain + index[i].nChainCount )
-			{
-				pData[readChains].nIndexE = index[i].nPrefix << 16;
-				uint32 endPoint = 0; // have to set to 0
-				// XXX start points may not exceed 6 bytes ( 2^48 )
-				fread( &pData[readChains].nIndexS, 6, 1, data);
-				fread( &endPoint, 2, 1, data);
-				pData[readChains].nIndexE += endPoint;
-				readChains++;
-				
-				if( readChains == numChains || readChains == getChainsLeft() )
-					break;
-			}
-			if( readChains == numChains )
+			continue;
+		while( chainPosition + readChains < index[i].nFirstChain + index[i].nChainCount )
+		{	
+		//	printf("RTIREADER::readChains() - inside while{}\n");
+			pData[readChains].nIndexE = index[i].nPrefix << 16;
+			uint32 endPoint = 0; // have to set to 0
+			// XXX start points may not exceed 6 bytes ( 2^48 )
+			fread( &pData[readChains].nIndexS, 6, 1, data);
+			fread( &endPoint, 2, 1, data);
+			pData[readChains].nIndexE += endPoint;
+			readChains++;
+			
+			if( readChains == numChains || readChains == chainsLeft )
 				break;
 		}
+		if( readChains == numChains )
+			break;
 	}
+
 	if( readChains != numChains )
 		numChains = readChains; // update how many chains we read
 
 	chainPosition += readChains;
-	std::cout << "Chain position is now " << chainPosition << std::endl;
-
+	std::cout << "Chain Position is now " << chainPosition << std::endl;
 	return EXIT_SUCCESS;	
 }
 

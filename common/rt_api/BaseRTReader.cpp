@@ -25,10 +25,18 @@
 
 #include "BaseRTReader.h"
 
-/// Empty Constructor for speed
+/// Default Constructor
 BaseRTReader::BaseRTReader()
 {
 	data = NULL;
+	this->chainPosition = 0;
+	this->chainCount = 0;
+	this->chainLength = 0;
+	this->tableIndex = 0;
+	this->startPointBits = 0;
+	this->endPointBits = 0;
+	fileName = "";
+	salt = "";	
 }
 
 /**

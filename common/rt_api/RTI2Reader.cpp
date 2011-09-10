@@ -431,46 +431,37 @@ void RTI2Reader::Dump()
 {
 	std::cout << "header.tag: " << header.tag << std::endl;
 	std::cout << "header.minor: " << (uint32)header.minor << std::endl;
-	std::cout << "header.startPointBits: " << (uint32)header.startPointBits
-		<< std::endl;
-	std::cout << "header.endPointBits: " << (uint32)header.endPointBits
-		<< std::endl;
-	std::cout << "header.checkPointBits: "	<< (uint32)header.checkPointBits
-		<< std::endl;
+	std::cout << "header.startPointBits: " << (uint32)header.startPointBits << std::endl;
+	std::cout << "header.endPointBits: " << (uint32)header.endPointBits << std::endl;
+	std::cout << "header.checkPointBits: "	<< (uint32)header.checkPointBits << std::endl;
 	std::cout << "header.fileIndex: " << (uint32)header.fileIndex << std::endl;
 	std::cout << "header.files: " << (uint32)header.files << std::endl;
-	std::cout << "header.minimumStartPoint: "
-		<< (uint64)header.minimumStartPoint << std::endl;
-	std::cout << "header.chainLength: "
-		<< (uint32)header.chainLength << std::endl;
-	std::cout << "header.tableIndex: "
-		<< (uint16)header.tableIndex << std::endl;
-	std::cout << "header.algorithm: "
-		<< (uint32)header.algorithm << std::endl;
-	std::cout << "header.reductionFunction: "
-		<< (uint32)header.reductionFunction << std::endl;
+	std::cout << "header.minimumStartPoint: " << (uint64)header.minimumStartPoint << std::endl;
+	std::cout << "header.chainLength: " << (uint32)header.chainLength << std::endl;
+	std::cout << "header.tableIndex: " 	<< (uint16)header.tableIndex << std::endl;
+	std::cout << "header.algorithm: " << (uint32)header.algorithm << std::endl;
+	std::cout << "header.reductionFunction: " << (uint32)header.reductionFunction << std::endl;
+
 	if ( getSalt().size() > 0 )
 		std::cout << "header.salt: " << getSalt() << std::endl;
+
 	std::cout << "subKeySpaces Count: " << subKeySpaces.size() << std::endl;
 
 	for ( uint32 i = 0; i < subKeySpaces.size(); i++ )
 	{
 		std::cout << "subKeySpace " << i + 1 << std::endl;
-		
-		std::cout << "Number of hybrid sets: "
-			<< (uint32)subKeySpaces[i].hybridSets << std::endl;
+		std::cout << "Number of hybrid sets: " << (uint32)subKeySpaces[i].hybridSets << std::endl;
 
 		for ( uint32 j = 0; j < (uint32)subKeySpaces[i].hybridSets; j++ )
 		{
 			std::cout << "Hybrid set " << j + 1 << std::endl;
-			std::cout << "Password length: " << (uint32)subKeySpaces[i].passwordLength[j]
-				<< std::endl;
-			std::cout << "charSetFlags: "
-				<< (uint32)subKeySpaces[i].charSetFlags[j] << std::endl;
+			std::cout << "Password length: " << (uint32)subKeySpaces[i].passwordLength[j] << std::endl;
+			std::cout << "charSetFlags: " << (uint32)subKeySpaces[i].charSetFlags[j] << std::endl;
 
 			if ( subKeySpaces[i].charSetFlags[j] & 1 )
 			{
 				std::cout << "characterSet1: ";
+				
 				for ( uint32 k = 0; k < subKeySpaces[i].perPositionCharacterSets[j].characterSet1.size(); k++ )
 				{
 					std::cout << subKeySpaces[i].perPositionCharacterSets[j].characterSet1[k];
@@ -481,8 +472,7 @@ void RTI2Reader::Dump()
 		
 	}
 
-	std::cout << "header.checkPointBits: " << (uint32)header.checkPointBits
-		<< std::endl;
+	std::cout << "header.checkPointBits: " << (uint32)header.checkPointBits << std::endl;
 
 	if ( (uint32)header.checkPointBits > 0 )
 	{
@@ -497,8 +487,7 @@ void RTI2Reader::Dump()
 	}
 
 	std::cout << "index.firstPrefix: " << index.firstPrefix << std::endl;
-	std::cout << "index.prefixIndex.size(): "
-		<< index.prefixIndex.size()  << std::endl;
+	std::cout << "index.prefixIndex.size(): " << index.prefixIndex.size()  << std::endl;
 
 	/*
 	for ( uint32 i = 0; i < index.prefixIndex.size(); i++ )
