@@ -4,6 +4,7 @@
  *
  * Copyright 2010, 2011 Martin Westergaard Jørgensen <martinwj2005@gmail.com>
  * Copyright 2010, 2011 James Nobis <quel@quelrod.net>
+ * Copyright 2011 Logan Watt <logan.watt@gmail.com>
  *
  * This file is part of freerainbowtables.
  *
@@ -21,11 +22,7 @@
  * along with freerainbowtables.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "BaseRTReader.h"
 #include "RTI2Reader.h"
-
-#include <math.h>
-#include <iomanip>
 
 RTI2Reader::RTI2Reader( std::string filename )
 {
@@ -145,8 +142,6 @@ RTI2Reader::RTI2Reader( std::string filename )
 		// XXX finish handling custom algorithm
 	}
 	
-	setMinimumStartPoint();
-
 	// Salt
 	setSalt( "" );
 
@@ -452,28 +447,30 @@ void RTI2Reader::Dump()
 		<< (uint32)header.algorithm << std::endl;
 	std::cout << "header.reductionFunction: "
 		<< (uint32)header.reductionFunction << std::endl;
+
 	if ( getSalt().size() > 0 )
 		std::cout << "header.salt: " << getSalt() << std::endl;
+
 	std::cout << "subKeySpaces Count: " << subKeySpaces.size() << std::endl;
 
 	for ( uint32 i = 0; i < subKeySpaces.size(); i++ )
 	{
 		std::cout << "subKeySpace " << i + 1 << std::endl;
-		
 		std::cout << "Number of hybrid sets: "
 			<< (uint32)subKeySpaces[i].hybridSets << std::endl;
 
 		for ( uint32 j = 0; j < (uint32)subKeySpaces[i].hybridSets; j++ )
 		{
 			std::cout << "Hybrid set " << j + 1 << std::endl;
-			std::cout << "Password length: " << (uint32)subKeySpaces[i].passwordLength[j]
-				<< std::endl;
+			std::cout << "Password length: "
+				<< (uint32)subKeySpaces[i].passwordLength[j] << std::endl;
 			std::cout << "charSetFlags: "
 				<< (uint32)subKeySpaces[i].charSetFlags[j] << std::endl;
 
 			if ( subKeySpaces[i].charSetFlags[j] & 1 )
 			{
 				std::cout << "characterSet1: ";
+				
 				for ( uint32 k = 0; k < subKeySpaces[i].perPositionCharacterSets[j].characterSet1.size(); k++ )
 				{
 					std::cout << subKeySpaces[i].perPositionCharacterSets[j].characterSet1[k];
@@ -501,7 +498,7 @@ void RTI2Reader::Dump()
 
 	std::cout << "index.firstPrefix: " << index.firstPrefix << std::endl;
 	std::cout << "index.prefixIndex.size(): "
-		<< index.prefixIndex.size()  << std::endl;
+		<< index.prefixIndex.size() << std::endl;
 
 	/*
 	for ( uint32 i = 0; i < index.prefixIndex.size(); i++ )
@@ -602,7 +599,19 @@ int RTI2Reader::readChains(unsigned int &numChains, RainbowChainO *pData)
 	return 0;
 }
 
-void RTI2Reader::setMinimumStartPoint()
+void RTI2Reader::setMinimumStartPoint( uint64 minimumStartPoint )
 {
-	minimumStartPoint = header.minimumStartPoint;
+	header.minimumStartPoint = minimumStartPoint;
+}
+
+/// getChainSizeBytes
+uint32 RTI2Reader::getChainSizeBytes()
+{
+	return this->chainSizeBytes;
+}
+
+/// getMinimumStartPoint
+uint64 RTI2Reader::getMinimumStartPoint()
+{
+	return header.minimumStartPoint;
 }

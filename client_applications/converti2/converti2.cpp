@@ -4,6 +4,7 @@
 * Copyright 2009, 2010, 2011 Martin Westergaard Jørgensen <martinwj2005@gmail.com>
 * Copyright 2010, 2011 James Nobis <quel@quelrod.net>
 * Copyright 2011 Richard W. Watson <rwatson@therichard.com>
+* Copyright 2011 Logan Watt <logan.watt@gmail.com>
 *
 * This file is part of converti2.
 *
@@ -574,8 +575,6 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 		return;
 	}
 
-	reader->setMinimumStartPoint();
-
 	std::vector<std::string> vPart;
 
 	if ( !SeperateString( fileName, "___x_", vPart ) )
@@ -805,6 +804,8 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 	uint32 checkPointShift = eptl + sptl;
 */
 
+	uint64 minimumStartPoint = reader->getMinimumStartPoint();
+
 	// XXX showDistribution shouldn't be mixed in here
 	if( !showDistribution )
 	{
@@ -813,7 +814,7 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 		writer->setEndPointLen( eptl );
 		writer->setCheckPointLen( checkPointBits );
 		writer->setCheckPointPos( cppositions );
-		writer->setMinimumStartPoint( reader->getMinimumStartPoint() );
+		writer->setMinimumStartPoint( minimumStartPoint );
 		writer->setChainLength( rainbowChainLen );
 		writer->setTableIndex( rainbowTableIndex );
 		writer->setChainCount( rainbowChainCount );
@@ -850,7 +851,7 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 			unsigned int nChains = (uint32) nAllocatedSize / sizeof(RainbowChainO);
 			uint64 curPrefix = 0, prefixStart = 0, prefix = 0, chainrow = 0;
 			std::vector<IndexRow> indexes;
-			unsigned int chainsLeft;
+			unsigned int chainsLeft = 0;
 
 			while( (chainsLeft = reader->getChainsLeft()) > 0 && chainsLeft > dropLastNchains )
 			{
@@ -861,7 +862,12 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 #ifdef _MEMORYDEBUG
 				printf("Grabbing %i chains from file\n", nChains);
 #endif
-				reader->readChains(nChains, pChain);
+				if(reader->readChains(nChains, pChain) == EXIT_FAILURE)
+				{
+					printf("Read last chain moving along...\n");
+					break;
+				}
+				
 #ifdef _MEMORYDEBUG
 				printf("Recieved %i chains from file\n", nChains);
 #endif
@@ -903,7 +909,7 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 						// Mask off the bits that won't be in an index somewhere...
 						chainrow = pChain[i].nIndexE & endPointMask;
 
-						chainrow |= ( ((uint64)(pChain[i].nIndexS - reader->getMinimumStartPoint()) & startPointMask )) << startPointShift;
+						chainrow |= ( ((uint64)(pChain[i].nIndexS - minimumStartPoint) & startPointMask )) << startPointShift;
 
 						/*
 						 * XXX check points go here
@@ -953,7 +959,8 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 
 				t2 = clock();
 				fTime = 1.0f * (t2 - t1) / CLOCKS_PER_SEC;
-				printf("conversion time: %.2f s\n", fTime);		
+				printf("conversion time: %.2f s\n", fTime);
+
 				if( showDistribution )
 				{
 					for(int i = 0; i < 64; i++)

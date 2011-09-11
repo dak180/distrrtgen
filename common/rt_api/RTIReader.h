@@ -4,6 +4,7 @@
  *
  * Copyright 2010, 2011 Martin Westergaard Jørgensen <martinwj2005@gmail.com>
  * Copyright 2010, 2011 James Nobis <quel@quelrod.net>
+ * Copyright 2011 Logan Watt <logan.watt@gmail.com>
  *
  * This file is part of freerainbowtables.
  *
@@ -24,30 +25,69 @@
 #ifndef _RTIREADER_H
 #define _RTIREADER_H
 
-#include <string>
-
-#if defined(_WIN32) && !defined(__GNUC__)
-	#include <io.h>
-#endif
-
-#include "Public.h"
 #include "BaseRTReader.h"
 
-class RTIReader : BaseRTReader
+// http://www.tobtu.com/rtcalc.php#info -- RTI file format info
+
+class RTIReader : public BaseRTReader
 {
-private:
-	unsigned int m_nIndexSize;
-	IndexChain *m_pIndex;
+	private:
+		uint32 chainSize;		// 8 bytes -> 6 byte start point + 2 byte end point
+		uint32 indexSize;		// 11 bytes -> 5 byte EP prefix + 4 byte Chain offset + 2 bytes number of chains
+		std::string indexFileName;
+		FILE *indexFileData;
+		struct stat fileStats;
+		struct stat indexFileStats;
+		IndexChain *index;
+		void RTIReaderInit();
 
-public:
-	RTIReader( std::string filename );
-	~RTIReader();
+	protected:
+		/// Set methods
+		void setChainSize(uint32);
+		void setIndexFileName(std::string);
+		void loadIndex();
 
-	uint32 getChainsLeft();
-	int readChains(uint32 &numChains, RainbowChainO *pData);
-	void setMinimumStartPoint();
+	public:
+		/// Default Constructor
+		RTIReader();
 
-	void Dump();
+		/** Constructor with filename
+		 * @param std::string file name on disk
+		 * index file is std::string + '.index'
+		 */
+		RTIReader( std::string filename );
+
+		/**
+		 * Argument Constructor
+		 * @param uint32 number of chains in the file
+		 * @param uint32 size of the chain
+		 * @param uint32 reduction function index offset
+		 * @param uint32 start point in the chain
+		 * @param uint32 end point in the chain
+		 * @param std::string name of the file on disk
+		 * @param std::string salt used for hash
+		 */
+		RTIReader(uint32, uint32, uint32, uint32, uint32, std::string, std::string);
+
+		/// Destructor
+		~RTIReader();
+
+		/// Get Methods
+		std::string getIndexFileName();
+		uint32 getChainSize();
+		uint32 getIndexSize();
+		// XXX used for debugging, can remove later if not needed
+		uint32 getIndexFileSize();
+		uint32 getDataFileSize();
+		FILE* getIndexFileData();
+		FILE* getDataFile();
+		// XXX end debug type functions
+
+		int readChains(uint32 &numChains, RainbowChainO *pData);
+		uint32 getChainsLeft();
+		uint64 getMinimumStartPoint();
+
+		void Dump();
 };
 
 #endif
