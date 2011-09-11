@@ -22,7 +22,6 @@
  * along with freerainbowtables.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 #ifndef _RTREADER_H
 #define _RTREADER_H
 
@@ -36,6 +35,7 @@ class RTReader : public BaseRTReader
 	private:
 		uint32 chainSize;
 		struct stat fileStats;
+		void RTReaderInit();
 
 	protected:
 
@@ -70,7 +70,6 @@ class RTReader : public BaseRTReader
 		int readChains(uint32&, RainbowChainO*);
 		uint32 getChainsLeft();
 		uint64 getMinimumStartPoint();
-
 };
 
 #endif

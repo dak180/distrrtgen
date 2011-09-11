@@ -575,8 +575,6 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 		return;
 	}
 
-//	reader->setMinimumStartPoint();
-
 	std::vector<std::string> vPart;
 
 	if ( !SeperateString( fileName, "___x_", vPart ) )
@@ -806,7 +804,7 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 	uint32 checkPointShift = eptl + sptl;
 */
 
-	uint64 minSP = reader->getMinimumStartPoint();
+	uint64 minimumStartPoint = reader->getMinimumStartPoint();
 
 	// XXX showDistribution shouldn't be mixed in here
 	if( !showDistribution )
@@ -816,8 +814,7 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 		writer->setEndPointLen( eptl );
 		writer->setCheckPointLen( checkPointBits );
 		writer->setCheckPointPos( cppositions );
-		// XXX writer->setMinimumStartPoint( reader->getMinimumStartPoint() );
-		writer->setMinimumStartPoint(minSP);
+		writer->setMinimumStartPoint( minimumStartPoint );
 		writer->setChainLength( rainbowChainLen );
 		writer->setTableIndex( rainbowTableIndex );
 		writer->setChainCount( rainbowChainCount );
@@ -909,12 +906,10 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 							}
 						}
 
-					// XXX	printf("CHAINS LEFT: %u\n", chainsLeft);
-
 						// Mask off the bits that won't be in an index somewhere...
 						chainrow = pChain[i].nIndexE & endPointMask;
 
-						chainrow |= ( ((uint64)(pChain[i].nIndexS - minSP /*reader->getMinimumStartPoint()*/) & startPointMask )) << startPointShift;
+						chainrow |= ( ((uint64)(pChain[i].nIndexS - minimumStartPoint) & startPointMask )) << startPointShift;
 
 						/*
 						 * XXX check points go here
@@ -927,7 +922,7 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 						*/
 						
 						writer->addDataChain( &chainrow );
-					
+
 						prefix = pChain[i].nIndexE >> eptl;
 
 						if ( i == 0 && curPrefix == 0 )
@@ -964,7 +959,7 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 
 				t2 = clock();
 				fTime = 1.0f * (t2 - t1) / CLOCKS_PER_SEC;
-				printf("conversion time: %.2f s\n", fTime);	
+				printf("conversion time: %.2f s\n", fTime);
 
 				if( showDistribution )
 				{

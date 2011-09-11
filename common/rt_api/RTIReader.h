@@ -32,13 +32,14 @@
 class RTIReader : public BaseRTReader
 {
 	private:
-		uint32 chainSize;					// 8 bytes -> 6 byte start point + 2 byte end point
-		uint32 indexSize; 				// 11 bytes -> 5 byte EP prefix + 4 byte Chain offset + 2 bytes number of chains
+		uint32 chainSize;		// 8 bytes -> 6 byte start point + 2 byte end point
+		uint32 indexSize;		// 11 bytes -> 5 byte EP prefix + 4 byte Chain offset + 2 bytes number of chains
 		std::string indexFileName;
 		FILE *indexFileData;
 		struct stat fileStats;
 		struct stat indexFileStats;
 		IndexChain *index;
+		void RTIReaderInit();
 
 	protected:
 		/// Set methods

@@ -24,14 +24,10 @@
 
 #include "RTReader.h"
 
-
 /// Default Constructor
 RTReader::RTReader()
 {
-	// bytes per chain
-	this->chainSize = 16;
-	setStartPointBits(8);
-	setEndPointBits(8);
+	RTReaderInit();
 }
 
 /** Constructor with filename
@@ -39,11 +35,10 @@ RTReader::RTReader()
  */
 RTReader::RTReader(std::string fname)
 {
+	RTReaderInit();
+
 	//bytes per chain
-	this->chainSize = 16;
 	setFileName( fname );
-	setStartPointBits(8);
-	setEndPointBits(8);
 
 	if( stat( getFileName().c_str(), &fileStats ) == -1 )
 	{
@@ -58,7 +53,6 @@ RTReader::RTReader(std::string fname)
 		std::cerr << "ERROR: could not open table file: " << getFileName() << " EXITING!" << std::endl;
 		exit(-1);
 	}
-
 }
 
 /**
@@ -73,7 +67,7 @@ RTReader::RTReader(std::string fname)
  */
 RTReader::RTReader(uint32 chCount, uint32 chLength, uint32 tblIdx, uint32 stPt, uint32 endPt, std::string fname, std::string slt)
 {
-	this->chainSize = 16;
+	RTReaderInit();
 	setFileName( fname );
 
 	if( stat( getFileName().c_str(), &fileStats ) == -1 )
@@ -95,6 +89,15 @@ RTReader::RTReader(uint32 chCount, uint32 chLength, uint32 tblIdx, uint32 stPt, 
 		std::cerr << "ERROR: could not open table file: " << getFileName() << " EXITING!" << std::endl;
 		exit(-1);
 	}
+}
+
+/// shared Init method
+void RTReader::RTReaderInit()
+{
+	// bytes per chain
+	this->chainSize = 16;
+	setStartPointBits(8);
+	setEndPointBits(8);
 }
 
 /// Deconstructor
@@ -130,13 +133,11 @@ int RTReader::readChains(uint32 &numChains, RainbowChainO *pData)
 		return EXIT_FAILURE;
 	}
 
-
 	numChains = numRead / chainSize;
 	chainPosition += numChains;
 
 	return EXIT_SUCCESS;
 }
-
 
 /// getChainsLeft
 uint32 RTReader::getChainsLeft()

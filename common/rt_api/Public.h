@@ -45,7 +45,7 @@
 #include "global.h"
 
 #if defined(_WIN32) && !defined(__GNUC__)
-        #include <io.h>
+	#include <io.h>
 #endif
 
 struct RainbowChainO

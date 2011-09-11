@@ -1006,7 +1006,6 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 	timeval tv2;
 	timeval final;
 
-	// RT stuff
 	if( CChainWalkContext::getRTfileFormat() == getRTfileFormatId("RT") )
 	{
 		RTReader *reader = new RTReader( pathName );
@@ -1014,17 +1013,22 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 		unsigned int bytesForChainWalkSet = hs.GetStatHashTotal() * (nRainbowChainLen-1) * 8;
 
 		if (debug) 
-			std::cout << "Debug: Saving " << bytesForChainWalkSet << " bytes of memory for chainwalkset." << std::endl;
+		{
+			std::cout << "Debug: Saving " << bytesForChainWalkSet
+				<< " bytes of memory for chainwalkset." << std::endl;
 		
-		if( debug )
 			std::cout << "Debug: This is a table in .rt format." << std::endl;
+		}
 
 		static CMemoryPool mp( bytesForChainWalkSet, debug, maxMem );
 		//uint64 size = reader->getChainsLeft() * sizeof( RainbowChainO );
 		RainbowChainO* pChain = ( RainbowChainO* )mp.Allocate( reader->getDataFileSize() , nAllocatedSize );
 
 		if( debug )
-			std::cout << "Debug: Allocate " << nAllocatedSize << " bytes, filelen " << reader->getDataFileSize() << std::endl;
+		{
+			std::cout << "Debug: Allocate " << nAllocatedSize
+				<< " bytes, filelen " << reader->getDataFileSize() << std::endl;
+		}
 
 		if( pChain != NULL )
 		{
@@ -1104,8 +1108,8 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 				// Already finished?
 				if( !hs.AnyHashLeftWithLen( CChainWalkContext::GetHashLen() ) )
 					break;
-			} // end while
-		} // end if
+			}
+		}
 
 		else
 			std::cout << "memory allocation fail" << std::endl;
@@ -1115,10 +1119,7 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 
 		if( reader != NULL )
 			delete reader;
-
-	} // end RT stuff
-
-	// RTI stuff
+	}
 	else if( CChainWalkContext::getRTfileFormat() == getRTfileFormatId("RTI") )
 	{
 		RTIReader *reader = new RTIReader( pathName );
@@ -1127,10 +1128,12 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 		unsigned int bytesForChainWalkSet = hs.GetStatHashTotal() * (nRainbowChainLen-1) * 8;
 
 		if (debug)
-			std::cout << "Debug: Saving " << bytesForChainWalkSet << " bytes of memory for chainwalkset." << std::endl;
+		{
+			std::cout << "Debug: Saving " << bytesForChainWalkSet
+				<< " bytes of memory for chainwalkset." << std::endl;
 
-		if( debug )
 			std::cout << "Debug: This is a table in .rti format." << std::endl;
+		}
 
 		static CMemoryPool mpIndex( bytesForChainWalkSet, debug, maxMem );
 		uint64 nAllocatedSizeIndex;
@@ -1143,148 +1146,148 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 
 		static CMemoryPool mp( bytesForChainWalkSet + nAllocatedSizeIndex, debug, maxMem );
 
-			if( pIndex != NULL && nAllocatedSizeIndex > 0 )
+		if( pIndex != NULL && nAllocatedSizeIndex > 0 )
+		{
+			// Round to sizeOfIndexChain boundary
+			nAllocatedSizeIndex = nAllocatedSizeIndex / sizeof( RTIrcrackiIndexChain ) * sizeof( RTIrcrackiIndexChain );
+
+			fseek( reader->getIndexFileData(), 0, SEEK_SET );
+
+			// Index chunk read loop
+			while( ftell( reader->getIndexFileData() ) != reader->getIndexFileSize() )
 			{
-				// Round to sizeOfIndexChain boundary
-				nAllocatedSizeIndex = nAllocatedSizeIndex / sizeof( RTIrcrackiIndexChain ) * sizeof( RTIrcrackiIndexChain );
+				// Load index chunk
+				memset( pIndex, 0x00, nAllocatedSizeIndex );
+				std::cout << "reading index... ";
 
-				fseek( reader->getIndexFileData(), 0, SEEK_SET );
+				gettimeofday( &tv, NULL );
+				unsigned int nDataRead = fread( pIndex, 1, nAllocatedSizeIndex, reader->getIndexFileData() );
+				gettimeofday( &tv2, NULL );
+				final = sub_timeofday( tv2, tv );
 
-				// Index chunk read loop
-				while( ftell( reader->getIndexFileData() ) != reader->getIndexFileSize() )
+				float fTime = 1.0f * final.tv_sec + 1.0f * final.tv_usec / 1000000;
+				std::cout << nDataRead << " bytes read, disk access time: "
+					<< fTime << " s" << std::endl;
+				m_fTotalDiskAccessTime += fTime;
+
+				int nIndexChainCountRead = nDataRead / sizeof( RTIrcrackiIndexChain );
+				unsigned int nCoveredRainbowTableChains = 0;
+
+				for( int i = 0; i < nIndexChainCountRead; i++ )
 				{
-					// Load index chunk
-					memset( pIndex, 0x00, nAllocatedSizeIndex );
-					std::cout << "reading index... ";
+					nCoveredRainbowTableChains += pIndex[i].nChainCount;
+				}
 
-					gettimeofday( &tv, NULL );
-					unsigned int nDataRead = fread( pIndex, 1, nAllocatedSizeIndex, reader->getIndexFileData() );
-					gettimeofday( &tv2, NULL );
-					final = sub_timeofday( tv2, tv );
+				RainbowChain* pChain = (RainbowChain*)mp.Allocate( nCoveredRainbowTableChains * sizeOfChain, nAllocatedSize );
+				if( debug )
+				{
+					std::cout << "Debug: Allocated " << nAllocatedSize << " for "
+						<< nCoveredRainbowTableChains << " chains, filelen " 
+						<< reader->getDataFileSize() << std::endl;
+				}
 
-					float fTime = 1.0f * final.tv_sec + 1.0f * final.tv_usec / 1000000;
-					std::cout << nDataRead << " bytes read, disk access time: " << fTime << " s" << std::endl;
-					m_fTotalDiskAccessTime += fTime;
+				if( pChain != NULL && nAllocatedSize > 0 )
+				{
+					// Round to sizeOfChain boundary
+					nAllocatedSize = nAllocatedSize / sizeOfChain * sizeOfChain;
 
-					int nIndexChainCountRead = nDataRead / sizeof( RTIrcrackiIndexChain );
-					unsigned int nCoveredRainbowTableChains = 0;
+					uint32 nProcessedChains = 0;
 
-					for( int i = 0; i < nIndexChainCountRead; i++ )
+					// Chunk read loop
+					while( ftell( reader->getDataFile() ) != reader->getDataFileSize() && nProcessedChains < nCoveredRainbowTableChains )
 					{
-						nCoveredRainbowTableChains += pIndex[i].nChainCount;
-					}
+						// Load table chunk
+						memset( pChain, 0x00, nAllocatedSize );
+						std::cout << "reading table... ";
+						gettimeofday( &tv, NULL );
+						unsigned int nDataRead = fread( pChain, 1, nAllocatedSize, reader->getDataFile() );
+						gettimeofday( &tv2, NULL );
+						final = sub_timeofday( tv2, tv );
 
-					RainbowChain* pChain = (RainbowChain*)mp.Allocate( nCoveredRainbowTableChains * sizeOfChain, nAllocatedSize );
-					if( debug )
-					{
-						std::cout << "Debug: Allocated " << nAllocatedSize << " for " << nCoveredRainbowTableChains << " chains, filelen " 
-									 << reader->getDataFileSize() << std::endl;
-					}
+						float fTime = 1.0f * final.tv_sec + 1.0f * final.tv_sec / 1000000;
+						std::cout << nDataRead << " bytes read, disk access time: "
+							<< fTime << " s" << std::endl;
+						m_fTotalDiskAccessTime += fTime;
+						int nRainbowChainCountRead = nDataRead / sizeOfChain;
 
-					if( pChain != NULL && nAllocatedSize > 0 )
-					{
-						// Round to sizeOfChain boundary
-						nAllocatedSize = nAllocatedSize / sizeOfChain * sizeOfChain;
+						// Verify table chunk (someone was too lazy to implement)
 
-						uint32 nProcessedChains = 0;
-
-						// Chunk read loop
-						while( ftell( reader->getDataFile() ) != reader->getDataFileSize() && nProcessedChains < nCoveredRainbowTableChains )
+						if( debug && !fVerified )
 						{
-							// Load table chunk
-							memset( pChain, 0x00, nAllocatedSize );
-							std::cout << "reading table... ";
-							gettimeofday( &tv, NULL );
-							unsigned int nDataRead = fread( pChain, 1, nAllocatedSize, reader->getDataFile() );
-							gettimeofday( &tv2, NULL );
-							final = sub_timeofday( tv2, tv );
+							std::cout << "Debug: verifying the file...";
 
-							float fTime = 1.0f * final.tv_sec + 1.0f * final.tv_sec / 1000000;
-							std::cout << nDataRead << " bytes read, disk access time: " << fTime << " s" << std::endl;
-							m_fTotalDiskAccessTime += fTime;
-							int nRainbowChainCountRead = nDataRead / sizeOfChain;
+							// Chain length test
+							unsigned int nIndexToVerify = nRainbowChainCountRead / 2;
+							CChainWalkContext cwc;
+							uint64 nIndexS;
+							nIndexS = pChain[nIndexToVerify].nIndexS & 0x0000FFFFFFFFFFFFULL; // for first 6 bytes
 
-							// Verify table chunk (someone was too lazy to implement)
+							cwc.SetIndex( nIndexS );
 
-							if( debug && !fVerified )
+							int nPos;
+							for( nPos = 0; nPos < nRainbowChainLen - 1; nPos++ )
 							{
-								std::cout << "Debug: verifying the file...";
+								cwc.IndexToPlain();
+								cwc.PlainToHash();
+								cwc.HashToIndex( nPos );
+							}
 
-								// Chain length test
-								unsigned int nIndexToVerify = nRainbowChainCountRead / 2;
-								CChainWalkContext cwc;
-								uint64 nIndexS;
-								nIndexS = pChain[nIndexToVerify].nIndexS & 0x0000FFFFFFFFFFFFULL; // for first 6 bytes
+							uint64 nEndPoint = 0;
 
-								cwc.SetIndex( nIndexS );
-
-								int nPos;
-								for( nPos = 0; nPos < nRainbowChainLen - 1; nPos++ )
+							for( int i = 0; i < nIndexChainCountRead; i++ )
+							{
+								// Find matching index
+								if( nIndexToVerify >= pIndex[i].nFirstChain && nIndexToVerify < pIndex[i].nFirstChain + pIndex[i].nChainCount )
 								{
-									cwc.IndexToPlain();
-									cwc.PlainToHash();
-									cwc.HashToIndex( nPos );
-								}
-
-								uint64 nEndPoint = 0;
-
-								for( int i = 0; i < nIndexChainCountRead; i++ )
-								{
-									// Find matching index
-									if( nIndexToVerify >= pIndex[i].nFirstChain && nIndexToVerify < pIndex[i].nFirstChain + pIndex[i].nChainCount )
-									{
-										// Now we need to seek nIndexToVerify into the
-										// chains
-										// first 5 bytes
-										nEndPoint += ( pIndex[i].nPrefix & 0x000000FFFFFFFFFFULL) << 16;
-										nEndPoint += pChain[nIndexToVerify].nIndexE;
-										break;
-									}
-								}
-
-								if( cwc.GetIndex() != nEndPoint )
-								{
-									std::cout << "rainbow chain length verify fail" << std::endl;
+									// Now we need to seek nIndexToVerify into the
+									// chains
+									// first 5 bytes
+									nEndPoint += ( pIndex[i].nPrefix & 0x000000FFFFFFFFFFULL) << 16;
+									nEndPoint += pChain[nIndexToVerify].nIndexE;
 									break;
 								}
+							}
 
-								fVerified = true;
-								std::cout << "ok" << std::endl;
-							} // end Verify Table Chunk
-
-							// Search table chunk
-							gettimeofday( &tv, NULL );
-							float preTime = m_fTotalCryptanalysisTime;
-
-							SearchTableChunk( pChain, nRainbowChainLen, nRainbowChainCountRead, hs, pIndex, nIndexChainCountRead, nProcessedChains );
-							float postTime = m_fTotalCryptanalysisTime;
-							gettimeofday( &tv2, NULL );
-							final = sub_timeofday( tv2, tv );
-
-							fTime = 1.0f * final.tv_sec + 1.0f * final.tv_usec / 1000000;
-							std::cout << "cryptanalysis time: " << ( fTime + postTime - preTime ) << " s" << std::endl;
-							m_fTotalCryptanalysisTime += fTime;
-							nProcessedChains += nRainbowChainCountRead;
-
-							// Already finished?
-							if( !hs.AnyHashLeftWithLen( CChainWalkContext::GetHashLen() ) )
+							if( cwc.GetIndex() != nEndPoint )
+							{
+								std::cout << "rainbow chain length verify fail" << std::endl;
 								break;
-						} // end Chunk read loop
-					} // end if
-					else
-						std::cout << "memory allocation failed for rainbow table" << std::endl;
-				}// endwhile
-			}// end if
+							}
 
-			// XXX
-			// delete pChain
+							fVerified = true;
+							std::cout << "ok" << std::endl;
+						}
 
-			if( reader != NULL )
-				delete reader;
+						// Search table chunk
+						gettimeofday( &tv, NULL );
+						float preTime = m_fTotalCryptanalysisTime;
 
-	} // end RTI stuff
+						SearchTableChunk( pChain, nRainbowChainLen, nRainbowChainCountRead, hs, pIndex, nIndexChainCountRead, nProcessedChains );
+						float postTime = m_fTotalCryptanalysisTime;
+						gettimeofday( &tv2, NULL );
+						final = sub_timeofday( tv2, tv );
 
-	// RTI2 stuff
+						fTime = 1.0f * final.tv_sec + 1.0f * final.tv_usec / 1000000;
+						std::cout << "cryptanalysis time: " << ( fTime + postTime - preTime ) << " s" << std::endl;
+						m_fTotalCryptanalysisTime += fTime;
+						nProcessedChains += nRainbowChainCountRead;
+
+						// Already finished?
+						if( !hs.AnyHashLeftWithLen( CChainWalkContext::GetHashLen() ) )
+							break;
+					}
+				}
+				else
+					std::cout << "memory allocation failed for rainbow table" << std::endl;
+			}
+		}
+
+		// XXX
+		// delete pChain
+
+		if( reader != NULL )
+			delete reader;
+	}
 	else if( CChainWalkContext::getRTfileFormat() == getRTfileFormatId("RTI2") )
 	{
 		RTI2Reader *reader = new RTI2Reader( pathName );
@@ -1295,7 +1298,6 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 		if (debug)
 			std::cout << "Debug: Saving " << bytesForChainWalkSet << " bytes of memory for chainwalkset." << std::endl;
 
-
 		if( debug )
 			std::cout << "Debug: This is a table in .rti2 format." << std::endl;
 
@@ -1304,7 +1306,10 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 		RainbowChainO* pChain = ( RainbowChainO* )mp.Allocate( size, nAllocatedSize );
 
 		if( debug )
-			std::cout << "Debug: Allocate " << nAllocatedSize << " bytes, filelen " << GetFileLen( pathName ) << std::endl;
+		{
+			std::cout << "Debug: Allocate " << nAllocatedSize
+				<< " bytes, filelen " << GetFileLen( pathName ) << std::endl;
+		}
 
 		if( pChain != NULL )
 		{
@@ -1384,9 +1389,8 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 				// Already finished?
 				if( !hs.AnyHashLeftWithLen( CChainWalkContext::GetHashLen() ) )
 					break;
-			} // end while
-		} // end if
-
+			}
+		}
 		else
 			std::cout << "memory allocation fail" << std::endl;
 
@@ -1395,12 +1399,9 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 
 		if( reader != NULL )
 			delete reader;
-
-	} // end RTI2 stuff
-
-	// Unsupported Format
+	}
 	else
-			std::cout << "Unsupported file format or corrupt table." << std::endl;
+		std::cout << "Unsupported file format or corrupt table." << std::endl;
 /*
 			if (debug)
 			printf("Debug: writing progress to %s\n", sProgressPathName.c_str());
@@ -1414,7 +1415,7 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 		fclose (file);
 	}
 	*/
-}//end of function
+}
 
 void CCrackEngine::Run(std::vector<std::string> vPathName, CHashSet& hs, int i_maxThreads, uint64 i_maxMem, bool resume, bool bDebug)
 {
@@ -1432,7 +1433,7 @@ void CCrackEngine::Run(std::vector<std::string> vPathName, CHashSet& hs, int i_m
 	ResetStatistics();
 
 	// Sort vPathName (CChainWalkSet need it)
-	sort(vPathName.begin(), vPathName.end());
+	std::sort(vPathName.begin(), vPathName.end());
 
 	// Run
 	for (i = 0; i < vPathName.size() && hs.AnyhashLeft(); i++)
@@ -1468,10 +1469,7 @@ float CCrackEngine::GetStatTotalDiskAccessTime()
 {
 	return m_fTotalDiskAccessTime;
 }
-/*float CCrackEngine::GetWastedTime()
-{
-	return m_fIndexTime;
-}*/
+
 float CCrackEngine::GetStatTotalCryptanalysisTime()
 {
 	return m_fTotalCryptanalysisTime;

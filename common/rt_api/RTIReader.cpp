@@ -27,12 +27,7 @@
 /// Default constructor
 RTIReader::RTIReader()
 {
-	this->chainSize = 8;
-	this->indexSize = 11;
-
-	setStartPointBits(6);
-	setEndPointBits(2);
-	index = NULL;
+	RTIReaderInit();
 }
 
 /** Constructor with filename
@@ -41,14 +36,11 @@ RTIReader::RTIReader()
  */
 RTIReader::RTIReader( std::string fname )
 {
-	this->chainSize = 8;
-	this->indexSize = 11;
+	RTIReaderInit();
+
 	this->indexFileName = fname + ".index";
 
 	setFileName( fname );
-	setStartPointBits(6);
-	setEndPointBits(2);
-	index = NULL;
 
 	if( stat( getFileName().c_str(), &fileStats ) == -1 )
 	{
@@ -78,7 +70,6 @@ RTIReader::RTIReader( std::string fname )
 
 	// XXX possibly remove if we dont want this to happen automagically
 	loadIndex();
-	fclose(indexFileData);
 }
 
 /**
@@ -93,14 +84,11 @@ RTIReader::RTIReader( std::string fname )
  */
 RTIReader::RTIReader(uint32 chCount, uint32 chLength, uint32 tblIdx, uint32 stPt, uint32 endPt, std::string fname, std::string slt)
 {
-	this->chainSize = 8;
-	this->indexSize = 11;
+	RTIReaderInit();
+
 	this->indexFileName = fname + ".index";
 
 	setFileName( fname );
-	setStartPointBits(6);
-	setEndPointBits(2);
-	index = NULL;
 
 	if( stat( getFileName().c_str(), &fileStats ) == -1 )
 	{
@@ -138,6 +126,18 @@ RTIReader::RTIReader(uint32 chCount, uint32 chLength, uint32 tblIdx, uint32 stPt
 	setEndPointBits( endPt );
 	setSalt( slt );
 }
+
+/// shared init method
+void RTIReader::RTIReaderInit()
+{
+	this->chainSize = 8;
+	this->indexSize = 11;
+
+	setStartPointBits(6);
+	setEndPointBits(2);
+	index = NULL;
+}
+
 
 /// loadIndex
 void RTIReader::loadIndex()
@@ -209,7 +209,7 @@ void RTIReader::loadIndex()
 	}
 
 	// XXX this was in the original RTIReader - i dont know why but putting it
-	// hear just in case
+	// here just in case
 	indexSize = rows;
 }
 
@@ -273,18 +273,13 @@ int RTIReader::readChains(uint32 &numChains, RainbowChainO *pData)
 	uint32 readChains = 0;
 	uint32 chainsLeft = getChainsLeft();
 
-	printf("++++ chainPosition: \t%d\n++++ readChains: \t%d\n", chainPosition, readChains );
-	printf("***** indexSize: \t%u\n", indexSize );
-	printf("***** numChains: \t%u\n", numChains);
-
-	
 	for( uint32 i = 0; i < indexSize; i++ )
 	{
 		if( chainPosition + readChains > index[i].nFirstChain + index[i].nChainCount )
 			continue;
+
 		while( chainPosition + readChains < index[i].nFirstChain + index[i].nChainCount )
 		{	
-		//	printf("RTIREADER::readChains() - inside while{}\n");
 			pData[readChains].nIndexE = index[i].nPrefix << 16;
 			uint32 endPoint = 0; // have to set to 0
 			// XXX start points may not exceed 6 bytes ( 2^48 )
@@ -328,7 +323,6 @@ uint64 RTIReader::getMinimumStartPoint()
 
 	fseek( data, originalFilePos, SEEK_SET );
 	return minimumStartPoint;
-
 }
 
 void RTIReader::Dump()
@@ -341,6 +335,5 @@ RTIReader::~RTIReader()
 	if( indexFileData != NULL )
 	{
 		fclose( indexFileData );
-	//	delete indexFileData;
 	}
 }
