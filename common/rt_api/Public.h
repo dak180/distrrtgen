@@ -29,16 +29,24 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 
 #include <string>
 #include <vector>
 #include <list>
+#include <iterator>
 #include <iostream>
+#include <fstream>
+#include <map>
 #include <algorithm>
 
 #include "global.h"
+
+#if defined(_WIN32) && !defined(__GNUC__)
+        #include <io.h>
+#endif
 
 struct RainbowChainO
 {

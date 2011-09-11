@@ -58,6 +58,7 @@
 #if defined(_WIN32) && !defined(__GNUC__)
 	#include <windows.h>
 	#include <time.h>
+	#include <io.h>
 
 	#if defined(_MSC_VER) || defined(_MSC_EXTENSIONS)
 		#define DELTA_EPOCH_IN_MICROSECS  11644473600000000Ui64
