@@ -23,11 +23,11 @@
 #ifndef RCUDA_H
 #define RCUDA_H
 
-#include "../../../common/rt_api/Public.h"
+#include "Public.h"
 
 namespace rcuda {
 
-	enum RHash { RHASH_UNDEF = -1, RHASH_LM, RHASH_MD4, RHASH_MD5, RHASH_SHA1, RHASH_NTLM };
+enum RHash { RHASH_UNDEF = -1, RHASH_LM, RHASH_MD4, RHASH_MD5, RHASH_SHA1, RHASH_NTLM };
 
 struct RCudaTask {
 	RHash hash;
