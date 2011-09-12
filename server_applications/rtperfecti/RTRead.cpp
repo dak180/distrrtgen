@@ -374,7 +374,7 @@ void RTRead::printStatus()
 int RTRead::getInfo(char *file, int len, FileList *ret)
 {
 	FILE *pFile;
-	unsigned int size;
+	long size;
 
 	if (m_verbose)
 	{
@@ -390,7 +390,7 @@ int RTRead::getInfo(char *file, int len, FileList *ret)
 	// Get file size
 	fseek(pFile, 0, SEEK_END);
 	size = ftell(pFile);
-	if ( (size & 17) != 0)
+	if ( (size % 18) != 0)
 	{
 		fclose(pFile);
 		printf("Error file size of '%s' is not a multiple of 18 bytes.\n", file);
