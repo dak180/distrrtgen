@@ -1,21 +1,23 @@
 /*
-	Copyright (C) 2008 Steve Thomas <SMT837784@yahoo.com>
-	Copyright 2011 James Nobis <quel@quelrod.net>
-
-	This file is part of RT Perfecter v0.0.
-
-	RT Perfecter v0.0 is free software: you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published by
-	the Free Software Foundation, either version 3 of the License, or
-	(at your option) any later version.
-
-	RT Perfecter v0.0 is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU General Public License for more details.
-
-	You should have received a copy of the GNU General Public License
-	along with RT Perfecter v0.0.  If not, see <http://www.gnu.org/licenses/>.
+ * Copyright (C) 2008 Steve Thomas <SMT837784@yahoo.com>
+ * Copyright 2008, 2009, 2010, 2011 Martin Westergaard Jørgensen <martinwj2005@gmail.com>
+ * Copyright 2011 James Nobis <quel@quelrod.net>
+ * Copyright 2011 Andrew Dranse <aramith@aramith.org>
+ *
+ * This file is part of RT Perfecter v0.0.
+ *
+ * RT Perfecter v0.0 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * RT Perfecter v0.0 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with RT Perfecter v0.0.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <stdio.h>
@@ -26,7 +28,15 @@
 #include <stdlib.h>
 #include "RTRead.h"
 
-#include <dirent.h>
+#ifdef HAVE_DIRENT_H
+	#include <dirent.h>
+#else
+	// I know Microsoft's compiler, .Net 2005 or older, does not come with this file.
+	// You can use this if you don't have dirent.h: http://www.cs.fiu.edu/~weiss/cop4338_spr06/dirent.h
+	// Umm I'm not sure if the license on that file, which appears to be public domain, conflicts with GPL v3.
+	// So only use that if you need it and the licenses don't conflict.
+	#include "dirent.h"
+#endif
 
 #ifdef _WIN32
 	#include <conio.h>
@@ -387,14 +397,14 @@ int RTRead::getInfo(char *file, int len, FileList *ret)
 		perror(file);
 		return 1;
 	}
-
+   setvbuf(pFile, NULL, _IOFBF, 4718592); // set 4 MB file buffering
 	// Get file size
 	fseek(pFile, 0, SEEK_END);
 	size = ftell(pFile);
 	if ( (size & 15) != 0)
 	{
 		fclose(pFile);
-		printf("Error file size of '%s' is not a multible of 16 bytes.\n", file);
+		printf("Error file size of '%s' is not a multiple of 16 bytes.\n", file);
 		return 1;
 	}
 	fseek(pFile, 0, SEEK_SET);
