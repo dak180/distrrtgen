@@ -565,9 +565,9 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 		isOldRtFormat = true;
 
 	if ( isOldRtFormat )
-		reader = (BaseRTReader*)new RTReader(pathName);
+		reader = new RTReader(pathName);
 	else 
-		reader = (BaseRTReader*)new RTIReader(pathName);
+		reader = new RTIReader(pathName);
 
 	if(reader == NULL)
 	{

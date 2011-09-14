@@ -333,7 +333,11 @@ void RTIReader::Dump()
 RTIReader::~RTIReader()
 {
 	if( indexFileData != NULL )
-	{
 		fclose( indexFileData );
+
+	if ( index != NULL )
+	{
+		delete index;
+		index = NULL;
 	}
 }

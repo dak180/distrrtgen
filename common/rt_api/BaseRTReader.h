@@ -73,7 +73,7 @@ class BaseRTReader
 		BaseRTReader(uint32, uint32, uint32, uint32, uint32, std::string, std::string);
 
 		/// Default destructor
-		~BaseRTReader();
+		virtual ~BaseRTReader();
 
 		/**
 		 * reads data chains into memory
