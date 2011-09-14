@@ -28,7 +28,7 @@
 #include "BaseRTReader.h"
 #include "RTI2Common.h"
 
-class RTI2Reader : BaseRTReader
+class RTI2Reader : public BaseRTReader
 {
 	private:
 		std::ifstream fin;

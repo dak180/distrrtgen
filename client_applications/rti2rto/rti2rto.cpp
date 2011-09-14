@@ -341,9 +341,9 @@ void ConvertRainbowTable( std::string pathName, std::string resultFileName, std:
 	uint64 nAllocatedSize;
 	BaseRTReader *reader = NULL;
 	if(sType == "RTI2")
-		reader = (BaseRTReader*)new RTI2Reader( pathName );
+		reader = new RTI2Reader( pathName );
 	else if(sType == "RTI")
-		reader = (BaseRTReader*)new RTIReader( pathName );
+		reader = new RTIReader( pathName );
 	else 
 	{
 		printf("Invalid table type '%s'", sType.c_str());
