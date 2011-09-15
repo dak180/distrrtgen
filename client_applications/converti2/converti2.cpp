@@ -1031,7 +1031,8 @@ void Converti2::convertRainbowTable( std::string resultFileName, uint32 files )
 				if ( indexes[i].numchains > 255 )
 				{
 					std::cerr << "WARNING! A prefix index with more than 255 (1 byte) chains was encountered" << std::endl;
-					std::cerr << "The prefix contains: " << indexes[i].numchains
+					std::cerr << "The prefix, " << indexes[i].prefix
+						<< ", contains: " << indexes[i].numchains
 						<< " chains" << std::endl;
 					std::cerr << "Aborting..." << std::endl;
 					exit(1);
