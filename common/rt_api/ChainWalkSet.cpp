@@ -186,20 +186,32 @@ bool CChainWalkSet::FindInFile(uint64* pIndexE, unsigned char* pHash, int nHashL
 
 	if (gotPrecalcOnLine > -1)
 	{
-		if (debug) printf("Debug: Reading pre calculations from file, line %d offset %lu\n", gotPrecalcOnLine, offset);
+		if (debug)
+		{
+			std::cout << "Debug: Reading pre calculations from file, line "
+				<< gotPrecalcOnLine << " offset " << offset << std::endl;
+		}
 		
 		FILE* fp = fopen(sCurrentPrecalcPathName.c_str(), "rb");
 
-		if (fp!=NULL) {
+		if (fp!=NULL)
+		{
 			fseek(fp, offset, SEEK_SET);
 
 			// We should do some verification here, for example by recalculating the middle chain, to catch corrupted files
 			if(fread(pIndexE, sizeof(uint64), (unsigned long)m_nRainbowChainLen-1, fp) != (unsigned long)m_nRainbowChainLen-1)
-				printf("File read error.");
+			{
+				std::cout << "Error reading " << sCurrentPrecalcPathName
+					<< std::endl;
+			}
+
 			fclose(fp);
 		}
 		else
-			printf("Cannot open precalculation file %s.\n", sCurrentPrecalcPathName.c_str());
+		{
+			std::cout << "Cannot open precalculation file "
+				<<  sCurrentPrecalcPathName << "." << std::endl;
+		}
 
 		//printf("\npIndexE[0]: %s\n", uint64tostr(pIndexE[0]).c_str());
 		//printf("\npIndexE[nRainbowChainLen-2]: %s\n", uint64tostr(pIndexE[m_nRainbowChainLen-2]).c_str());

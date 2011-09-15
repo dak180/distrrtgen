@@ -152,7 +152,14 @@ bool CChainWalkContext::LoadCharset( std::string sName )
 				if( m_nHybridCharset != 0 )
 				{
 					std::vector<tCharset> vCharsets;
-					GetHybridCharsets(sName, vCharsets);
+
+					if ( !GetHybridCharsets(sName, vCharsets) )
+					{
+						std::cout << "Failed to GetHybridCharserts: "
+							<< sName << std::endl;
+						return false;
+					}
+
 					if(sCharsetName == vCharsets[m_vCharset.size()].sName)
 					{
 						stCharset tCharset;
