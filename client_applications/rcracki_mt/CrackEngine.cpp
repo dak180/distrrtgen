@@ -996,7 +996,8 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 	// Already finished?
 	if (!hs.AnyHashLeftWithLen(CChainWalkContext::GetHashLen()))
 	{
-		std::cout << "this table contains hashes with length " << CChainWalkContext::GetHashLen() << " only" << std::endl; 
+		std::cout << "this table contains hashes with length "
+			<< CChainWalkContext::GetHashLen() << " only" << std::endl; 
 		return;
 	}
 
@@ -1179,6 +1180,7 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 				}
 
 				RainbowChain* pChain = (RainbowChain*)mp.Allocate( nCoveredRainbowTableChains * sizeOfChain, nAllocatedSize );
+
 				if( debug )
 				{
 					std::cout << "Debug: Allocated " << nAllocatedSize << " for "
@@ -1248,6 +1250,7 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 								}
 							}
 
+							cwc.Dump();
 							if( cwc.GetIndex() != nEndPoint )
 							{
 								std::cout << "rainbow chain length verify fail" << std::endl;
@@ -1296,10 +1299,12 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 		unsigned int bytesForChainWalkSet = hs.GetStatHashTotal() * (nRainbowChainLen-1) * 8;
 
 		if (debug)
-			std::cout << "Debug: Saving " << bytesForChainWalkSet << " bytes of memory for chainwalkset." << std::endl;
+		{
+			std::cout << "Debug: Saving " << bytesForChainWalkSet
+				<< " bytes of memory for chainwalkset." << std::endl;
 
-		if( debug )
 			std::cout << "Debug: This is a table in .rti2 format." << std::endl;
+		}
 
 		static CMemoryPool mp( bytesForChainWalkSet, debug, maxMem );
 		uint64 size = reader->getChainsLeft() * sizeof( RainbowChainO );
@@ -1332,7 +1337,9 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 				final = sub_timeofday( tv2, tv );
 
 				float fTime = 1.0f * final.tv_sec + 1.0f * final.tv_usec / 1000000;
-				std::cout << (nChains * sizeOfChain ) << " bytes read, disk access time: " << fTime << "s" << std::endl;
+				std::cout << (nChains * sizeOfChain )
+					<< " bytes read, disk access time: " << fTime << "s"
+					<< std::endl;
 				m_fTotalDiskAccessTime += fTime;
 
 				// Verify table chunk
