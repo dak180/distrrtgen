@@ -1,3 +1,9 @@
+*note* BOINC 6.12.2 is the minimum version required to build
+"- API/client: move CUdevice_attribute_enum out of lib/coproc.h to fix app build errors"
+Which essentially means when you copy and paste things from cuda.h into core
+boinc libraries bad things happen.  Builds with 6.12.34 run fine with only BOINC
+client 6.10.58.
+
 Makefile is for a standalone build
 	edit the following as necessary:
 		BOINC_DIR

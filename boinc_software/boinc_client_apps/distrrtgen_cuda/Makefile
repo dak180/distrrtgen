@@ -25,7 +25,8 @@
 SHELL = /bin/sh
 
 #BOINC_DIR = /home/ubuntu/boinc
-BOINC_DIR = /usr/share/boinc-dev
+BOINC_DIR = /home/quel/download/boinc_core_release_6_12_34
+#BOINC_DIR = /usr/share/boinc-dev
 BOINC_API_DIR = $(BOINC_DIR)/api
 BOINC_LIB_DIR = $(BOINC_DIR)/lib
 CC = g++
