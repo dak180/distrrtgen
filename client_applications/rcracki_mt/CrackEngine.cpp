@@ -9,6 +9,7 @@
  * Copyright 2010 uroskn
  * Copyright 2011 Janosch Rux <janosch.rux@web.de>
  * Copyright 2011 Logan Watt <logan.watt@gmail.com>
+ * Copyright 2011 Jan Kyska
  *
  * This file is part of rcracki_mt.
  *
@@ -42,6 +43,7 @@ CCrackEngine::CCrackEngine()
 	resumeSession = false;
 	debug = false;
 	keepPrecalcFiles = false;
+	gpu = 0;
 
 	sSessionPathName = "";
 	sProgressPathName = "";
@@ -448,6 +450,7 @@ void CCrackEngine::SearchTableChunkOld(RainbowChainO* pChain, int nRainbowChainL
 				rcrackiThread* r_Thread = new rcrackiThread(TargetHash, thread_ID, nRainbowChainLen, maxThreads, pStartPosIndexE);
 				if (r_Thread)
 				{
+					r_Thread->Configure(gpu);
 					pthread_t pThread;
 					int returnValue = pthread_create( &pThread, &attr, rcrackiThread::rcrackiThreadStaticEntryPointPthread, (void *) r_Thread);
 
@@ -509,6 +512,7 @@ void CCrackEngine::SearchTableChunkOld(RainbowChainO* pChain, int nRainbowChainL
 		for (i = 0; i < maxThreads; i++)
 		{
 			rcrackiThread* r_Thread = new rcrackiThread(TargetHash, true);
+			r_Thread->Configure(gpu);
 			threadPool.push_back(r_Thread);
 		}
 
@@ -782,6 +786,7 @@ void CCrackEngine::SearchTableChunk(RainbowChain* pChain, int nRainbowChainLen, 
 				rcrackiThread* r_Thread = new rcrackiThread(TargetHash, thread_ID, nRainbowChainLen, maxThreads, pStartPosIndexE);
 				if (r_Thread)
 				{
+					r_Thread->Configure(gpu);
 					pthread_t pThread;
 					int returnValue = pthread_create( &pThread, &attr, rcrackiThread::rcrackiThreadStaticEntryPointPthread, (void *) r_Thread);
 
@@ -843,6 +848,7 @@ void CCrackEngine::SearchTableChunk(RainbowChain* pChain, int nRainbowChainLen, 
 		for (i = 0; i < maxThreads; i++)
 		{
 			rcrackiThread* r_Thread = new rcrackiThread(TargetHash);
+			r_Thread->Configure(gpu);
 			threadPool.push_back(r_Thread);
 		}
 
@@ -1424,7 +1430,7 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 	*/
 }
 
-void CCrackEngine::Run(std::vector<std::string> vPathName, CHashSet& hs, int i_maxThreads, uint64 i_maxMem, bool resume, bool bDebug)
+void CCrackEngine::Run(std::vector<std::string> vPathName, CHashSet& hs, int i_maxThreads, uint64 i_maxMem, bool resume, bool bDebug, int gpu)
 {
 	uint32 i;
 
@@ -1433,8 +1439,9 @@ void CCrackEngine::Run(std::vector<std::string> vPathName, CHashSet& hs, int i_m
 #endif
 	resumeSession = resume;
 	debug = bDebug;
+	this->gpu = gpu;
 
-	maxThreads = i_maxThreads;
+	maxThreads = (gpu? 1 : i_maxThreads);
 	maxMem = i_maxMem;
 	// Reset statistics
 	ResetStatistics();

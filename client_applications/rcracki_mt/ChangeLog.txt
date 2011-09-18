@@ -1,6 +1,7 @@
 [rcracki_mt ChangeLog]
 
 TBD (TDB):
+* cuda support
 * refactoring of all RT file readers
 * refactoring of CrackEngine.cpp
 

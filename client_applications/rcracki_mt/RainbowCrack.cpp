@@ -9,6 +9,7 @@
  * Copyright 2009, 2010, 2011 James Nobis <quel@quelrod.net>
  * Copyright 2010 uroskn
  * Copyright 2011 Logan Watt <logan.watt@gmail.com>
+ * Copyright 2011 Jan Kyska
  *
  * Modified by Martin Westergaard Jørgensen <martinwj2005@gmail.com> to support  * indexed and hybrid tables
  *
@@ -350,6 +351,9 @@ void Usage()
 		<< "                  -k keep precalculation on disk" << std::endl
 		<< "                  -m [megabytes] limit memory usage" << std::endl
 		<< "                  -v show debug information" << std::endl
+#ifdef GPU
+		<< "                  -g enable calculations on GPU" << std::endl
+#endif
 		<< std::endl;
 #ifdef _WIN32
 	std::cout << "example: rcracki_mt -h 5d41402abc4b2a76b9719d911017c592 -t 2 [path]\\MD5"
@@ -391,6 +395,7 @@ int main(int argc, char* argv[])
 	bool useDefaultRainbowTablePath			= false;
 	bool debug					= false;
 	bool keepPrecalcFiles				= false;
+	int enableGPU					= 0;
 	std::string sAlgorithm				= "";
 	int maxThreads					= 1;
 	uint64 maxMem					= 0;
@@ -442,6 +447,10 @@ int main(int argc, char* argv[])
 					else if (sOption == "AlwaysDebug") {
 						if (sValue == "1")
 							debug = true;
+					}
+					else if (sOption == "EnableGPU") {
+						if (sValue == "1")
+							enableGPU = 1;
 					}
 					else if (sOption == "AlwaysKeepPrecalcFiles") {
 						if (sValue == "1")
@@ -525,6 +534,9 @@ int main(int argc, char* argv[])
 		}
 		else if (cla == "-v") {
 			debug = true;
+		}
+		else if (cla == "-g") {
+			enableGPU = 1;
 		}
 		else if (cla == "-k") {
 			keepPrecalcFiles = true;
@@ -787,7 +799,7 @@ int main(int argc, char* argv[])
 	if (writeOutput)
 		ce.setOutputFile(outputFile);
 	ce.setSession(sSessionPathName, sProgressPathName, sPrecalcPathName, keepPrecalcFiles);
-	ce.Run(vPathName, hs, maxThreads, maxMem, resumeSession, debug);
+	ce.Run(vPathName, hs, maxThreads, maxMem, resumeSession, debug, enableGPU);
 
 	// Remove session files
 	if (debug)

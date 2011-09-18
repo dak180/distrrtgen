@@ -7,6 +7,7 @@
  * Copyright 2009, 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
  * Copyright 2009, 2010, 2011 James Nobis <quel@quelrod.net>
  * Copyright 2010 uroskn
+ * Copyright 2011 Jan Kyska
  *
  * This file is part of rcracki_mt.
  *
@@ -74,6 +75,7 @@ private:
 	//string sPrecalcIndexPathName;
 	bool debug;
 	bool keepPrecalcFiles;
+	int gpu;
 
 	// Statistics
 	float m_fTotalDiskAccessTime;
@@ -100,7 +102,7 @@ private:
 
 public:
 	void SearchRainbowTable(std::string pathName, CHashSet& hs);
-	void Run(std::vector<std::string> vPathName, CHashSet& hs, int i_maxThreads, uint64 i_maxMem, bool resume, bool bDebug);
+	void Run(std::vector<std::string> vPathName, CHashSet& hs, int i_maxThreads, uint64 i_maxMem, bool resume, bool bDebug, int gpu = 0);
 	float GetStatTotalDiskAccessTime();
 	float GetStatTotalCryptanalysisTime();
 	float GetStatTotalPrecalculationTime();

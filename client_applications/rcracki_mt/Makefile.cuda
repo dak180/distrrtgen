@@ -27,15 +27,20 @@ CC = g++
 #  -mtune=native doesn't work on OSX either
 #  add -mtune=native to OPTIMIZATION for better performance (if it works)
 OPTIMIZATION = -O3
-INCLUDES = -I../../common/rt_api
-CFLAGS = -Wall -ansi $(INCLUDES) $(OPTIMIZATION) -c $(DEBUG)
-LFLAGS = -Wall -ansi -filt $(INCLUDES) $(OPTIMIZATION) $(DEBUG)
-LIBS = -L/lib -L/usr/lib -lcrypto -lpthread
+INCLUDES = -I../../common/rt_api -I$(CUDA_PATH)/include
+CFLAGS = -Wall -ansi $(INCLUDES) $(OPTIMIZATION) -c $(DEBUG) -DGPU
+NVCCFLAGS = --ptxas-options=-v
+LFLAGS = -Wall -ansi -filt $(INCLUDES) $(OPTIMIZATION) $(DEBUG) \
+	-L$(CUDA_PATH)/lib64 -L$(CUDA_PATH)/lib -L. -Xlinker -rpath .
+LIBS = -L/lib -L/usr/lib -lcrypto -lpthread -lcudart
 OBJS = BaseRTReader.o ChainWalkContext.o ChainWalkSet.o CrackEngine.o \
 	fast_md5.o HashAlgorithm.o HashRoutine.o HashSet.o lm2ntlm.o fast_md4.o \
-	MemoryPool.o Public.o RainbowCrack.o rcrackiThread.o RTReader.o \
-	RTIReader.o RTI2Reader.o
+	MemoryPool.o Public.o RainbowCrack.o rcrackiThread.o rcuda_ext.o rcuda.o \
+	RTReader.o RTIReader.o RTI2Reader.o
 COMMON_API_PATH = ../../common/rt_api
+CUDA_SHARED_PATH = ../../boinc_software/boinc_client_apps/distrrtgen_cuda
+CUDA_PATH = /usr/local/cuda
+CUDA_LIB = libcudart.so.2
 #sha1.o
 WARNALL = -Wextra -Wunused-macros -Wunsafe-loop-optimizations -Wundef -Woverlength-strings -Wdisabled-optimization -Wformat-extra-args -Wformat-security -Winline
 
@@ -61,7 +66,7 @@ RELEASE_DIR = rcracki_mt_0.7_beta_src
 all: rcracki_mt
 
 rcracki_mt: $(OBJS)
-	$(CC) $(LFLAGS) $(OBJS) $(LIBS) -o rcracki_mt
+	$(CC) -DGPU $(LFLAGS) $(OBJS) $(LIBS) -o rcracki_mt
 
 clean:
 	rm -f core *.o *.gcno *.gcda *.gcov rcracki_mt rcracki.session \
@@ -212,7 +217,16 @@ RainbowCrack.o: RainbowCrack.cpp CrackEngine.h lm2ntlm.h
 
 rcrackiThread.o: rcrackiThread.h rcrackiThread.cpp \
 	$(COMMON_API_PATH)/ChainWalkContext.h $(COMMON_API_PATH)/Public.h HashSet.h
-	$(CC) $(CFLAGS) rcrackiThread.cpp
+	$(CC) -I$(CUDA_SHARED_PATH) $(CFLAGS) rcrackiThread.cpp
+
+rcuda_ext.o: $(CUDA_SHARED_PATH)/rcuda_ext.h $(CUDA_SHARED_PATH)/rcuda_ext.cpp $(COMMON_API_PATH)/ChainWalkContext.h
+	$(CC) $(CFLAGS) $(CUDA_SHARED_PATH)/rcuda_ext.cpp
+
+rcuda.o: $(CUDA_SHARED_PATH)/rcuda.h $(CUDA_SHARED_PATH)/rcuda.cu $(COMMON_API_PATH)/Public.h $(COMMON_API_PATH)/global.h
+	$(CUDA_PATH)/bin/nvcc --compiler-bindir=/usr/bin/gcc-4.3 $(OPTIMIZATION) \
+		$(NVCCDEBUG) $(NVCCFLAGS) --compiler-options="$(DEBUG)" \
+		--compiler-options="$(CXXFLAGS)" -I../../common/rt_api \
+		--compile $(CUDA_SHARED_PATH)/rcuda.cu
 
 RTReader.o: $(COMMON_API_PATH)/RTReader.h $(COMMON_API_PATH)/RTReader.cpp
 	$(CC) $(CFLAGS) $(COMMON_API_PATH)/RTReader.cpp

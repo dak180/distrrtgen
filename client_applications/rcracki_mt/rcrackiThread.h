@@ -4,6 +4,7 @@
  *
  * Copyright 2009, 2010 Daniël Niggebrugge <niggebrugge@fox-it.com>
  * Copyright 2009, 2010, 2011 James Nobis <quel@quelrod.net>
+ * Copyright 2011 Jan Kyska
  *
  * This file is part of rcracki_mt.
  *
@@ -54,6 +55,10 @@ private:
 	std::string t_Hash;
 	std::string t_Plain;
 	std::string t_Binary;
+	int gpu;
+	int cudaDevId;
+	int cudaBuffCount;
+	int cudaChainSize;
 
 public:
 	rcrackiThread(unsigned char* TargetHash, int thread_id, int nRainbowChainLen, int thread_count, uint64* pStartPosIndexE);
@@ -75,6 +80,7 @@ public:
 	std::string GetHash();
 	std::string GetPlain();
 	std::string GetBinary();
+	void Configure(int gpu);
 
 private:
 	void rcrackiThreadEntryPoint();
