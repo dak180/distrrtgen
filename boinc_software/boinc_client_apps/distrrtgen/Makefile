@@ -59,7 +59,7 @@ LFLAGS = -static -static-libgcc -Wall $(INCLUDES) $(OPTIMIZATION) \
 	-L$(BOINC_API_DIR) -L$(BOINC_LIB_DIR) -L /usr/X11R6/lib -L. $(DEBUG)
 
 LIBS = -lboinc_api -lboinc -lpthread -lssl libstdc++.a \
-	$(COMMON_LIB_DIR)/libssl.a $(COMMON_LIB_DIR)/libpthread.a
+	$(COMMON_LIB_DIR)/libcrypto.a $(COMMON_LIB_DIR)/libpthread.a
 
 OBJS = ChainWalkContext.o des_enc.o des_setkey.o distrrtgen.o ecb_enc.o \
 	HashAlgorithm.o HashRoutine.o fast_md4.o fast_md5.o Public.o
