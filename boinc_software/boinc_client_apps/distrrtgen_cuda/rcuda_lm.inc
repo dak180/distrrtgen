@@ -1,9 +1,9 @@
 // freerainbowtables is a project for generating, distributing, and using
 // perfect rainbow tables
 //
-// Copyright 2010 Jan Kyska
+// Copyright 2010, 2011 Jan Kyska
 // Copyright 2010 Martin Westergaard Jørgensen <martinwj2005@gmail.com>
-// Copyright 2010, 2011 James Nobis <frt@quelrod.net>
+// Copyright 2010, 2011 James Nobis <quel@quelrod.net>
 //
 // This file is part of freerainbowtables.
 //
@@ -363,132 +363,114 @@ __device__ unsigned int D_ENCRYPT(unsigned int ll, unsigned int uu, unsigned int
 
 }
 
-__global__ void RTGenLMKernel(unsigned int chainStart, unsigned int chainStop) {
-	uint3 dimItem;
-	unsigned int *hData2, *hData3;
-	uint64 uiDiv64, uiVal64, uiMul64;
-	unsigned int uiVal, uiDiv;
-	unsigned int jj, rs, rt;
-
-	__shared__ unsigned int shData2[SHIDX(BLOCK_X_SIZE)];
-	__shared__ unsigned int shData3[BLOCK_X_SIZE<<2];
-	hData2 = shData2 + ((threadIdx.x>>4)<<8)+(threadIdx.x&15);
-	hData3 = shData3 + ((threadIdx.x>>4)<<6)+(threadIdx.x&15);
-
-	RTGEN_PROLOGUE;
-
-	// transform to the plain text
-	for(ii = 0; ii < 8; ii++)
-		hData[SHIDX(ii)] = 0;
-	
-	for(ii = 0; idx64 > 0xfffffff0ull && ii < PLAIN_MAX_SIZE; ii++) {
-		uiVal64 = idx64 + cplStart[ii];
-		uiVal64--;
-		dimItem = cplDimVec[ii];
-
-		uiMul64 = (uint64)dimItem.y<<32;
-		idx64 = __umul64hi(uiVal64, uiMul64);
-		uiDiv64 = uiVal64 - idx64*(uint64)dimItem.x;
-		uiVal = __umulhi((unsigned int)uiDiv64, dimItem.y);
-		uiDiv = (unsigned int)uiDiv64 - uiVal * dimItem.x;
-		idx64 += uiVal;
-		if(uiDiv >= dimItem.x) {
-			uiDiv -= dimItem.x;
-			idx64++;
-		}
-		hData[SHIDX(ii&7)] = cplChrSet[dimItem.z + uiDiv];
-	}
-
-	for(idx = (unsigned int)idx64; idx != 0 && ii < PLAIN_MAX_SIZE; ii++) {
-		uiVal = idx + cplStart[ii];
-		uiVal--;
-		dimItem = cplDimVec[ii];
-
-		idx = __umulhi(uiVal, dimItem.y);
-		uiDiv = uiVal - idx*dimItem.x;
-		if(uiDiv >= dimItem.x) {
-			uiDiv -= dimItem.x;
-			idx++;
-		}
-		hData[SHIDX(ii&7)] = cplChrSet[dimItem.z + uiDiv];
-	}
-
-	for(jj = 8, ii--; jj < 15; jj++, ii--)
-		hData[SHIDX(jj)] = hData[SHIDX(ii&7)];
-
-	// set key
-	ii = 255;
-	uiVal = ((hData[SHIDX(10)] << 5) | (hData[SHIDX(11)] >> 3))&ii;
-	uiVal = (uiVal<<8) | (((hData[SHIDX(9)] << 6) | (hData[SHIDX(10)] >> 2))&ii);
-	uiVal = (uiVal<<8) | (((hData[SHIDX(8)] << 7) | (hData[SHIDX(9)] >> 1))&ii);
-	uiVal = (uiVal<<8) | hData[SHIDX(8)];
-	
-	uiDiv = (hData[SHIDX(14)] << 1)&ii;
-	uiDiv = (uiDiv<<8) | (((hData[SHIDX(13)] << 2) | (hData[SHIDX(14)] >> 6))&ii);
-	uiDiv = (uiDiv<<8) | (((hData[SHIDX(12)] << 3) | (hData[SHIDX(13)] >> 5))&ii);
-	uiDiv = (uiDiv<<8) | (((hData[SHIDX(11)] << 4) | (hData[SHIDX(12)] >> 4))&ii);
-
-	hData[SHIDX(0)] = uiVal;
-	hData[SHIDX(1)] = uiDiv;
-	RC_LM::PERM_OP(SHIDX(1), SHIDX(0), SHIDX(2), 4, 0x0f0f0f0f, hData);
-	RC_LM::HPERM_OP(SHIDX(0), SHIDX(2), -2, 0xcccc0000, hData);
-	RC_LM::HPERM_OP(SHIDX(1), SHIDX(2), -2, 0xcccc0000, hData);
-	RC_LM::PERM_OP(SHIDX(1), SHIDX(0), SHIDX(2), 1, 0x55555555, hData);
-	RC_LM::PERM_OP(SHIDX(0), SHIDX(1), SHIDX(2), 8, 0x00ff00ff, hData);
-	RC_LM::PERM_OP(SHIDX(1), SHIDX(0), SHIDX(2), 1, 0x55555555, hData);
-	uiVal = hData[SHIDX(0)];
-	uiDiv = hData[SHIDX(1)];
-	uiDiv =	((uiDiv&0x000000ff)<<16) | (uiDiv&0x0000ff00) | ((uiDiv&0x00ff0000)>>16) | ((uiVal&0xf0000000)>>4);
-	uiVal &= 0x0fffffff;
-
-	for(ii = 0; ii < ITERATIONS; ii++) {
-		if(RC_LM::shifts2[ii]) { 
-			uiVal = ((uiVal>>2)|(uiVal<<26)); 
-			uiDiv =((uiDiv>>2)|(uiDiv<<26)); 
-		} else { 
-			uiVal = ((uiVal>>1)|(uiVal<<27)); 
-			uiDiv = ((uiDiv>>1)|(uiDiv<<27)); 
-		}
-		uiVal &= 0x0fffffff;
-		uiDiv &= 0x0fffffff;
-
-		rs = RC_LM::des_skb[0][uiVal&0x3f] |
-			RC_LM::des_skb[1][((uiVal>>6)&0x03)|((uiVal>>7)&0x3c)] |
-			RC_LM::des_skb[2][((uiVal>>13)&0x0f)|((uiVal>>14)&0x30)] |
-			RC_LM::des_skb[3][((uiVal>>20)&0x01)|((uiVal>>21)&0x06) |
-			((uiVal>>22)&0x38)];
-		rt = RC_LM::des_skb[4][uiDiv&0x3f] |
-			RC_LM::des_skb[5][((uiDiv>>7)&0x03)|((uiDiv>>8)&0x3c)] |
-			RC_LM::des_skb[6][(uiDiv>>15)&0x3f] |
-			RC_LM::des_skb[7][((uiDiv>>21)&0x0f)|((uiDiv>>22)&0x30)];
-
-		/* table contained 0213 4657 */
-		idx = (rt<<16)|(rs&0x0000ffff);
-		hData[SHIDX(ii)] = (idx>>30)|(idx<<2);
-		idx = (rs>>16)|(rt&0xffff0000);
-		hData2[SHIDX(ii)] = (idx>>26)|(idx<<6);
-	}
-
-	// encrypt the "magic" data
-	hData3[SHIDX(0)] = 0x2153474B;
-	hData3[SHIDX(1)] = 0x25242340;
-
-	RC_LM::IP(SHIDX(0), SHIDX(1), SHIDX(2), hData3);
-	uiVal = hData3[SHIDX(0)];
-	uiVal = ((uiVal>>29)|(uiVal<<3));
-	uiDiv = hData3[SHIDX(1)];
-	uiDiv = ((uiDiv>>29)|(uiDiv<<3));
-
-	for(ii = 0; ii < 16; ii+=2) {
-		uiDiv = RC_LM::D_ENCRYPT(uiDiv, uiVal^hData[SHIDX(ii)], uiVal^hData2[SHIDX(ii)]);
-		uiVal = RC_LM::D_ENCRYPT(uiVal, uiDiv^hData[SHIDX(ii+1)], uiDiv^hData2[SHIDX(ii+1)]);
-	}
-
-	hData3[SHIDX(0)] = ((uiVal>>3)|(uiVal<<29));
-	hData3[SHIDX(1)] = ((uiDiv>>3)|(uiDiv<<29));
-	RC_LM::FP(SHIDX(0), SHIDX(1), SHIDX(2), hData3);
-	
-	hData[SHIDX(0)] = hData3[SHIDX(1)];
-	hData[SHIDX(1)] = hData3[SHIDX(0)];
-	RTGEN_EPILOGUE
+#define RT_LM_KERNEL(kerName, kerPrologue, kerEpilogue)  \
+__global__ void kerName(unsigned int chainStart, unsigned int chainStop) {  \
+	unsigned int *hData2, *hData3;  \
+	unsigned int jj, rs, rt;  \
+	\
+	__shared__ unsigned int shData2[SHIDX(BLOCK_X_SIZE)];  \
+	__shared__ unsigned int shData3[BLOCK_X_SIZE<<2];  \
+	hData2 = shData2 + ((threadIdx.x>>4)<<8)+(threadIdx.x&15);  \
+	hData3 = shData3 + ((threadIdx.x>>4)<<6)+(threadIdx.x&15);  \
+	\
+	kerPrologue;  \
+	\
+	/* transform to the plain text */  \
+	for(ii = 0; ii < 8; ii++)  \
+		hData[SHIDX(ii)] = 0;  \
+	\
+	RTGEN_IDX2PLAIN_BEGIN;  \
+		RTGEN_I2P_LOOP64_BEGIN;  \
+			hData[SHIDX(ii&7)] = cplChrSet[(dimItem.z&255u) + uiDiv];  \
+		RTGEN_I2P_LOOP64_END;  \
+		\
+		RTGEN_I2P_LOOP32_BEGIN;  \
+			hData[SHIDX(ii&7)] = cplChrSet[(dimItem.z&255u) + uiDiv];  \
+		RTGEN_I2P_LOOP32_END;  \
+	RTGEN_IDX2PLAIN_END;  \
+	\
+	for(jj = 8, ii--; jj < 15; jj++, ii--)  \
+		hData[SHIDX(jj)] = hData[SHIDX(ii&7)];  \
+	\
+	/* set key */  \
+	ii = 255;  \
+	uiVal = ((hData[SHIDX(10)] << 5) | (hData[SHIDX(11)] >> 3))&ii;  \
+	uiVal = (uiVal<<8) | (((hData[SHIDX(9)] << 6) | (hData[SHIDX(10)] >> 2))&ii);  \
+	uiVal = (uiVal<<8) | (((hData[SHIDX(8)] << 7) | (hData[SHIDX(9)] >> 1))&ii);  \
+	uiVal = (uiVal<<8) | hData[SHIDX(8)];  \
+	\
+	uiDiv = (hData[SHIDX(14)] << 1)&ii;  \
+	uiDiv = (uiDiv<<8) | (((hData[SHIDX(13)] << 2) | (hData[SHIDX(14)] >> 6))&ii);  \
+	uiDiv = (uiDiv<<8) | (((hData[SHIDX(12)] << 3) | (hData[SHIDX(13)] >> 5))&ii);  \
+	uiDiv = (uiDiv<<8) | (((hData[SHIDX(11)] << 4) | (hData[SHIDX(12)] >> 4))&ii);  \
+	\
+	hData[SHIDX(0)] = uiVal;  \
+	hData[SHIDX(1)] = uiDiv;  \
+	RC_LM::PERM_OP(SHIDX(1), SHIDX(0), SHIDX(2), 4, 0x0f0f0f0f, hData);  \
+	RC_LM::HPERM_OP(SHIDX(0), SHIDX(2), -2, 0xcccc0000, hData);  \
+	RC_LM::HPERM_OP(SHIDX(1), SHIDX(2), -2, 0xcccc0000, hData);  \
+	RC_LM::PERM_OP(SHIDX(1), SHIDX(0), SHIDX(2), 1, 0x55555555, hData);  \
+	RC_LM::PERM_OP(SHIDX(0), SHIDX(1), SHIDX(2), 8, 0x00ff00ff, hData);  \
+	RC_LM::PERM_OP(SHIDX(1), SHIDX(0), SHIDX(2), 1, 0x55555555, hData);  \
+	uiVal = hData[SHIDX(0)];  \
+	uiDiv = hData[SHIDX(1)];  \
+	uiDiv =	((uiDiv&0x000000ff)<<16) | (uiDiv&0x0000ff00) | ((uiDiv&0x00ff0000)>>16) | ((uiVal&0xf0000000)>>4);  \
+	uiVal &= 0x0fffffff;  \
+	\
+	for(ii = 0; ii < ITERATIONS; ii++) {  \
+		if(RC_LM::shifts2[ii]) {  \
+			uiVal = ((uiVal>>2)|(uiVal<<26));  \
+			uiDiv =((uiDiv>>2)|(uiDiv<<26));  \
+		} else {  \
+			uiVal = ((uiVal>>1)|(uiVal<<27));  \
+			uiDiv = ((uiDiv>>1)|(uiDiv<<27));  \
+		}  \
+		uiVal &= 0x0fffffff;  \
+		uiDiv &= 0x0fffffff;  \
+		\
+		rs = RC_LM::des_skb[0][uiVal&0x3f] |  \
+			RC_LM::des_skb[1][((uiVal>>6)&0x03)|((uiVal>>7)&0x3c)] |  \
+			RC_LM::des_skb[2][((uiVal>>13)&0x0f)|((uiVal>>14)&0x30)] |  \
+			RC_LM::des_skb[3][((uiVal>>20)&0x01)|((uiVal>>21)&0x06) |  \
+			((uiVal>>22)&0x38)];  \
+		rt = RC_LM::des_skb[4][uiDiv&0x3f] |  \
+			RC_LM::des_skb[5][((uiDiv>>7)&0x03)|((uiDiv>>8)&0x3c)] |  \
+			RC_LM::des_skb[6][(uiDiv>>15)&0x3f] |  \
+			RC_LM::des_skb[7][((uiDiv>>21)&0x0f)|((uiDiv>>22)&0x30)];  \
+		\
+		/* table contained 0213 4657 */  \
+		idx = (rt<<16)|(rs&0x0000ffff);  \
+		hData[SHIDX(ii)] = (idx>>30)|(idx<<2);  \
+		idx = (rs>>16)|(rt&0xffff0000);  \
+		hData2[SHIDX(ii)] = (idx>>26)|(idx<<6);  \
+	}  \
+	\
+	/* encrypt the "magic" data */  \
+	hData3[SHIDX(0)] = 0x2153474B;  \
+	hData3[SHIDX(1)] = 0x25242340;  \
+	\
+	RC_LM::IP(SHIDX(0), SHIDX(1), SHIDX(2), hData3);  \
+	uiVal = hData3[SHIDX(0)];  \
+	uiVal = ((uiVal>>29)|(uiVal<<3));  \
+	uiDiv = hData3[SHIDX(1)];  \
+	uiDiv = ((uiDiv>>29)|(uiDiv<<3));  \
+	\
+	for(ii = 0; ii < 16; ii+=2) {  \
+		uiDiv = RC_LM::D_ENCRYPT(uiDiv, uiVal^hData[SHIDX(ii)], uiVal^hData2[SHIDX(ii)]);  \
+		uiVal = RC_LM::D_ENCRYPT(uiVal, uiDiv^hData[SHIDX(ii+1)], uiDiv^hData2[SHIDX(ii+1)]);  \
+	}  \
+	\
+	hData3[SHIDX(0)] = ((uiVal>>3)|(uiVal<<29));  \
+	hData3[SHIDX(1)] = ((uiDiv>>3)|(uiDiv<<29));  \
+	RC_LM::FP(SHIDX(0), SHIDX(1), SHIDX(2), hData3);  \
+	\
+	hData[SHIDX(0)] = hData3[SHIDX(1)];  \
+	hData[SHIDX(1)] = hData3[SHIDX(0)];  \
+	\
+	kerEpilogue;  \
 }
+
+
+RT_LM_KERNEL(RTGenLMKernel, RTGEN_PROLOGUE, RTGEN_EPILOGUE)
+RT_LM_KERNEL(RTPreCalcKernel, RTPRECALC_PROLOGUE, RTPRECALC_EPILOGUE)
+RT_LM_KERNEL(RTCheckAlarmLMKernel, RTCHKALARM_PROLOGUE, RTCHKALARM_EPILOGUE)

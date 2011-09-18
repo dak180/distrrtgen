@@ -1,7 +1,7 @@
 // freerainbowtables is a project for generating, distributing, and using
 // perfect rainbow tables
 //
-// Copyright 2010 Jan Kyska
+// Copyright 2010, 2011 Jan Kyska
 // Copyright 2010 Martin Westergaard Jørgensen <martinwj2005@gmail.com>
 // Copyright 2010, 2011 James Nobis <quel@quelrod.net>
 //
@@ -86,75 +86,57 @@ __device__ void MD4(unsigned int* dataHash) {
 
 }
 
-__global__ void RTGenNTLMKernel(unsigned int chainStart, unsigned int chainStop) {
-	uint3 dimItem;
-	uint64 uiDiv64, uiVal64, uiMul64;
-	unsigned int uiVal, uiDiv;
-	unsigned int size, jj, kk;
-	unsigned int plain;
-
-	RTGEN_PROLOGUE;
-	
-	// transform to the plain text
-	plain = 0x80;
-	jj = (PLAIN_MAX_SIZE>>1)+1;
-
-	for(ii = kk = 0; idx64 > 0xfffffff0ull && ii < PLAIN_MAX_SIZE; ii++) {
-		uiVal64 = idx64 + cplStart[ii];
-		uiVal64--;
-		dimItem = cplDimVec[ii];
-
-		uiMul64 = (uint64)dimItem.y<<32;
-		idx64 = __umul64hi(uiVal64, uiMul64);
-		uiDiv64 = uiVal64 - idx64*(uint64)dimItem.x;
-		uiVal = __umulhi((unsigned int)uiDiv64, dimItem.y);
-		uiDiv = (unsigned int)uiDiv64 - uiVal * dimItem.x;
-		idx64 += uiVal;
-		if(uiDiv >= dimItem.x) {
-			uiDiv -= dimItem.x;
-			idx64++;
-		}
-		plain = (plain<<8);
-		if((kk++)&1) {
-			hData[SHIDX(jj--)] = plain;
-			plain = 0;
-		}
-		plain = (plain<<8) | cplChrSet[dimItem.z + uiDiv];
-	}
-
-	for(idx = (unsigned int)idx64; idx != 0 && ii < PLAIN_MAX_SIZE; ii++) {
-		uiVal = idx + cplStart[ii];
-		uiVal--;
-		dimItem = cplDimVec[ii];
-
-		idx = __umulhi(uiVal, dimItem.y);
-		uiDiv = uiVal - idx*dimItem.x;
-		if(uiDiv >= dimItem.x) {
-			uiDiv -= dimItem.x;
-			idx++;
-		}
-		plain = (plain<<8);
-		if((kk++)&1) {
-			hData[SHIDX(jj--)] = plain;
-			plain = 0;
-		}
-		plain = (plain<<8) | cplChrSet[dimItem.z + uiDiv];
-	}
-
-	// prepare for MD4
-	size = (ii<<1);
-	ii = (((kk^1)&1)<<4)+8;
-	plain = plain<<ii;
-	for(jj++, idx = 0; jj <= (PLAIN_MAX_SIZE>>1)+1; plain = hData[SHIDX(jj++)], idx++)
-		hData[SHIDX(idx)] = (plain>>ii)|(hData[SHIDX(jj)]<<(32-ii));
-	hData[SHIDX(idx)] = plain>>ii;
-	for(idx++; idx < 14; idx++)
-		hData[SHIDX(idx)] = 0;
-	hData[SHIDX(idx++)] = size<<3;
-	hData[SHIDX(idx)] = 0;
-
-	// hash
-	RC_NTLM::MD4(hData);
-
-	RTGEN_EPILOGUE
+#define RT_NTLM_KERNEL(kerName, kerPrologue, kerEpilogue)  \
+__global__ void kerName(unsigned int chainStart, unsigned int chainStop) {  \
+	unsigned int size, jj, kk;  \
+	unsigned int plain;  \
+	\
+	kerPrologue;  \
+	\
+	/* transform to the plain text */  \
+	plain = 0x80;  \
+	jj = (PLAIN_MAX_SIZE>>1)+1;  \
+	\
+	kk = 0;  \
+	RTGEN_IDX2PLAIN_BEGIN;  \
+		RTGEN_I2P_LOOP64_BEGIN;  \
+			plain = (plain<<8);  \
+			if((kk++)&1) {  \
+				hData[SHIDX(jj--)] = plain;  \
+				plain = 0;  \
+			}  \
+			plain = (plain<<8) | cplChrSet[(dimItem.z&255u) + uiDiv];  \
+		RTGEN_I2P_LOOP64_END;  \
+		\
+		RTGEN_I2P_LOOP32_BEGIN;  \
+			plain = (plain<<8);  \
+			if((kk++)&1) {  \
+				hData[SHIDX(jj--)] = plain;  \
+				plain = 0;  \
+			}  \
+		plain = (plain<<8) | cplChrSet[(dimItem.z&255u) + uiDiv];  \
+		RTGEN_I2P_LOOP32_END;  \
+	RTGEN_IDX2PLAIN_END;  \
+	\
+	/* prepare for MD4 */  \
+	size = (ii<<1);  \
+	ii = (((kk^1)&1)<<4)+8;  \
+	plain = plain<<ii;  \
+	for(jj++, idx = 0; jj <= (PLAIN_MAX_SIZE>>1)+1; plain = hData[SHIDX(jj++)], idx++)  \
+		hData[SHIDX(idx)] = (plain>>ii)|(hData[SHIDX(jj)]<<(32-ii));  \
+	hData[SHIDX(idx)] = plain>>ii;  \
+	for(idx++; idx < 14; idx++)  \
+		hData[SHIDX(idx)] = 0;  \
+	hData[SHIDX(idx++)] = size<<3;  \
+	hData[SHIDX(idx)] = 0;  \
+	\
+	/* hash */  \
+	RC_NTLM::MD4(hData);  \
+	\
+	kerEpilogue;  \
 }
+
+
+RT_NTLM_KERNEL(RTGenNTLMKernel, RTGEN_PROLOGUE, RTGEN_EPILOGUE)
+RT_NTLM_KERNEL(RTPreCalcNTLMKernel, RTPRECALC_PROLOGUE, RTPRECALC_EPILOGUE)
+RT_NTLM_KERNEL(RTCheckAlarmNTLMKernel, RTCHKALARM_PROLOGUE, RTCHKALARM_EPILOGUE)

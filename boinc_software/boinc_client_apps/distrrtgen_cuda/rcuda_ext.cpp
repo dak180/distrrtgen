@@ -1,9 +1,9 @@
 // freerainbowtables is a project for generating, distributing, and using
 // perfect rainbow tables
 //
-// Copyright 2010 Jan Kyska
+// Copyright 2010, 2011 Jan Kyska
 // Copyright 2010 Martin Westergaard Jørgensen <martinwj2005@gmail.com>
-// Copyright 2010, 2011 James Nobis <frt@quelrod.net>
+// Copyright 2010, 2011 James Nobis <quel@quelrod.net>
 //
 // This file is part of freerainbowtables.
 //
@@ -52,54 +52,23 @@ void CudaCWCExtender::Init(void) {
 		hash = rcuda::RHASH_MD5;
 	else if(hashName.compare("sha1") == 0)
 		hash = rcuda::RHASH_SHA1;
+	else if(hashName.compare("mysqlsha1") == 0)
+		hash = rcuda::RHASH_MYSQLSHA1;
 	else if(hashName.compare("ntlm") == 0)
 		hash = rcuda::RHASH_NTLM;
 	else
 		hash = rcuda::RHASH_UNDEF;
 
-	for(ii = 0; ii < (int)CChainWalkContext::m_vCharset.size(); ii++) {
+	for(ii = (int)CChainWalkContext::m_vCharset.size()-1; !(ii < 0); ii--) {
 		stCharset &chs = CChainWalkContext::m_vCharset[ii];
 		int chSetOffset = plainCharSet.size();
 		plainCharSet.append((char*)chs.m_PlainCharset, chs.m_nPlainCharsetLen);
+		uint64 plainSpace = (ii>0? CChainWalkContext::m_vCharset[ii-1].m_nPlainSpaceTotal : 1);
+		plainDimVec.push_back((unsigned int)plainSpace);
+		plainDimVec.push_back((unsigned int)(plainSpace>>32));
 		for(jj = 0; jj < chs.m_nPlainLenMax; jj++) {
-			plainDimVec.push_back((unsigned int)chs.m_nPlainCharsetLen);
+			plainDimVec.push_back((unsigned int)chs.m_nPlainCharsetLen|((unsigned int)chSetOffset<<16)|(jj<chs.m_nPlainLenMin?0:(1u<<24))|(jj+1==chs.m_nPlainLenMax?(1u<<25):0));
 			plainDimVec.push_back((unsigned int)-1/(unsigned int)chs.m_nPlainCharsetLen);
-			plainDimVec.push_back((unsigned int)chSetOffset);
 		}
 	}
-}
-
-int CudaCWCExtender::IndexToStartPlain(const uint64 nIndex, std::vector<unsigned char>& stPlain) {
-	int nPlainLen, nCharsetLen;
-	int ii, jj;
-
-	stPlain.clear();
-	stPlain.reserve(0x20);
-	nPlainLen = 0;
-
-	for(ii = CChainWalkContext::m_nPlainLenMaxTotal - 1; ii >= CChainWalkContext::m_nPlainLenMinTotal - 1; ii--) {
-		if(nIndex >= CChainWalkContext::m_nPlainSpaceUpToX[ii]) {
-			nPlainLen = ii + 1;
-			break;
-		}
-	}
-	if(nPlainLen == 0)
-		nPlainLen = CChainWalkContext::m_nPlainLenMinTotal;
-	uint64 nIndexOfX = nIndex - CChainWalkContext::m_nPlainSpaceUpToX[nPlainLen - 1];
-
-	// Slow version, but never mind
-	for(ii = nPlainLen - 1; ii >= 0; ii--) {
-		nCharsetLen = 0;
-		for(jj = 0; jj < (int)CChainWalkContext::m_vCharset.size(); jj++) {
-			stCharset &chs = CChainWalkContext::m_vCharset[jj];
-			nCharsetLen += chs.m_nPlainLenMax;
-			if(ii < nCharsetLen) { // We found the correct charset
-				//XXX from md5 only cuda stPlain.push_back(nIndexOfX % chs.m_nPlainCharsetLen + 1);
-				stPlain.push_back((unsigned char)(nIndexOfX % (uint64)chs.m_nPlainCharsetLen + 1));
-				nIndexOfX /= chs.m_nPlainCharsetLen;
-			}
-		}
-	}
-
-	return stPlain.size();
 }

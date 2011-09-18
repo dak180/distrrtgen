@@ -1,9 +1,9 @@
 // freerainbowtables is a project for generating, distributing, and using
 // perfect rainbow tables
 //
-// Copyright 2010 Jan Kyska
+// Copyright 2010, 2011 Jan Kyska
 // Copyright 2010 Martin Westergaard Jørgensen <martinwj2005@gmail.com>
-// Copyright 2010, 2011 James Nobis <frt@quelrod.net>
+// Copyright 2010, 2011 James Nobis <quel@quelrod.net>
 //
 // This file is part of freerainbowtables.
 //
@@ -30,9 +30,9 @@ class CudaCWCExtender {
 public:
 	CudaCWCExtender(CChainWalkContext *cwc);
 	void Init(void);
-	int IndexToStartPlain(const uint64 nIndex, std::vector<unsigned char>& stPlain);
 
 	inline rcuda::RHash GetHash(void) { return hash; }
+	inline int GetHashLen(void) { return CChainWalkContext::m_nHashLen; }
 	inline unsigned int* GetPlainDimVec(void) { return &plainDimVec[0]; }
 	inline int GetPlainDimVecSize(void) { return plainDimVec.size(); }
 	inline unsigned char* GetCharSet(void) { return (unsigned char*)plainCharSet.c_str(); }

@@ -1,9 +1,9 @@
 // freerainbowtables is a project for generating, distributing, and using
 // perfect rainbow tables
 //
-// Copyright 2010 Jan Kyska
+// Copyright 2010, 2011 Jan Kyska
 // Copyright 2010 Martin Westergaard Jørgensen <martinwj2005@gmail.com>
-// Copyright 2010, 2011 James Nobis <frt@quelrod.net>
+// Copyright 2010, 2011 James Nobis <quel@quelrod.net>
 //
 // This file is part of freerainbowtables.
 //
@@ -27,14 +27,12 @@
 
 namespace rcuda {
 
-enum RHash { RHASH_UNDEF = -1, RHASH_LM, RHASH_MD4, RHASH_MD5, RHASH_SHA1, RHASH_NTLM };
+enum RHash { RHASH_UNDEF = -1, RHASH_LM, RHASH_MD4, RHASH_MD5, RHASH_SHA1, RHASH_NTLM, RHASH_MYSQLSHA1 };
 
 struct RCudaTask {
 	RHash hash;
 	uint64 startIdx;
 	int idxCount;
-	unsigned char* stPlain;
-	int stPlainSize;
 	unsigned int* dimVec;
 	int dimVecSize;
 	unsigned char* charSet;
@@ -45,11 +43,14 @@ struct RCudaTask {
 	uint64 reduceOffset;
 	uint64 plainSpaceTotal;
 	unsigned int rainbowChainLen;
+	unsigned char *targetHash;
 };
 
 extern "C" int SetCudaDevice(int device);
 extern "C" int GetChainsBufferSize(int minSize);
 extern "C" int CalcChainsOnCUDA(const RCudaTask* task, uint64 *resultBuff);
+extern "C" int PreCalculateOnCUDA(const rcuda::RCudaTask* task, uint64 *resultBuff);
+extern "C" int CheckAlarmOnCUDA(const rcuda::RCudaTask* task, uint64 *resultBuff);
 
 }
 

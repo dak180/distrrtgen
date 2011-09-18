@@ -253,7 +253,6 @@ int main(int argc, char **argv) {
 
 	CudaCWCExtender ex(&cwc);
 	rcuda::RCudaTask cuTask;
-	std::vector<unsigned char> stPlain;
 	ex.Init();
 
 	for(int nCurrentCalculatedChains = nDataLen / 10, calcSize; nCurrentCalculatedChains < nRainbowChainCount; )
@@ -264,10 +263,8 @@ int main(int argc, char **argv) {
 		cuTask.hash = ex.GetHash();
 		cuTask.startIdx = nChainStart + nCurrentCalculatedChains;
 		cuTask.idxCount = std::min<int>(nRainbowChainCount - nCurrentCalculatedChains, maxCalcBuffSize);
-		cuTask.stPlainSize = ex.IndexToStartPlain(0, stPlain);
-		cuTask.stPlain = &stPlain[0];
 		cuTask.dimVec = ex.GetPlainDimVec();
-		cuTask.dimVecSize = ex.GetPlainDimVecSize()/3;
+		cuTask.dimVecSize = ex.GetPlainDimVecSize()/2;
 		cuTask.charSet = ex.GetCharSet();
 		cuTask.charSetSize = ex.GetCharSetSize();
 		cuTask.cpPositions = &vCPPositions[0];

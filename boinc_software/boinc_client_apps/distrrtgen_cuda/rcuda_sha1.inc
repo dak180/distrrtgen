@@ -1,9 +1,9 @@
 // freerainbowtables is a project for generating, distributing, and using
 // perfect rainbow tables
 //
-// Copyright 2010 Jan Kyska
+// Copyright 2010, 2011 Jan Kyska
 // Copyright 2010 Martin Westergaard Jørgensen <martinwj2005@gmail.com>
-// Copyright 2010, 2011 James Nobis <frt@quelrod.net>
+// Copyright 2010, 2011 James Nobis <quel@quelrod.net>
 //
 // This file is part of freerainbowtables.
 //
@@ -101,75 +101,116 @@ __device__ void SHA1(unsigned int* dataHash) {
 
 }
 
-__global__ void RTGenSHA1Kernel(unsigned int chainStart, unsigned int chainStop) {
-	uint3 dimItem;
-	uint64 uiDiv64, uiVal64, uiMul64;
-	unsigned int uiVal, uiDiv;
-	unsigned int size, jj;
-	unsigned int plain;
-
-	RTGEN_PROLOGUE;
-	
-	// transform to the plain text
-	plain = 0x80;
-	jj = (PLAIN_MAX_SIZE>>2)+1;
-
-	for(ii = 0; idx64 > 0xfffffff0ull && ii < PLAIN_MAX_SIZE; ii++) {
-		uiVal64 = idx64 + cplStart[ii];
-		uiVal64--;
-		dimItem = cplDimVec[ii];
-
-		uiMul64 = (uint64)dimItem.y<<32;
-		idx64 = __umul64hi(uiVal64, uiMul64);
-		uiDiv64 = uiVal64 - idx64*(uint64)dimItem.x;
-		uiVal = __umulhi((unsigned int)uiDiv64, dimItem.y);
-		uiDiv = (unsigned int)uiDiv64 - uiVal * dimItem.x;
-		idx64 += uiVal;
-		if(uiDiv >= dimItem.x) {
-			uiDiv -= dimItem.x;
-			idx64++;
-		}
-		plain = (plain<<8) | cplChrSet[dimItem.z + uiDiv];
-		if((ii&3) == 2) {
-			hData[SHIDX(jj--)] = plain;
-			plain = 0;
-		}
-	}
-
-	for(idx = (unsigned int)idx64; idx != 0 && ii < PLAIN_MAX_SIZE; ii++) {
-		uiVal = idx + cplStart[ii];
-		uiVal--;
-		dimItem = cplDimVec[ii];
-
-		idx = __umulhi(uiVal, dimItem.y);
-		uiDiv = uiVal - idx*dimItem.x;
-		if(uiDiv >= dimItem.x) {
-			uiDiv -= dimItem.x;
-			idx++;
-		}
-		plain = (plain<<8) | cplChrSet[dimItem.z + uiDiv];
-		if((ii&3) == 2) {
-			hData[SHIDX(jj--)] = plain;
-			plain = 0;
-		}
-	}
-
-	// prepare for SHA1
-	size = ii;
-	ii = ((((3-(ii&3))<<3)-1)&0x1f)+1;
-	plain = plain<<ii;
-	for(jj++, idx = 0; jj <= (PLAIN_MAX_SIZE>>2)+1; plain = hData[SHIDX(jj++)], idx++)
-		hData[SHIDX(idx)] = RC_SHA1::SwapEndian((plain>>ii)|(hData[SHIDX(jj)]<<(32-ii)));
-	hData[SHIDX(idx)] = RC_SHA1::SwapEndian(plain>>ii);
-	for(idx++; idx < 14; idx++)
-		hData[SHIDX(idx)] = 0;
-	hData[SHIDX(idx++)] = 0;
-	hData[SHIDX(idx)] = size<<3;
-
-	// hash
-	RC_SHA1::SHA1(hData);
-	
-	hData[SHIDX(0)] = RC_SHA1::SwapEndian(hData[SHIDX(0)]);
-	hData[SHIDX(1)] = RC_SHA1::SwapEndian(hData[SHIDX(1)]);
-	RTGEN_EPILOGUE
+#define RT_SHA1_KERNEL(kerName, kerPrologue, kerEpilogue)  \
+__global__ void kerName(unsigned int chainStart, unsigned int chainStop) {  \
+	unsigned int size, jj;  \
+	unsigned int plain;  \
+	\
+	kerPrologue;  \
+	\
+	/* transform to the plain text */  \
+	plain = 0x80;  \
+	jj = (PLAIN_MAX_SIZE>>2)+1;  \
+	\
+	RTGEN_IDX2PLAIN_BEGIN;  \
+		RTGEN_I2P_LOOP64_BEGIN;  \
+			plain = (plain<<8) | cplChrSet[(dimItem.z&255u) + uiDiv];  \
+			if((ii&3) == 2) {  \
+				hData[SHIDX(jj--)] = plain;  \
+				plain = 0;  \
+			}  \
+		RTGEN_I2P_LOOP64_END;  \
+		\
+		RTGEN_I2P_LOOP32_BEGIN;  \
+			plain = (plain<<8) | cplChrSet[(dimItem.z&255u) + uiDiv];  \
+			if((ii&3) == 2) {  \
+				hData[SHIDX(jj--)] = plain;  \
+				plain = 0;  \
+			}  \
+		RTGEN_I2P_LOOP32_END;  \
+	RTGEN_IDX2PLAIN_END;  \
+	\
+	/* prepare for SHA1 */  \
+	size = ii;  \
+	ii = ((((3-(ii&3))<<3)-1)&0x1f)+1;  \
+	plain = plain<<ii;  \
+	for(jj++, idx = 0; jj <= (PLAIN_MAX_SIZE>>2)+1; plain = hData[SHIDX(jj++)], idx++)  \
+		hData[SHIDX(idx)] = RC_SHA1::SwapEndian((plain>>ii)|(hData[SHIDX(jj)]<<(32-ii)));  \
+	hData[SHIDX(idx)] = RC_SHA1::SwapEndian(plain>>ii);  \
+	for(idx++; idx < 14; idx++)  \
+		hData[SHIDX(idx)] = 0;  \
+	hData[SHIDX(idx++)] = 0;  \
+	hData[SHIDX(idx)] = size<<3;  \
+	\
+	/* hash */  \
+	RC_SHA1::SHA1(hData);  \
+	\
+	hData[SHIDX(0)] = RC_SHA1::SwapEndian(hData[SHIDX(0)]);  \
+	hData[SHIDX(1)] = RC_SHA1::SwapEndian(hData[SHIDX(1)]);  \
+	\
+	kerEpilogue;  \
 }
+
+#define RT_MYSQLSHA1_KERNEL(kerName, kerPrologue, kerEpilogue)  \
+__global__ void kerName(unsigned int chainStart, unsigned int chainStop) {  \
+	unsigned int size, jj, kk;  \
+	unsigned int plain;  \
+	\
+	kerPrologue;  \
+	\
+	/* transform to the plain text */  \
+	plain = 0x80;  \
+	jj = (PLAIN_MAX_SIZE>>2)+1;  \
+	\
+	RTGEN_IDX2PLAIN_BEGIN;  \
+		RTGEN_I2P_LOOP64_BEGIN;  \
+			plain = (plain<<8) | cplChrSet[(dimItem.z&255u) + uiDiv];  \
+			if((ii&3) == 2) {  \
+				hData[SHIDX(jj--)] = plain;  \
+				plain = 0;  \
+			}  \
+		RTGEN_I2P_LOOP64_END;  \
+		\
+		RTGEN_I2P_LOOP32_BEGIN;  \
+			plain = (plain<<8) | cplChrSet[(dimItem.z&255u) + uiDiv];  \
+			if((ii&3) == 2) {  \
+				hData[SHIDX(jj--)] = plain;  \
+				plain = 0;  \
+			}  \
+		RTGEN_I2P_LOOP32_END;  \
+	RTGEN_IDX2PLAIN_END;  \
+	\
+	/* prepare for SHA1 */  \
+	size = ii;  \
+	ii = ((((3-(ii&3))<<3)-1)&0x1f)+1;  \
+	plain = plain<<ii;  \
+	for(jj++, idx = 0; jj <= (PLAIN_MAX_SIZE>>2)+1; plain = hData[SHIDX(jj++)], idx++)  \
+		hData[SHIDX(idx)] = RC_SHA1::SwapEndian((plain>>ii)|(hData[SHIDX(jj)]<<(32-ii)));  \
+	hData[SHIDX(idx)] = RC_SHA1::SwapEndian(plain>>ii);  \
+	for(kk = 0; kk < 2; kk++) {  \
+		for(idx++; idx < 14; idx++)  \
+			hData[SHIDX(idx)] = 0;  \
+		hData[SHIDX(idx++)] = 0;  \
+		hData[SHIDX(idx)] = size<<3;  \
+		\
+		/* hash */  \
+		RC_SHA1::SHA1(hData);  \
+		\
+		idx = 5;  \
+		hData[SHIDX(idx)] = RC_SHA1::SwapEndian(0x80);  \
+		size = 20;  \
+	}  \
+	hData[SHIDX(0)] = RC_SHA1::SwapEndian(hData[SHIDX(0)]);  \
+	hData[SHIDX(1)] = RC_SHA1::SwapEndian(hData[SHIDX(1)]);  \
+	\
+	kerEpilogue;  \
+}
+
+
+RT_SHA1_KERNEL(RTGenSHA1Kernel, RTGEN_PROLOGUE, RTGEN_EPILOGUE)
+RT_SHA1_KERNEL(RTPreCalcSHA1Kernel, RTPRECALC_PROLOGUE, RTPRECALC_EPILOGUE)
+RT_SHA1_KERNEL(RTCheckAlarmSHA1Kernel, RTCHKALARM_PROLOGUE, RTCHKALARM_EPILOGUE)
+
+RT_MYSQLSHA1_KERNEL(RTGenMySQLSHA1Kernel, RTGEN_PROLOGUE, RTGEN_EPILOGUE)
+RT_MYSQLSHA1_KERNEL(RTPreCalcMySQLSHA1Kernel, RTPRECALC_PROLOGUE, RTPRECALC_EPILOGUE)
+RT_MYSQLSHA1_KERNEL(RTCheckAlarmMySQLSHA1Kernel, RTCHKALARM_PROLOGUE, RTCHKALARM_EPILOGUE)
