@@ -298,7 +298,7 @@ void CCrackEngine::SearchTableChunkOld(RainbowChainO* pChain, int nRainbowChainL
 	printf("searching for %lu hash%s...\n", (unsigned long)vHash.size(),
 										   vHash.size() > 1 ? "es" : "");
 
-	int nChainWalkStep = 0;
+	uint64 nChainWalkStep = 0;
 	int nFalseAlarm = 0;
 	int nChainWalkStepDueToFalseAlarm = 0;
 
@@ -634,7 +634,7 @@ void CCrackEngine::SearchTableChunk(RainbowChain* pChain, int nRainbowChainLen, 
 	printf("searching for %lu hash%s...\n", (unsigned long)vHash.size(),
 										   vHash.size() > 1 ? "es" : "");
 
-	int nChainWalkStep = 0;
+	uint64 nChainWalkStep = 0;
 	int nFalseAlarm = 0;
 	int nChainWalkStepDueToFalseAlarm = 0;
 
