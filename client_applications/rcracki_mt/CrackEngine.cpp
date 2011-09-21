@@ -1256,7 +1256,6 @@ void CCrackEngine::SearchRainbowTable( std::string pathName, CHashSet& hs )
 								}
 							}
 
-							cwc.Dump();
 							if( cwc.GetIndex() != nEndPoint )
 							{
 								std::cout << "rainbow chain length verify fail" << std::endl;

@@ -245,7 +245,6 @@ bool CChainWalkContext::SetPlainCharset( std::string sCharsetName, int nPlainLen
 		m_vCharset[j].m_nPlainSpaceUpToX[0] = 0;
 		uint64 nTemp2 = 1;
 			
-		// XXX assumes each sub keyspace starts at length 1
 		for (i = 1; i <= m_vCharset[j].m_nPlainLenMax; i++)
 		{			
 			nTemp *= m_vCharset[j].m_nPlainCharsetLen;
