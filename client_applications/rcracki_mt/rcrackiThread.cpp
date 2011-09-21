@@ -320,7 +320,7 @@ void rcrackiThread::CheckAlarmO()
 {
 	uint32 i;
 
-	//if(cudaDevId < 0) {
+	if(cudaDevId < 0) {
 		for (i = 0; i < t_pChainsFoundO.size(); i++)
 		{
 			RainbowChainO* t_pChain = t_pChainsFoundO[i];
@@ -355,9 +355,9 @@ void rcrackiThread::CheckAlarmO()
 				t_nFalseAlarm++;
 			}
 		}
-	//}
+	}
 	
-#if GPUO
+#if GPU
 	else {
 		uint64 *calcBuff = new uint64[2*cudaBuffCount];
 		CudaCWCExtender ex(&t_cwc);
