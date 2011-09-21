@@ -551,19 +551,19 @@ extern "C" int CheckAlarmOnCUDA(const rcuda::RCudaTask* task, uint64 *resultBuff
 			RTCheckAlarmMD5Kernel<<<numBlocks, BLOCK_X_SIZE>>>(idx, min(idx+task->kernChainSize-1, task->rainbowChainLen));
 			break;
 		case rcuda::RHASH_MD4:
-			RTCheckAlarmMD4Kernel<<<numBlocks, BLOCK_X_SIZE>>>(idx, min(idx+task->kernChainSize, task->rainbowChainLen-1));
+			RTCheckAlarmMD4Kernel<<<numBlocks, BLOCK_X_SIZE>>>(idx, min(idx+task->kernChainSize-1, task->rainbowChainLen-1));
 			break;
 		case rcuda::RHASH_NTLM:
-			RTCheckAlarmNTLMKernel<<<numBlocks, BLOCK_X_SIZE>>>(idx, min(idx+task->kernChainSize, task->rainbowChainLen-1));
+			RTCheckAlarmNTLMKernel<<<numBlocks, BLOCK_X_SIZE>>>(idx, min(idx+task->kernChainSize-1, task->rainbowChainLen-1));
 			break;
 		case rcuda::RHASH_SHA1:
-			RTCheckAlarmSHA1Kernel<<<numBlocks, BLOCK_X_SIZE>>>(idx, min(idx+task->kernChainSize, task->rainbowChainLen-1));
+			RTCheckAlarmSHA1Kernel<<<numBlocks, BLOCK_X_SIZE>>>(idx, min(idx+task->kernChainSize-1, task->rainbowChainLen-1));
 			break;
 		case rcuda::RHASH_MYSQLSHA1:
-			RTCheckAlarmMySQLSHA1Kernel<<<numBlocks, BLOCK_X_SIZE>>>(idx, min(idx+task->kernChainSize, task->rainbowChainLen-1));
+			RTCheckAlarmMySQLSHA1Kernel<<<numBlocks, BLOCK_X_SIZE>>>(idx, min(idx+task->kernChainSize-1, task->rainbowChainLen-1));
 			break;
 		case rcuda::RHASH_LM:
-			RTCheckAlarmLMKernel<<<numBlocks, BLOCK_X_SIZE>>>(idx, min(idx+task->kernChainSize, task->rainbowChainLen-1));
+			RTCheckAlarmLMKernel<<<numBlocks, BLOCK_X_SIZE>>>(idx, min(idx+task->kernChainSize-1, task->rainbowChainLen-1));
 			break;
 		case rcuda::RHASH_UNDEF:
 			break;

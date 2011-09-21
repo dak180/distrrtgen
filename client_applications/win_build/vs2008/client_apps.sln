@@ -3,6 +3,10 @@ Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rcracki_mt", "rcracki_mt.vcproj", "{53721591-B8EB-4EA9-8883-977B43A2E259}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "converti2", "converti2.vcproj", "{D4C788E6-863E-48F7-9D8D-7ED05391FABD}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rti2rto", "rti2rto.vcproj", "{72321C11-699F-4341-B622-4F837253FF16}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -13,6 +17,14 @@ Global
 		{53721591-B8EB-4EA9-8883-977B43A2E259}.Debug|Win32.Build.0 = Debug|Win32
 		{53721591-B8EB-4EA9-8883-977B43A2E259}.Release|Win32.ActiveCfg = Release|Win32
 		{53721591-B8EB-4EA9-8883-977B43A2E259}.Release|Win32.Build.0 = Release|Win32
+		{D4C788E6-863E-48F7-9D8D-7ED05391FABD}.Debug|Win32.ActiveCfg = Debug|Win32
+		{D4C788E6-863E-48F7-9D8D-7ED05391FABD}.Debug|Win32.Build.0 = Debug|Win32
+		{D4C788E6-863E-48F7-9D8D-7ED05391FABD}.Release|Win32.ActiveCfg = Release|Win32
+		{D4C788E6-863E-48F7-9D8D-7ED05391FABD}.Release|Win32.Build.0 = Release|Win32
+		{72321C11-699F-4341-B622-4F837253FF16}.Debug|Win32.ActiveCfg = Debug|Win32
+		{72321C11-699F-4341-B622-4F837253FF16}.Debug|Win32.Build.0 = Debug|Win32
+		{72321C11-699F-4341-B622-4F837253FF16}.Release|Win32.ActiveCfg = Release|Win32
+		{72321C11-699F-4341-B622-4F837253FF16}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
