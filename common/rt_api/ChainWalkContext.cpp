@@ -257,7 +257,17 @@ bool CChainWalkContext::SetPlainCharset( std::string sCharsetName, int nPlainLen
 			}
 			else
 			{
-				m_nPlainSpaceUpToX[k] = m_nPlainSpaceUpToX[k - 1] + nTemp;
+				// special case of the last keyspace in a hybrid2 set
+				if ( i == 1 && j > 1 && m_vCharset[j].m_nPlainCharsetLen != 1
+					&& j == m_vCharset.size() - 1 )
+				{
+					m_nPlainSpaceUpToX[k] = nTemp;
+				}
+				else
+				{
+					m_nPlainSpaceUpToX[k] = m_nPlainSpaceUpToX[k - 1] + nTemp;
+				}
+
 				m_vCharset[j].m_nPlainSpaceUpToX[i] = m_vCharset[j].m_nPlainSpaceUpToX[i - 1] + nTemp2;
 			}
 
