@@ -36,6 +36,7 @@ OBJS = BaseRTReader.o ChainWalkContext.o ChainWalkSet.o CrackEngine.o \
 	MemoryPool.o Public.o RainbowCrack.o rcrackiThread.o RTReader.o \
 	RTIReader.o RTI2Reader.o
 COMMON_API_PATH = ../../common/rt_api
+CUDA_SHARED_PATH = ../../boinc_software/boinc_client_apps/distrrtgen_cuda
 #sha1.o
 WARNALL = -Wextra -Wunused-macros -Wunsafe-loop-optimizations -Wundef -Woverlength-strings -Wdisabled-optimization -Wformat-extra-args -Wformat-security -Winline
 

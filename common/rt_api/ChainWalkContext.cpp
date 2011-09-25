@@ -390,7 +390,7 @@ bool CChainWalkContext::SetupWithPathName( std::string sPathName, int& nRainbowC
 		printf("invalid rainbow table index %d\n", nRainbowTableIndex);
 		return false;
 	}
-	m_nPlainSpaceTotal = m_nPlainSpaceUpToX[m_nPlainLenMaxTotal];
+
 	return true;
 }
 
