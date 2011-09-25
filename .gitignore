@@ -1,0 +1,9 @@
+#Mac Stuff
+.DS_Store
+*.pbxuser
+*.perspectivev3
+*.xcodeproj/project.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+/external/
+/prebuilt/
+/build/
